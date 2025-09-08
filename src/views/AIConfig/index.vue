@@ -2,21 +2,60 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div class="space-y-5 sm:space-y-6">
-      <ComponentCard >
+      <ComponentCard>
         <div class="mb-4 flex items-center justify-between">
-          <div></div>
-          <Button size="sm" @click="openAdd">新增</Button>
+          <div class="flex items-center gap-3">
+            <!-- <div class="relative">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="请搜索配置名称"
+                class="w-80 h-10 pl-10 pr-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                @keyup.enter="handleSearchClick"
+              />
+              <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              @click="handleSearchClick"
+              :disabled="isSearching"
+            >
+              <span v-if="isSearching" class="mr-2">搜索中...</span>
+              <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              搜索
+            </Button>
+            <Button
+              v-if="searchQuery"
+              size="sm"
+              variant="outline"
+              @click="clearSearch"
+              class="text-gray-500 hover:text-gray-700"
+            >
+              清除
+            </Button> -->
+          </div>
+          <div class="flex gap-2">
+            <Button size="sm" @click="openAdd">新增</Button>
+          </div>
         </div>
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
             <TableRow>
-              <TableHead class="whitespace-nowrap">ID</TableHead>
+              <TableHead class="whitespace-nowrap">id</TableHead>
+              <TableHead class="whitespace-nowrap">配置名称</TableHead>
               <TableHead class="whitespace-nowrap">平台</TableHead>
-              <TableHead class="whitespace-nowrap">用户名</TableHead>
-              <TableHead class="whitespace-nowrap">主页地址</TableHead>
-              <TableHead class="whitespace-nowrap">对话风格</TableHead>
-              <TableHead class="whitespace-nowrap">补充提示词</TableHead>
-              <TableHead class="whitespace-nowrap">状态</TableHead>
+               <TableHead class="whitespace-nowrap">key</TableHead>
+              <TableHead class="whitespace-nowrap">模型名称</TableHead>
+              <TableHead class="whitespace-nowrap">所属用户</TableHead>
+              <TableHead class="whitespace-nowrap">默认配置</TableHead>
+              <TableHead class="whitespace-nowrap">是否激活</TableHead>
+              <!-- <TableHead class="whitespace-nowrap">状态</TableHead> -->
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
@@ -24,9 +63,11 @@
           <TableBody>
             <TableRow v-for="acc in accounts" :key="acc.id">
               <TableCell class="whitespace-nowrap">{{ acc.id }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.platform }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.username }}</TableCell>
-              <TableCell class="whitespace-nowrap">
+              <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ formdata[acc.service_type] }}</TableCell>
+               <TableCell class="whitespace-nowrap">{{ acc.api_base }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.model_name }}</TableCell>
+              <!-- <TableCell class="whitespace-nowrap">
                 <a
                   :href="acc.homepage"
                   target="_blank"
@@ -35,33 +76,25 @@
                 >
                   {{ acc.homepage }}
                 </a>
-              </TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.dialogStyle }}</TableCell>
-              <TableCell class="max-w-[280px] truncate" :title="acc.extraPrompt">
-                {{ acc.extraPrompt }}
-              </TableCell>
-              <TableCell class="whitespace-nowrap">
-                <span
-                  :class="[
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    acc.status === '启用'
-                      ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
-                      : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
-                  ]"
-                >
-                  {{ acc.status }}
+              </TableCell> -->
+              <TableCell class="whitespace-nowrap">{{ acc.owner }}</TableCell>
+              <TableCell class="max-w-[280px] truncate" :title="acc.model_name">
+                <span :class="acc.is_default ? 'text-green-600' : 'text-gray-500'">
+                  {{ acc.is_default ? '是' : '否' }}
                 </span>
               </TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.createdAt }}</TableCell>
+              <TableCell class="whitespace-nowrap">
+                <span :class="acc.is_active ? 'text-green-600' : 'text-red-500'">
+                  {{ acc.is_active ? '是' : '否' }}
+                </span>
+              </TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.created_at }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
+                  <Button size="sm" variant="outline"
                     :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
-                    @click="onDelete(acc)"
-                  >
+                    @click="onDelete(acc)">
                     删除
                   </Button>
                 </div>
@@ -89,44 +122,65 @@
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
         <template #body>
           <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <h3 class="mb-4 text-lg font-semibold">新增服务配置</h3>
+            <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑服务配置' : '新增服务配置' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span class="text-error-500">*</span></label>
-                <input v-model="form.platform" type="text" placeholder="如：OpenAI"
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">配置名称<span
+                    class="text-error-500">*</span></label>
+                <input v-model="form.name" type="text" placeholder="如：OpenAI GPT-4配置"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">用户名<span class="text-error-500">*</span></label>
-                <input v-model="form.username" type="text" placeholder="账号名"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">主页地址</label>
-                <input v-model="form.homepage" type="url" placeholder="https://example.com/@user"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">对话风格</label>
-                <input v-model="form.dialogStyle" type="text" placeholder="如：专业、简洁"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">补充提示词</label>
-                <textarea v-model="form.extraPrompt" rows="3" placeholder="用于补充的提示词"
-                  class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">状态</label>
-                <select v-model="form.status"
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span
+                    class="text-error-500">*</span></label>
+                <select v-model="form.service_type"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="启用">启用</option>
-                  <option value="停用">停用</option>
+                  <option value="" >请选择平台</option>
+                  <option :value="item.value" v-for="(item,index) in type" :key="index">{{ item.title }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">API基础地址<span
+                    class="text-error-500">*</span></label>
+                <input v-model="form.api_base" type="url" placeholder="https://api.openai.com/v1"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">API密钥<span
+                    class="text-error-500">*</span></label>
+                <input v-model="form.api_key" type="password" placeholder="sk-..."
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模型名称<span
+                    class="text-error-500">*</span></label>
+                <input v-model="form.model_name" type="text" placeholder="如：gpt-4, claude-3-sonnet"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">最大令牌数</label>
+                <input v-model="form.max_tokens" type="number" placeholder="如：4096"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">温度参数</label>
+                <input v-model="form.temperature" type="number" step="0.1" placeholder="如：0.7"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transp   arent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">是否激活</label>
+                <select v-model="form.is_active"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <option :value="true">激活</option>
+                  <option :value="false">停用</option>
                 </select>
               </div>
               <div class="flex justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" @click="closeAdd">取消</Button>
-                <Button type="submit">保存</Button>
+                <Button type="button" variant="outline" @click="closeAdd" :disabled="isLoading">取消</Button>
+                <Button type="submit" :disabled="isLoading">
+                  <span v-if="isLoading" class="mr-2">处理中...</span>
+                  {{ isEditMode ? '更新' : '保存' }}
+                </Button>
               </div>
             </form>
           </div>
@@ -137,92 +191,230 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
+import { getlist, addlist, details, updatelist ,deletelist} from '@/api/aiCofig.ts'
+import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
-
 const currentPageTitle = ref('AI 服务配置')
-
-const accounts = ref([
-  {
-    id: 1,
-    platform: 'OpenAI',
-    username: 'alice',
-    homepage: 'https://example.com/@alice',
-    dialogStyle: '专业、简洁',
-    extraPrompt: '回答前先给要点，最后总结',
-    status: '启用',
-    createdAt: '2024-08-01 10:23',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-])
-
+const accounts = ref([])
 const page = ref(1)
 const pageSize = ref(10)
 const total = computed(() => accounts.value.length)
+const searchQuery = ref('')
+const searchTimeout = ref(null)
+const isSearching = ref(false)
+const type = ref([
+  {
+    title: 'OpenAI',
+    value: 'openai'
+  },
+   {
+    title: 'Azure OpenAI',
+    value: 'azure'
+  },
+   {
+    title: 'Google Gemini',
+    value: 'gemini'
+  }, {
+    title: 'Anthropic Claude',
+    value: 'anthropic'
+  },{
+    title: 'Together Al',
+    value: 'together'
+  },{
+    title: 'Deepseek',
+    value: 'deepseek'
+  },{
+    title: 'Moonshot',
+    value: 'moonshot'
+  },{
+    title: '智谱AI',
+    value: 'zhipuai'
+  },{
+    title: '自定义OpenAl兼容接口',
+    value: 'custom'
+  },
 
-function onEdit(account) {
-  console.log('edit', account)
+])
+const formdata = {
+   openai:'OpenAI',
+   azure:'Azure OpenAI',
+   gemini:'Google Gemini',
+   anthropic:'Anthropic Claude',
+   together:'Together Al',
+   deepseek:'Deepseek',
+   moonshot:'Moonshot',
+   zhipuai:'智谱AI',
+   custom:'自定义OpenAl兼容接口'
+}
+async function onEdit(account) {
+  try {
+    // 获取详细信息
+    const detailData = await details(account.id)
+
+    // 设置为编辑模式
+    isEditMode.value = true
+    editingId.value = account.id
+
+    // 填充表单数据
+    form.value = {
+      name: detailData.name || '',
+      service_type: detailData.service_type || '',
+      api_base: detailData.api_base || '',
+      api_key: detailData.api_key || '',
+      model_name: detailData.model_name || '',
+      max_tokens: detailData.max_tokens || '',
+      temperature: detailData.temperature || '',
+      is_active: detailData.is_active !== undefined ? detailData.is_active : true,
+    }
+
+    // 打开弹窗
+    showAdd.value = true
+  } catch (error) {
+    console.error('获取详情失败:', error)
+    toast.error('获取详情失败')
+  }
 }
 
-function onDelete(account) {
-  console.log('delete', account)
+ async function onDelete(account) {
+  // console.log('delete', account)
+  const res = await deletelist(account.id)
+  console.log(res,'resresssss');
+  await fetchlist()
+
 }
 
 const showAdd = ref(false)
+const isEditMode = ref(false)
+const editingId = ref(null)
+const isLoading = ref(false)
 const form = ref({
-  platform: '',
-  username: '',
-  homepage: '',
-  dialogStyle: '',
-  extraPrompt: '',
-  status: '启用',
+  name: '',
+  service_type: '',
+  api_base: '',
+  api_key: '',
+  model_name: '',
+  max_tokens: '',
+  temperature: '',
+  is_active: true,
 })
 
 function openAdd() {
+  // 重置为新增模式
+  isEditMode.value = false
+  editingId.value = null
   showAdd.value = true
 }
 
 function closeAdd() {
   showAdd.value = false
+  isEditMode.value = false
+  editingId.value = null
   form.value = {
-    platform: '',
-    username: '',
-    homepage: '',
-    dialogStyle: '',
-    extraPrompt: '',
-    status: '启用',
+    name: '',
+    service_type: '',
+    api_base: '',
+    api_key: '',
+    model_name: '',
+    max_tokens: '',
+    temperature: '',
+    is_active: true,
   }
 }
 
-function submitAdd() {
-  if (!form.value.platform || !form.value.username) {
-    return
+async function submitAdd() {
+
+
+  isLoading.value = true
+
+  try {
+    // 准备提交数据
+    const submitData = {
+      name: form.value.name.trim(),
+      service_type: form.value.service_type,
+      api_base: form.value.api_base.trim(),
+      api_key: form.value.api_key.trim(),
+      model_name: form.value.model_name.trim(),
+      max_tokens: form.value.max_tokens || '4096',
+      temperature: form.value.temperature || '0.7',
+      is_active: form.value.is_active
+    }
+
+    // 根据模式调用不同的接口
+    if (isEditMode.value) {
+      // 编辑模式：调用更新接口
+      await updatelist(editingId.value, submitData)
+      toast.success('配置更新成功')
+    } else {
+      // 新增模式：调用新增接口
+      await addlist(submitData)
+      toast.success('配置新增成功')
+    }
+
+    // 成功后关闭弹窗并刷新列表
+    closeAdd()
+    await fetchlist()
+
+  } catch (error) {
+    console.error(isEditMode.value ? '更新失败:' : '新增失败:', error)
+
+    // 更详细的错误处理
+    let errorMessage = isEditMode.value ? '更新失败' : '新增失败'
+    if (error.response?.data?.message) {
+      errorMessage += `: ${error.response.data.message}`
+    } else if (error.message) {
+      errorMessage += `: ${error.message}`
+    } else {
+      errorMessage += '，请重试'
+    }
+
+    toast.error(errorMessage)
+  } finally {
+    isLoading.value = false
   }
-  const nextId = Math.max(0, ...accounts.value.map(a => a.id)) + 1
-  const createdAt = formatDateTime(new Date())
-  accounts.value.unshift({ id: nextId, ...form.value, createdAt })
-  closeAdd()
 }
 
 function formatDateTime(date) {
   const pad = (n) => String(n).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
+
+// 手动搜索按钮点击
+const handleSearchClick = async () => {
+  if (isSearching.value) return
+
+  isSearching.value = true
+  try {
+    await fetchlist()
+  } finally {
+    isSearching.value = false
+  }
+}
+
+// 清除搜索
+const clearSearch = () => {
+  searchQuery.value = ''
+  fetchlist()
+}
+
+const fetchlist = async () => {
+  let res = await getlist({
+    search: searchQuery.value,
+    // ordering: '',
+    // page: 1,
+    // pageSize: 10
+  })
+
+  accounts.value = res.results
+
+}
+onMounted(() => {
+  fetchlist()
+})
 </script>
-
-
