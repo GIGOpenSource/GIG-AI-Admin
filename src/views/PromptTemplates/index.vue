@@ -14,8 +14,6 @@
               <TableHead class="whitespace-nowrap">模板名称</TableHead>
               <TableHead class="whitespace-nowrap">模板类型</TableHead>
               <TableHead class="whitespace-nowrap">所属用户</TableHead>
-              <TableHead class="whitespace-nowrap">AI配置</TableHead>
-              <TableHead class="whitespace-nowrap">使用次数</TableHead>
               <TableHead class="whitespace-nowrap">是否激活</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
@@ -25,10 +23,8 @@
             <TableRow v-for="item in templates" :key="item.id">
               <TableCell class="whitespace-nowrap">{{ item.id }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.name }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.type }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ getTemplateTypeText(item.type) }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.user }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.aiConfig }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.usageCount }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.isActive ? '是' : '否' }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.createdAt }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
@@ -54,36 +50,28 @@
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">所属用户<span class="text-error-500">*</span></label>
-                <select v-model="form.user" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                <select v-model="form.owner" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                   <option value="" disabled>请选择用户</option>
                   <option v-for="u in userOptions" :key="u.id" :value="u.id">{{ u.name }}</option>
                 </select>
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模板类型</label>
-                <select v-model="form.type"
+                <select v-model="form.scene"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                   <option value="" disabled>请选择模板类型</option>
-                  <option value="评论模板">评论模板</option>
-                  <option value="发帖模板">发帖模板</option>
-                  <option value="回复模板">回复模板</option>
+                  <option value="reply_comment">回复评论</option>
+                  <option value="reply_message">回复消息</option>
+                  <option value="post">发帖</option>
                 </select>
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">AI配置</label>
-                <input v-model="form.aiConfig" type="text" placeholder="如：默认、GPT-4o"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">使用次数</label>
-                  <input v-model.number="form.usageCount" type="number" min="0" placeholder="0"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                </div>
-                <div class="flex items-center gap-3 pt-6">
-                  <input id="addActive" v-model="form.isActive" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" />
-                  <label for="addActive" class="text-sm font-medium text-gray-700 dark:text-gray-400">是否激活</label>
-                </div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">是否激活</label>
+                <select v-model="form.enabled"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <option :value="true">是</option>
+                  <option :value="false">否</option>
+                </select>
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">内容<span class="text-error-500">*</span></label>
@@ -111,36 +99,28 @@
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">所属用户<span class="text-error-500">*</span></label>
-                <select v-model="editForm.user" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                <select v-model="editForm.owner" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                   <option value="" disabled>请选择用户</option>
                   <option v-for="u in userOptions" :key="u.id" :value="u.id">{{ u.name }}</option>
                 </select>
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模板类型</label>
-                <select v-model="editForm.type"
+                <select v-model="editForm.scene"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                   <option value="" disabled>请选择模板类型</option>
-                  <option value="评论模板">评论模板</option>
-                  <option value="发帖模板">发帖模板</option>
-                  <option value="回复模板">回复模板</option>
+                  <option value="reply_comment">回复评论</option>
+                  <option value="reply_message">回复消息</option>
+                  <option value="post">发帖</option>
                 </select>
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">AI配置</label>
-                <input v-model="editForm.aiConfig" type="text" placeholder="如：默认、GPT-4o"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">使用次数</label>
-                  <input v-model.number="editForm.usageCount" type="number" min="0" placeholder="0"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                </div>
-                <div class="flex items-center gap-3 pt-6">
-                  <input id="editActive" v-model="editForm.isActive" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" />
-                  <label for="editActive" class="text-sm font-medium text-gray-700 dark:text-gray-400">是否激活</label>
-                </div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">是否激活</label>
+                <select v-model="editForm.enabled"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <option :value="true">是</option>
+                  <option :value="false">否</option>
+                </select>
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">内容<span class="text-error-500">*</span></label>
@@ -168,13 +148,11 @@ import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { getUser } from '@/api/index'
+import { getPromptsConfigs, createPromptsConfig, updatePromptsConfig, deletePromptsConfig, getPromptsConfig } from '@/api/prompts'
 
 const currentPageTitle = ref('提示词模板')
 
-const templates = ref([
-  { id: 1, name: '客服问候模板', type: '问候', user: 'admin', aiConfig: '默认', usageCount: 12, isActive: true, content: '您好，我是客服，很高兴为您服务。', createdAt: '2024-08-01 10:23' },
-  { id: 2, name: '售后回访模板', type: '售后', user: 'admin', aiConfig: '默认', usageCount: 5, isActive: false, content: '请问本次服务是否满意？欢迎反馈意见。', createdAt: '2024-08-03 14:05' },
-])
+const templates = ref([])
 
 // 用户下拉选项
 const userOptions = ref([])
@@ -188,25 +166,40 @@ async function fetchUsers() {
   })) : []
 }
 
+async function fetchTemplates() {
+  try {
+    const res = await getPromptsConfigs()
+    const list = (res && res.results) ? res.results : res
+    templates.value = Array.isArray(list) ? list.map((item) => ({
+      id: item.id,
+      name: item.name,
+      type: item.scene || item.type,
+      user: item.owner || item.user,
+      isActive: item.enabled !== undefined ? item.enabled : item.isActive,
+      content: item.content,
+      createdAt: item.createdAt || item.created_at,
+    })) : []
+  } catch (error) {
+    console.error('Failed to fetch templates:', error)
+    templates.value = []
+  }
+}
+
 const showAdd = ref(false)
 const form = ref({
   name: '',
-  type: '',
-  user: '',
-  aiConfig: '',
-  usageCount: 0,
-  isActive: true,
+  scene: '',
+  owner: '',
+  enabled: true,
   content: '',
 })
 const showEdit = ref(false)
 const editForm = ref({
   id: 0,
   name: '',
-  type: '',
-  user: '',
-  aiConfig: '',
-  usageCount: 0,
-  isActive: true,
+  scene: '',
+  owner: '',
+  enabled: true,
   content: '',
   createdAt: '',
 })
@@ -217,52 +210,88 @@ function openAdd() {
 
 function closeAdd() {
   showAdd.value = false
-  form.value = { name: '', type: '', user: '', aiConfig: '', usageCount: 0, isActive: true, content: '' }
+  form.value = { name: '', scene: '', owner: '', enabled: true, content: '' }
 }
 
-function submitAdd() {
-  if (!form.value.user || !form.value.name || !form.value.content) {
+async function submitAdd() {
+  if (!form.value.owner || !form.value.name || !form.value.content) {
     return
   }
-  const nextId = Math.max(0, ...templates.value.map(t => t.id)) + 1
-  const createdAt = formatDateTime(new Date())
-  templates.value.unshift({
-    id: nextId,
-    name: form.value.name,
-    type: form.value.type,
-    user: form.value.user,
-    aiConfig: form.value.aiConfig,
-    usageCount: Number(form.value.usageCount) || 0,
-    isActive: !!form.value.isActive,
-    content: form.value.content,
-    createdAt,
-  })
-  closeAdd()
+  try {
+    const payload = {
+      name: form.value.name,
+      scene: form.value.scene,
+      owner: form.value.owner,
+      enabled: !!form.value.enabled,
+      content: form.value.content,
+    }
+    await createPromptsConfig(payload)
+    await fetchTemplates() // Refresh the list
+    closeAdd()
+  } catch (error) {
+    console.error('Failed to create template:', error)
+  }
 }
 
-function openEdit(item) {
+async function openEdit(item) {
   showEdit.value = true
-  editForm.value = { ...item }
+  try {
+    const detail = await getPromptsConfig(String(item.id))
+    editForm.value = {
+      id: detail.id ?? item.id,
+      name: detail.name ?? item.name,
+      scene: detail.scene ?? item.type,
+      owner: detail.owner ?? item.user,
+      enabled: typeof detail.enabled === 'boolean' ? detail.enabled : (typeof detail.isActive === 'boolean' ? detail.isActive : item.isActive),
+      content: detail.content ?? item.content,
+      createdAt: detail.createdAt ?? detail.created_at ?? item.createdAt,
+    }
+  } catch (error) {
+    console.error('Failed to fetch template detail:', error)
+    editForm.value = {
+      id: item.id,
+      name: item.name,
+      scene: item.type,
+      owner: item.user,
+      enabled: item.isActive,
+      content: item.content,
+      createdAt: item.createdAt,
+    }
+  }
 }
 
 function closeEdit() {
   showEdit.value = false
-  editForm.value = { id: 0, name: '', type: '', user: '', aiConfig: '', usageCount: 0, isActive: true, content: '', createdAt: '' }
+  editForm.value = { id: 0, name: '', scene: '', owner: '', enabled: true, content: '', createdAt: '' }
 }
 
-function submitEdit() {
-  if (!editForm.value.user || !editForm.value.name || !editForm.value.content) {
+async function submitEdit() {
+  if (!editForm.value.owner || !editForm.value.name || !editForm.value.content) {
     return
   }
-  const index = templates.value.findIndex(t => t.id === editForm.value.id)
-  if (index !== -1) {
-    templates.value.splice(index, 1, { ...editForm.value })
+  try {
+    const payload = {
+      name: editForm.value.name,
+      scene: editForm.value.scene,
+      owner: editForm.value.owner,
+      enabled: !!editForm.value.enabled,
+      content: editForm.value.content,
+    }
+    await updatePromptsConfig(String(editForm.value.id), payload)
+    await fetchTemplates() // Refresh the list
+    closeEdit()
+  } catch (error) {
+    console.error('Failed to update template:', error)
   }
-  closeEdit()
 }
 
-function onDelete(item) {
-  templates.value = templates.value.filter(t => t.id !== item.id)
+async function onDelete(item) {
+  try {
+    await deletePromptsConfig(String(item.id))
+    await fetchTemplates() // Refresh the list
+  } catch (error) {
+    console.error('Failed to delete template:', error)
+  }
 }
 
 function formatDateTime(date) {
@@ -270,8 +299,18 @@ function formatDateTime(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+function getTemplateTypeText(type) {
+  const typeMap = {
+    'reply_comment': '回复评论',
+    'reply_message': '回复消息',
+    'post': '发帖'
+  }
+  return typeMap[type] || type
+}
+
 onMounted(() => {
   fetchUsers()
+  fetchTemplates()
 })
 </script>
 
