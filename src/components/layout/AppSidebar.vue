@@ -245,6 +245,9 @@ const menuGroups = [
       { icon: PieChartIcon, name: "控制台", path: "/" },
       { icon: TableIcon, name: "AI 用户列表", path: "/ai-accounts" },
       { icon: ListIcon, name: "AI 服务配置", path: "/ai-config" },
+      { icon: ChatIcon, name: "任务列表", path: "/auto-reply" },
+      { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
+      { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
     ],
   },
 ];

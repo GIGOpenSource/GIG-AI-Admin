@@ -216,8 +216,8 @@ import { login } from '@/api'
 
 const router = useRouter()
 
-const username = ref('admin1')
-const password = ref('admin123admin')
+const username = ref('admin')
+const password = ref('admin123')
 const showPassword = ref(false)
 const keepLoggedIn = ref(false)
 

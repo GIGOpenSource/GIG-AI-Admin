@@ -278,7 +278,7 @@
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { register } from '@/api'
 
 const firstName = ref('')
@@ -290,6 +290,7 @@ const passwordConfirm = ref('')
 const showPassword = ref(false)
 const showPasswordConfirm = ref(false)
 const agreeToTerms = ref(false)
+const router = useRouter()
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
@@ -314,10 +315,7 @@ const handleSubmit = async () => {
     password_confirm: passwordConfirm.value,
   })
   console.log(res)
-  // if (res && res.token) {
-  //   localStorage.setItem('token', res.token)
-  //   localStorage.setItem('profile', JSON.stringify(res.profile))
-  //   router.replace({ path: '/' })
-  // }
+  // On success, navigate to sign-in without keeping history
+  router.replace({ path: '/signin' })
 }
 </script>

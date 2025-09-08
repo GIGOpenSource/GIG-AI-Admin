@@ -2,53 +2,44 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div class="space-y-5 sm:space-y-6">
-      <ComponentCard >
+      <ComponentCard title="">
+        <div class="mb-4 flex items-center justify-between">
+          <div></div>
+          <Button size="sm" @click="openCreate">新增</Button>
+        </div>
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
             <TableRow>
               <TableHead class="whitespace-nowrap">ID</TableHead>
-              <TableHead class="whitespace-nowrap">平台</TableHead>
               <TableHead class="whitespace-nowrap">用户名</TableHead>
-              <TableHead class="whitespace-nowrap">主页地址</TableHead>
-              <TableHead class="whitespace-nowrap">对话风格</TableHead>
-              <TableHead class="whitespace-nowrap">补充提示词</TableHead>
+              <TableHead class="whitespace-nowrap">电子邮件地址</TableHead>
+              <TableHead class="whitespace-nowrap">角色</TableHead>
+              <TableHead class="whitespace-nowrap">最大爬虫账号数</TableHead>
+              <TableHead class="whitespace-nowrap">最大每日任务数</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
-              <TableHead class="whitespace-nowrap">创建时间</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow v-for="acc in accounts" :key="acc.id">
               <TableCell class="whitespace-nowrap">{{ acc.id }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.platform }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.username }}</TableCell>
-              <TableCell class="whitespace-nowrap">
-                <a
-                  :href="acc.homepage"
-                  target="_blank"
-                  rel="noopener"
-                  class="text-brand-600 hover:underline"
-                >
-                  {{ acc.homepage }}
-                </a>
-              </TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.dialogStyle }}</TableCell>
-              <TableCell class="max-w-[280px] truncate" :title="acc.extraPrompt">
-                {{ acc.extraPrompt }}
-              </TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.email }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.role }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.max_crawler_accounts }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.max_daily_tasks }}</TableCell>
               <TableCell class="whitespace-nowrap">
                 <span
                   :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    acc.status === '启用'
+                    acc.is_active
                       ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
                       : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
                   ]"
                 >
-                  {{ acc.status }}
+                  {{ acc.is_active ? '启用' : '停用' }}
                 </span>
               </TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.createdAt }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
@@ -82,187 +73,169 @@
           </Pagination>
         </div>
       </ComponentCard>
+      <Modal v-if="showModal" :fullScreenBackdrop="true" @close="closeModal">
+        <template #body>
+          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+            <h3 class="mb-4 text-lg font-semibold">{{ isEdit ? '编辑用户' : '新增用户' }}</h3>
+            <form @submit.prevent="submitForm" class="space-y-4">
+              <div v-if="!isEdit" class="space-y-3">
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">用户名</label>
+                  <input v-model.trim="form.username" type="text" required placeholder="输入用户名" class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-gray-900" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">密码</label>
+                  <input v-model="form.password" type="password" required placeholder="输入密码" class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-gray-900" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">确认密码</label>
+                  <input v-model="form.password_confirm" type="password" required placeholder="再次输入密码" class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-gray-900" />
+                </div>
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">账号启用</label>
+                <label class="inline-flex items-center text-sm font-normal text-gray-700 cursor-pointer select-none dark:text-gray-400">
+                  <input v-model="form.is_active" type="checkbox" class="mr-2" />
+                  启用
+                </label>
+              </div>
+              <div class="flex justify-end gap-3 pt-2">
+                <Button type="button" variant="outline" @click="closeModal">取消</Button>
+                <Button type="submit">保存</Button>
+              </div>
+            </form>
+          </div>
+        </template>
+      </Modal>
     </div>
   </AdminLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import Modal from '@/components/ui/Modal.vue'
+import { getUser, updateUserStatus, deleteUser, createUser } from '@/api'
+
 
 const currentPageTitle = ref('AI 用户列表')
 
-const accounts = ref([
-  {
-    id: 1,
-    platform: 'OpenAI',
-    username: 'alice',
-    homepage: 'https://example.com/@alice',
-    dialogStyle: '专业、简洁',
-    extraPrompt: '回答前先给要点，最后总结',
-    status: '启用',
-    createdAt: '2024-08-01 10:23',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
+// 列表数据源
+const accounts = ref([])
 
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-  {
-    id: 2,
-    platform: 'Anthropic',
-    username: 'bob',
-    homepage: 'https://example.com/@bob',
-    dialogStyle: '友好、详细',
-    extraPrompt: '举 2 个示例说明',
-    status: '停用',
-    createdAt: '2024-08-03 14:05',
-  },
-
-])
-
+// 分页参数
 const page = ref(1)
 const pageSize = ref(10)
 const total = computed(() => accounts.value.length)
 
 function onEdit(account) {
-  console.log('edit', account)
+  openEdit(account)
 }
 
-function onDelete(account) {
-  console.log('delete', account)
+async function onDelete(account) {
+  try {
+    await deleteUser(String(account.id))
+    accounts.value = accounts.value.filter(a => a.id !== account.id)
+  } catch (e) {
+    console.error('delete failed', e)
+  }
 }
+
+// 弹窗与表单状态（新增/编辑）
+const showModal = ref(false)
+const isEdit = ref(false)
+const form = ref({ id: 0, username: '', password: '', password_confirm: '', is_active: true })
+
+// 打开编辑弹窗
+function openEdit(acc) {
+  isEdit.value = true
+  form.value = { id: acc.id, is_active: acc.is_active }
+  showModal.value = true
+}
+
+// 打开新增弹窗
+function openCreate() {
+  isEdit.value = false
+  form.value = { id: 0, username: '', password: '', password_confirm: '', is_active: true }
+  showModal.value = true
+}
+
+// 关闭弹窗
+function closeModal() {
+  showModal.value = false
+}
+
+// 提交新增/编辑
+async function submitForm() {
+  // 仅允许编辑用户启用状态
+  if (isEdit.value) {
+    const idx = accounts.value.findIndex(a => a.id === form.value.id)
+    if (idx !== -1) {
+      const payload = {
+        is_active: form.value.is_active,
+      }
+      try {
+        const updated = await updateUserStatus(String(form.value.id), payload)
+        const updatedIsActive = (updated && typeof updated.is_active === 'boolean')
+          ? updated.is_active
+          : (updated && updated.user && typeof updated.user.is_active === 'boolean')
+            ? updated.user.is_active
+            : form.value.is_active
+        accounts.value[idx] = {
+          ...accounts.value[idx],
+          is_active: updatedIsActive,
+        }
+      } catch (e) {
+        console.error('update failed', e)
+        return
+      }
+    }
+  } else {
+    if (!form.value.username) {
+      console.error('username required')
+      return
+    }
+    if (form.value.password !== form.value.password_confirm) {
+      console.error('password not match')
+      return
+    }
+    try {
+      await createUser({
+        username: form.value.username,
+        password: form.value.password,
+        password_confirm: form.value.password_confirm,
+        is_active: form.value.is_active,
+      })
+      await getList()
+    } catch (e) {
+      console.error('create failed', e)
+      return
+    }
+  }
+  closeModal()
+}
+
+// 获取用户列表
+const getList = async ()=>{
+  const res = await getUser({
+    page: page.value,
+    page_size: pageSize.value,
+  })
+  console.log('res',res);
+
+  accounts.value = res.results
+  total.value = res.count
+}
+
+// 初始化加载列表
+onMounted(()=>{
+  getList()
+})
 </script>
 
 

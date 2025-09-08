@@ -55,6 +55,30 @@ const router = createRouter({
       },
     },
     {
+      path: '/auto-reply',
+      name: 'Auto Reply',
+      component: () => import('../views/AutoReply/index.vue'),
+      meta: {
+        title: 'Auto Reply',
+      },
+    },
+    {
+      path: '/prompt-templates',
+      name: 'Prompt Templates',
+      component: () => import('../views/PromptTemplates/index.vue'),
+      meta: {
+        title: 'Prompt Templates',
+      },
+    },
+    {
+      path: '/keyword-rules',
+      name: 'Keyword Rules',
+      component: () => import('../views/KeywordRules/index.vue'),
+      meta: {
+        title: 'Keyword Rules',
+      },
+    },
+    {
       path: '/line-chart',
       name: 'Line Chart',
       component: () => import('../views/Chart/LineChart/LineChart.vue'),
