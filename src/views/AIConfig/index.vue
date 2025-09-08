@@ -64,7 +64,19 @@
               <!--  -->
               <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.api_key_masked }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.enabled ?'正常':'禁用' }}</TableCell>
+              <TableCell class="whitespace-nowrap">
+
+               <span
+                  :class="[
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                    acc.enabled
+                      ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
+                      : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
+                  ]"
+                >
+                  {{ acc.enabled ?'正常':'禁用'}}
+                </span>
+              </TableCell>
               <!--{{ item.priority }}  -->
               <TableCell class="whitespace-nowrap">222</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.created_at }}</TableCell>
@@ -154,7 +166,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted ,nextTick} from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
@@ -263,8 +275,6 @@ function openAdd() {
   // 重置为新增模式
   isEditMode.value = false
   editingId.value = null
-
-  // 重置表单数据
   form.value = {
     name: '',
     provider: '',
@@ -272,11 +282,11 @@ function openAdd() {
     api_key: '',
     model: ''
   }
-  console.log(form.value);
-
-
-  // 直接打开弹窗，不需要调用接口
   showAdd.value = true
+
+  nextTick(() => {
+    console.log('DOM更新后打印:', form.value)
+  })
 }
 
 function closeAdd() {
@@ -395,9 +405,6 @@ const fetchlist = async () => {
 
     accounts.value = res.results
     total.value = res.count
-    console.log( accounts.value,' accounts.value');
-
-
     // 设置分页状态
     hasNext.value = res.next !== null
     hasPrevious.value = res.previous !== null
