@@ -26,26 +26,26 @@
           <TableBody>
             <TableRow v-for="(item, idx) in tasks" :key="item.id">
               <TableCell class="whitespace-nowrap">{{ idx + 1 }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.platform }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.keyword }}</TableCell>
-              <TableCell class="max-w-[380px] truncate" :title="item.prompt">{{ item.prompt }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.type }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.provider }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.keyword_config_id }}</TableCell>
+              <TableCell class="max-w-[380px] truncate" :title="item.prompt_config_id">{{ item.prompt_config_id }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ getTaskTypeText(item.type) }}</TableCell>
               <TableCell class="whitespace-nowrap">
                 <span
                   :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    item.status === '启用'
+                    item.enabled
                       ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
                       : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
                   ]"
                 >
-                  {{ item.status }}
+                  {{ item.enabled ? '启用' : '停用' }}
                 </span>
               </TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.cycleValue }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.cycleType }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.executeTime }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.createdAt }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.day_of_month }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ getRecurrenceTypeText(item.recurrence_type) }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.time_of_day }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.created_at }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
@@ -62,10 +62,18 @@
           <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
             <h3 class="mb-4 text-lg font-semibold">{{ isEditing ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitForm" class="space-y-4">
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
+                <select v-model="form.owner"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <option value="" disabled>请选择目标用户</option>
+                  <option v-for="user in userOptions" :key="user.id" :value="user.id">{{ user.name }}</option>
+                </select>
+              </div>
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span class="text-error-500">*</span></label>
-                  <select v-model="form.platform"
+                  <select v-model="form.provider"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option value="Twitter">Twitter</option>
                     <option value="Facebook">Facebook</option>
@@ -76,9 +84,9 @@
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span class="text-error-500">*</span></label>
                   <select v-model="form.type"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option value="回复评论">回复评论</option>
-                    <option value="发帖">发帖</option>
-                    <option value="回复消息">回复消息</option>
+                    <option value="reply_comment">回复评论</option>
+                    <option value="post">发帖</option>
+                    <option value="reply_message">回复消息</option>
                   </select>
                 </div>
               </div>
@@ -88,7 +96,7 @@
                   <select v-model="form.keyword"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option disabled value="">请选择关键词</option>
-                    <option v-for="opt in keywordOptions" :key="opt" :value="opt">{{ opt }}</option>
+                    <option v-for="opt in keywordOptions" :key="opt.id" :value="opt.id">{{ opt.keyword }}</option>
                   </select>
                 </div>
                 <div class="sm:col-span-2">
@@ -96,36 +104,36 @@
                   <select v-model="form.prompt"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option disabled value="">请选择提示词</option>
-                    <option v-for="opt in availablePrompts" :key="opt" :value="opt">{{ opt }}</option>
+                    <option v-for="opt in availablePrompts" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">循环类型<span class="text-error-500">*</span></label>
-                  <select v-model="form.cycleType"
+                  <select v-model="form.recurrence_type"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option value="周">周</option>
-                    <option value="日">日</option>
-                    <option value="时">时</option>
+                    <option value="daily">日</option>
+                    <option value="weekly">周</option>
+                    <option value="monthly">月</option>
                   </select>
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">循环周期<span class="text-error-500">*</span></label>
-                  <input v-model.number="form.cycleValue" type="number" min="1" placeholder="如：1"
+                  <input v-model.number="form.day_of_month" type="number" min="1" placeholder="如：1"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
                 <div class="sm:col-span-2">
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">执行时间<span class="text-error-500">*</span></label>
-                  <input v-model="form.executeTime" type="time"
+                  <input v-model="form.time_of_day" type="time"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
               </div>
 
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">状态</label>
-                <select v-model="form.status"
+                <select v-model="form.enabled"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="启用">启用</option>
-                  <option value="停用">停用</option>
+                  <option :value="true">启用</option>
+                  <option :value="false">停用</option>
                 </select>
               </div>
               <div class="flex justify-end gap-3 pt-2">
@@ -142,32 +150,37 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { getScheduledTasks, createScheduledTask, getScheduledTask, updateScheduledTask, deleteScheduledTask } from '@/api/task'
+import { getKeywordsConfigs } from '@/api/keywrods'
+import { getPromptsConfigs } from '@/api/prompts'
+import { getUser } from '@/api/index'
 
 const currentPageTitle = ref('任务列表')
 
-const tasks = ref([
-  { id: 1, platform: 'Twitter', type: '回复评论', keyword: '你好', prompt: '友好欢迎语并引导关注店铺。', cycleType: '日', cycleValue: 1, executeTime: '09:00', status: '启用', createdAt: '2024-08-01 10:23' },
-  { id: 2, platform: 'Facebook', type: '发帖', keyword: '下单', prompt: '收到关键词后发送下单链接。', cycleType: '周', cycleValue: 1, executeTime: '10:30', status: '停用', createdAt: '2024-08-03 14:05' },
-])
+const tasks = ref([])
+
+// 用户下拉选项
+const userOptions = ref([])
 
 const showForm = ref(false)
 const editingId = ref(null)
 const form = ref({
-  platform: 'Twitter',
-  type: '回复评论',
+  owner: '',
+  provider: 'Twitter',
+  type: 'reply_message',
   keyword: '',
   prompt: '',
-  cycleType: '日',
-  cycleValue: 1,
-  executeTime: '09:00',
-  status: '启用',
+  recurrence_type: 'daily',
+  day_of_month: 1,
+  time_of_day: '09:00',
+  enabled: true,
 })
 
 const isEditing = computed(() => editingId.value !== null)
@@ -177,17 +190,34 @@ function openAdd() {
   showForm.value = true
 }
 
-function openEdit(item) {
+async function openEdit(item) {
   editingId.value = item.id
-  form.value = {
-    platform: item.platform,
-    type: item.type,
-    keyword: item.keyword,
-    prompt: item.prompt,
-    cycleType: item.cycleType,
-    cycleValue: item.cycleValue,
-    executeTime: item.executeTime,
-    status: item.status,
+  try {
+    const detail = await getScheduledTask(String(item.id))
+    form.value = {
+      owner: detail.owner ?? item.owner,
+      provider: detail.provider ?? item.provider,
+      type: detail.type ?? item.type,
+      keyword: detail.keyword_config_id ?? item.keyword_config_id,
+      prompt: detail.prompt_config_id ?? item.prompt_config_id,
+      recurrence_type: detail.recurrence_type ?? item.recurrence_type,
+      day_of_month: detail.day_of_month ?? item.day_of_month,
+      time_of_day: detail.time_of_day ?? item.time_of_day,
+      enabled: typeof detail.enabled === 'boolean' ? detail.enabled : item.enabled,
+    }
+  } catch (error) {
+    console.error('Failed to fetch task detail:', error)
+    form.value = {
+      owner: item.owner,
+      provider: item.provider,
+      type: item.type,
+      keyword: item.keyword_config_id,
+      prompt: item.prompt_config_id,
+      recurrence_type: item.recurrence_type,
+      day_of_month: item.day_of_month,
+      time_of_day: item.time_of_day,
+      enabled: item.enabled,
+    }
   }
   showForm.value = true
 }
@@ -195,49 +225,46 @@ function openEdit(item) {
 function closeForm() {
   showForm.value = false
   editingId.value = null
-  form.value = { platform: 'Twitter', type: '回复评论', keyword: '', prompt: '', cycleType: '日', cycleValue: 1, executeTime: '09:00', status: '启用' }
+  form.value = { owner: '', provider: 'Twitter', type: 'reply_message', keyword: '', prompt: '', recurrence_type: 'daily', day_of_month: 1, time_of_day: '09:00', enabled: true }
 }
 
-function submitForm() {
-  if (!form.value.platform || !form.value.type || !form.value.keyword || !form.value.prompt || !form.value.cycleType || !form.value.cycleValue || !form.value.executeTime) {
-    return
-  }
-  if (isEditing.value) {
-    const index = tasks.value.findIndex(t => t.id === editingId.value)
-    if (index !== -1) {
-      tasks.value[index] = {
-        ...tasks.value[index],
-        platform: form.value.platform,
-        type: form.value.type,
-        keyword: form.value.keyword,
-        prompt: form.value.prompt,
-        cycleType: form.value.cycleType,
-        cycleValue: form.value.cycleValue,
-        executeTime: form.value.executeTime,
-        status: form.value.status,
-      }
-    }
-  } else {
-    const nextId = Math.max(0, ...tasks.value.map(r => r.id)) + 1
-    const createdAt = formatDateTime(new Date())
-    tasks.value.unshift({
-      id: nextId,
-      platform: form.value.platform,
+async function submitForm() {
+  // if (!form.value.owner || !form.value.provider || !form.value.type || !form.value.keyword || !form.value.prompt || !form.value.recurrence_type || !form.value.day_of_month || !form.value.time_of_day) {
+  //   return
+  // }
+  try {
+    const payload = {
+      owner: form.value.owner,
+      provider: form.value.provider,
       type: form.value.type,
-      keyword: form.value.keyword,
-      prompt: form.value.prompt,
-      cycleType: form.value.cycleType,
-      cycleValue: form.value.cycleValue,
-      executeTime: form.value.executeTime,
-      status: form.value.status,
-      createdAt,
-    })
+      keyword_config_id: form.value.keyword,
+      prompt_config_id: form.value.prompt,
+      recurrence_type: form.value.recurrence_type,
+      day_of_month: form.value.day_of_month,
+      time_of_day: form.value.time_of_day,
+      enabled: form.value.enabled,
+    }
+
+    if (isEditing.value) {
+      await updateScheduledTask(String(editingId.value), payload)
+    } else {
+      await createScheduledTask(payload)
+    }
+
+    await fetchTasks() // Refresh the list
+    closeForm()
+  } catch (error) {
+    console.error('Failed to save task:', error)
   }
-  closeForm()
 }
 
-function onDelete(item) {
-  tasks.value = tasks.value.filter(r => r.id !== item.id)
+async function onDelete(item) {
+  try {
+    await deleteScheduledTask(String(item.id))
+    await fetchTasks() // Refresh the list after deletion
+  } catch (error) {
+    console.error('Failed to delete task:', error)
+  }
 }
 
 function formatDateTime(date) {
@@ -245,18 +272,110 @@ function formatDateTime(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+function getRecurrenceTypeText(recurrenceType) {
+  const typeMap = {
+    'daily': '日',
+    'weekly': '周',
+    'monthly': '月'
+  }
+  return typeMap[recurrenceType] || recurrenceType
+}
+
+function getTaskTypeText(type) {
+  const typeMap = {
+    'reply_comment': '回复评论',
+    'post': '发帖',
+    'reply_message': '回复消息'
+  }
+  return typeMap[type] || type
+}
+
 // keyword/prompt options and linkage
-const keywordOptions = ref(['下单', '你好', '退款', '发货'])
-const promptMap = ref({
-  下单: ['请点击链接下单：xxx', '需要帮助下单吗？点这里：xxx'],
-  你好: ['你好！欢迎关注我们的店铺～', '欢迎～有问题随时留言'],
-  退款: ['关于退款的说明：xxx', '请提供订单号，我们来处理退款'],
-  发货: ['您的订单已发货，物流单号：xxx', '预计到达时间为2-3天，感谢耐心等待']
-})
+const keywordOptions = ref([])
+const promptOptions = ref([])
 
 const availablePrompts = computed(() => {
-  const key = form.value.keyword
-  return key ? (promptMap.value[key] || []) : []
+  // Return all prompt options from API
+  return promptOptions.value
+})
+
+async function fetchTasks() {
+  try {
+    const res = await getScheduledTasks()
+    const list = (res && res.results) ? res.results : res
+    tasks.value = Array.isArray(list) ? list.map((item) => ({
+      id: item.id,
+      owner: item.owner,
+      provider: item.provider,
+      type: item.type,
+      keyword_config_id: item.keyword_config_id,
+      prompt_config_id: item.prompt_config_id,
+      recurrence_type: item.recurrence_type,
+      day_of_month: item.day_of_month,
+      time_of_day: item.time_of_day,
+      enabled: item.enabled,
+      created_at: item.created_at,
+    })) : []
+  } catch (error) {
+    console.error('Failed to fetch tasks:', error)
+    tasks.value = []
+  }
+}
+
+async function fetchUsers() {
+  try {
+    const res = await getUser({})
+    const list = (res && res.results) ? res.results : res
+    userOptions.value = Array.isArray(list) ? list.map((u) => ({
+      id: u.id ?? u.pk ?? u.uuid,
+      name: u.username || u.name || u.email || `用户${u.id}`,
+    })) : []
+  } catch (error) {
+    console.error('Failed to fetch users:', error)
+    userOptions.value = []
+  }
+}
+
+async function fetchKeywords() {
+  try {
+    const res = await getKeywordsConfigs()
+    const list = (res && res.results) ? res.results : res
+    keywordOptions.value = Array.isArray(list) ? list.map((item) =>{
+      return {
+        id: item.id,
+        name: item.name,
+        keyword: item.include_keywords
+      }
+    }
+    ).filter(Boolean) : []
+  } catch (error) {
+    console.error('Failed to fetch keywords:', error)
+    keywordOptions.value = []
+  }
+}
+
+async function fetchPrompts() {
+  try {
+    const res = await getPromptsConfigs()
+    const list = (res && res.results) ? res.results : res
+    promptOptions.value = Array.isArray(list) ? list.map((item) => ({
+      id: item.id,
+      name: item.name,
+      content: item.content
+    })) : []
+  } catch (error) {
+    console.error('Failed to fetch prompts:', error)
+    promptOptions.value = []
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([
+    fetchTasks(),
+    fetchUsers(),
+    fetchKeywords(),
+    fetchPrompts()
+  ])
 })
 
 
