@@ -51,10 +51,6 @@
               <TableHead class="whitespace-nowrap">配置名称</TableHead>
               <TableHead class="whitespace-nowrap">平台名称</TableHead>
               <TableHead class="whitespace-nowrap">key</TableHead>
-              <TableHead class="whitespace-nowrap">模型名称</TableHead>
-              <TableHead class="whitespace-nowrap">所属用户</TableHead>
-              <TableHead class="whitespace-nowrap">默认配置</TableHead>
-              <TableHead class="whitespace-nowrap">是否激活</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
               <TableHead class="whitespace-nowrap">优先级</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
@@ -65,32 +61,12 @@
             <TableRow v-for="(acc, index) in accounts" :key="acc.id">
               <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ formdata[acc.service_type] }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.api_base }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.model_name }}</TableCell>
-              <!-- <TableCell class="whitespace-nowrap">
-                <a
-                  :href="acc.homepage"
-                  target="_blank"
-                  rel="noopener"
-                  class="text-brand-600 hover:underline"
-                >
-                  {{ acc.homepage }}
-                </a>
-              </TableCell> -->
-              <TableCell class="whitespace-nowrap">{{ acc.owner }}</TableCell>
-              <TableCell class="max-w-[280px] truncate" :title="acc.model_name">
-                <span :class="acc.is_default ? 'text-green-600' : 'text-gray-500'">
-                  {{ acc.is_default ? '是' : '否' }}
-                </span>
-              </TableCell>
-              <TableCell class="whitespace-nowrap">
-                <span :class="acc.is_active ? 'text-green-600' : 'text-red-500'">
-                  {{ acc.is_active ? '是' : '否' }}
-                </span>
-              </TableCell>
-              <TableCell class="whitespace-nowrap">--</TableCell>
-              <TableCell class="whitespace-nowrap">--</TableCell>
+              <!--  -->
+              <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.api_key_masked }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.enabled ?'正常':'禁用' }}</TableCell>
+              <!--{{ item.priority }}  -->
+              <TableCell class="whitespace-nowrap">222</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.created_at }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
@@ -110,23 +86,13 @@
             共 {{ total }} 条记录，第 {{ page }} 页
           </div>
           <div class="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              :disabled="!hasPrevious"
-              @click="handlePrevious"
-            >
+            <Button size="sm" variant="outline" :disabled="!hasPrevious" @click="handlePrevious">
               上一页
             </Button>
             <span class="px-3 py-1 text-sm bg-gray-100 rounded-md">
               {{ page }}
             </span>
-            <Button
-              size="sm"
-              variant="outline"
-              :disabled="!hasNext"
-              @click="handleNext"
-            >
+            <Button size="sm" variant="outline" :disabled="!hasNext" @click="handleNext">
               下一页
             </Button>
           </div>
@@ -144,50 +110,34 @@
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台名称<span
                     class="text-error-500">*</span></label>
-                <select v-model="form.service_type"
+                <select v-model="form.provider"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                   <option value="">请选择平台</option>
                   <option :value="item.value" v-for="(item, index) in type" :key="index">{{ item.title }}</option>
                 </select>
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">API基础地址<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.api_base" type="url" placeholder="https://api.openai.com/v1"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">API密钥<span
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">key<span
                     class="text-error-500">*</span></label>
                 <input v-model="form.api_key" type="password" placeholder="sk-..."
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
+
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模型名称<span
                     class="text-error-500">*</span></label>
-                <input v-model="form.model_name" type="text" placeholder="如：gpt-4, claude-3-sonnet"
+                <input v-model="form.model" type="text" placeholder="如：gpt-4、claude-3-sonnet"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
+
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">最大令牌数</label>
-                <input v-model="form.max_tokens" type="number" placeholder="如：4096"
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">优先级</label>
+                <input v-model="form.priority" type="number" placeholder="如：8"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">温度参数</label>
-                <input v-model="form.temperature" type="number" step="0.1" placeholder="如：0.7"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transp   arent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">是否激活</label>
-                <select v-model="form.is_active"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option :value="true">激活</option>
-                  <option :value="false">停用</option>
-                </select>
-              </div>
+
               <div class="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" @click="closeAdd" :disabled="isLoading">取消</Button>
                 <Button type="submit" :disabled="isLoading">
@@ -232,27 +182,14 @@ const type = ref([
   {
     title: 'Azure OpenAI',
     value: 'azure'
-  },
-  {
+  }, {
     title: 'Google Gemini',
     value: 'gemini'
   }, {
-    title: 'Anthropic Claude',
+    title: 'Anthropic',
     value: 'anthropic'
   }, {
-    title: 'Together Al',
-    value: 'together'
-  }, {
-    title: 'Deepseek',
-    value: 'deepseek'
-  }, {
-    title: 'Moonshot',
-    value: 'moonshot'
-  }, {
-    title: '智谱AI',
-    value: 'zhipuai'
-  }, {
-    title: '自定义OpenAl兼容接口',
+    title: 'Custom',
     value: 'custom'
   },
 
@@ -273,20 +210,17 @@ async function onEdit(account) {
     // 获取详细信息
     const detailData = await details(account.id)
 
-    // 设置为编辑模式
+    // pe
     isEditMode.value = true
     editingId.value = account.id
 
     // 填充表单数据
     form.value = {
       name: detailData.name || '',
-      service_type: detailData.service_type || '',
-      api_base: detailData.api_base || '',
+      provider: detailData.provider || '',
+      priority: detailData.priority || '',
       api_key: detailData.api_key || '',
-      model_name: detailData.model_name || '',
-      max_tokens: detailData.max_tokens || '',
-      temperature: detailData.temperature || '',
-      is_active: detailData.is_active !== undefined ? detailData.is_active : true,
+      model: detailData.model || ''
     }
 
     // 打开弹窗
@@ -298,11 +232,19 @@ async function onEdit(account) {
 }
 
 async function onDelete(account) {
-  // console.log('delete', account)
-  const res = await deletelist(account.id)
-  console.log(res, 'resresssss');
-  await fetchlist()
+  // 确认删除
+  if (!confirm(`确定要删除配置 "${account.name}" 吗？此操作不可撤销。`)) {
+    return
+  }
 
+  try {
+    await deletelist(account.id)
+    toast.success('删除成功')
+    await fetchlist()
+  } catch (error) {
+    console.error('删除失败:', error)
+    toast.error('删除失败，请重试')
+  }
 }
 
 const showAdd = ref(false)
@@ -311,19 +253,29 @@ const editingId = ref(null)
 const isLoading = ref(false)
 const form = ref({
   name: '',
-  service_type: '',
-  api_base: '',
+  provider: '',
+  priority: '',
   api_key: '',
-  model_name: '',
-  max_tokens: '',
-  temperature: '',
-  is_active: true,
+  model: ''
 })
 
 function openAdd() {
   // 重置为新增模式
   isEditMode.value = false
   editingId.value = null
+
+  // 重置表单数据
+  form.value = {
+    name: '',
+    provider: '',
+    priority: '',
+    api_key: '',
+    model: ''
+  }
+  console.log(form.value);
+
+
+  // 直接打开弹窗，不需要调用接口
   showAdd.value = true
 }
 
@@ -333,32 +285,24 @@ function closeAdd() {
   editingId.value = null
   form.value = {
     name: '',
-    service_type: '',
-    api_base: '',
+    provider: '',
+    priority: '',
     api_key: '',
-    model_name: '',
-    max_tokens: '',
-    temperature: '',
-    is_active: true,
+    model: ''
   }
 }
 
 async function submitAdd() {
 
 
-  isLoading.value = true
-
   try {
     // 准备提交数据
     const submitData = {
-      name: form.value.name.trim(),
-      service_type: form.value.service_type,
-      api_base: form.value.api_base.trim(),
-      api_key: form.value.api_key.trim(),
-      model_name: form.value.model_name.trim(),
-      max_tokens: form.value.max_tokens || '4096',
-      temperature: form.value.temperature || '0.7',
-      is_active: form.value.is_active
+      name: form.value.name,
+      provider: form.value.provider,
+      priority: form.value.priority,
+      api_key: form.value.api_key,
+      model: form.value.model
     }
 
     // 根据模式调用不同的接口
@@ -451,6 +395,8 @@ const fetchlist = async () => {
 
     accounts.value = res.results
     total.value = res.count
+    console.log( accounts.value,' accounts.value');
+
 
     // 设置分页状态
     hasNext.value = res.next !== null
