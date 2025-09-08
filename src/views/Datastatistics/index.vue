@@ -55,18 +55,17 @@
               <TableHead class="whitespace-nowrap">发帖数</TableHead>
               <TableHead class="whitespace-nowrap">回复评论数</TableHead>
               <TableHead class="whitespace-nowrap"></TableHead>
-              <!-- <TableHead class="whitespace-nowrap">状态</TableHead> -->
               <TableHead class="whitespace-nowrap">回复消息数</TableHead>
               <TableHead class="whitespace-nowrap text-right">总曝光量 </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow v-for="acc in accounts" :key="acc.id">
-              <TableCell class="whitespace-nowrap">{{ acc.id }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ formdata[acc.service_type] }}</TableCell>
-               <TableCell class="whitespace-nowrap">{{ acc.api_base }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.model_name }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.date }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.account_count }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.ins }}</TableCell>
+               <TableCell class="whitespace-nowrap">{{ acc.x }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.fb }}</TableCell>
               <!-- <TableCell class="whitespace-nowrap">
                 <a
                   :href="acc.homepage"
@@ -77,46 +76,44 @@
                   {{ acc.homepage }}
                 </a>
               </TableCell> -->
-              <TableCell class="whitespace-nowrap">{{ acc.owner }}</TableCell>
-              <TableCell class="max-w-[280px] truncate" :title="acc.model_name">
-                <span :class="acc.is_default ? 'text-green-600' : 'text-gray-500'">
-                  {{ acc.is_default ? '是' : '否' }}
-                </span>
-              </TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.post_count }}</TableCell>
+              <TableCell class="max-w-[280px] truncate" :title="acc.model_name">{{ acc.reply_comment_count }} </TableCell>
               <TableCell class="whitespace-nowrap">
-                <span :class="acc.is_active ? 'text-green-600' : 'text-red-500'">
-                  {{ acc.is_active ? '是' : '否' }}
-                </span>
+               {{ acc.reply_message_count }}
               </TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.created_at }}</TableCell>
-              <TableCell class="text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
-                  <Button size="sm" variant="outline"
-                    :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
-                    @click="onDelete(acc)">
-                    删除
-                  </Button>
-                </div>
+               <TableCell class="whitespace-nowrap">
               </TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.total_impressions }}</TableCell>
+                 <!-- <TableCell class="whitespace-nowrap">111</TableCell> -->
+
             </TableRow>
           </TableBody>
         </Table>
-        <div class="mt-4">
-          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
-            <PaginationContent v-slot="{ items }">
-              <PaginationFirst />
-              <PaginationPrevious />
-              <template v-for="(item, index) in items" :key="index">
-                <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
-                  {{ item.value }}
-                </PaginationItem>
-                <PaginationEllipsis v-else :index="index" />
-              </template>
-              <PaginationNext />
-              <PaginationLast />
-            </PaginationContent>
-          </Pagination>
+        <div class="mt-4 flex items-center justify-between">
+          <div class="text-sm text-gray-500">
+            共 {{ total }} 条记录，第 {{ page }} 页
+          </div>
+          <div class="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="!hasPrevious"
+              @click="handlePrevious"
+            >
+              上一页
+            </Button>
+            <span class="px-3 py-1 text-sm bg-gray-100 rounded-md">
+              {{ page }}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="!hasNext"
+              @click="handleNext"
+            >
+              下一页
+            </Button>
+          </div>
         </div>
       </ComponentCard>
     </div>
@@ -137,8 +134,10 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, Pag
 const currentPageTitle = ref('数据统计')
 const accounts = ref([])
 const page = ref(1)
-const pageSize = ref(10)
-const total = computed(() => accounts.value.length)
+const pageSize = ref(20) // 默认一页20条
+const total = ref(0)
+const hasNext = ref(false)
+const hasPrevious = ref(false)
 const searchQuery = ref('')
 const searchTimeout = ref(null)
 const isSearching = ref(false)
@@ -323,6 +322,7 @@ const handleSearchClick = async () => {
   if (isSearching.value) return
 
   isSearching.value = true
+  page.value = 1 // 搜索时重置到第一页
   try {
     await fetchlist()
   } finally {
@@ -333,13 +333,56 @@ const handleSearchClick = async () => {
 // 清除搜索
 const clearSearch = () => {
   searchQuery.value = ''
+  page.value = 1 // 重置到第一页
   fetchlist()
 }
 
-const fetchlist = async () => {
-  let res = await getdate({})
-  accounts.value = res.results
+// 分页处理函数
+const handlePageChange = (newPage) => {
+  page.value = newPage
+  fetchlist()
+}
 
+// 上一页
+const handlePrevious = () => {
+  if (hasPrevious.value && page.value > 1) {
+    page.value = page.value - 1
+    fetchlist()
+  }
+}
+
+// 下一页
+const handleNext = () => {
+  if (hasNext.value) {
+    page.value = page.value + 1
+    fetchlist()
+  }
+}
+
+const fetchlist = async () => {
+  try {
+    let res = await getdate({
+      page: page.value,
+      pageSize: pageSize.value
+    })
+
+    // 假设API返回格式与AIConfig一致
+    if (res.results) {
+      accounts.value = res.results
+      total.value = res.count
+      hasNext.value = res.next !== null
+      hasPrevious.value = res.previous !== null
+    } else {
+      // 如果API返回格式不同，需要根据实际情况调整
+      accounts.value = res
+      total.value = res.length
+      hasNext.value = false
+      hasPrevious.value = false
+    }
+  } catch (error) {
+    console.error('获取数据统计失败:', error)
+    toast.error('获取数据统计失败')
+  }
 }
 onMounted(() => {
   fetchlist()
