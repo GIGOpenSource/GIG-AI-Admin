@@ -20,7 +20,8 @@
       ]"
     >
       <router-link to="/">
-        <img
+        <h1 style="font-size: 18px; font-weight: bold;">AI Admin</h1>
+        <!-- <img
           v-if="isExpanded || isHovered || isMobileOpen"
           class="dark:hidden"
           src="/images/logo/logo.svg"
@@ -42,7 +43,7 @@
           alt="Logo"
           width="32"
           height="32"
-        />
+        /> -->
       </router-link>
     </div>
     <div

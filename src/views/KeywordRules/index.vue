@@ -11,6 +11,7 @@
           <TableHeader>
             <TableRow>
               <TableHead class="whitespace-nowrap">ID</TableHead>
+              <TableHead class="whitespace-nowrap">配置名称</TableHead>
               <TableHead class="whitespace-nowrap">目标用户</TableHead>
               <TableHead class="whitespace-nowrap">关键词</TableHead>
               <TableHead class="whitespace-nowrap">匹配模式</TableHead>
@@ -22,6 +23,7 @@
           <TableBody>
             <TableRow v-for="item in rules" :key="item.id">
               <TableCell class="whitespace-nowrap">{{ item.id }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.name || '-' }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ getUserName(item.owner) }}</TableCell>
               <TableCell class="max-w-[320px] truncate" :title="item.keywords.join(', ')">{{ item.keywords.join(', ') }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ getMatchModeText(item.match_mode) }}</TableCell>
@@ -54,6 +56,11 @@
           <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
             <h3 class="mb-4 text-lg font-semibold">新增关键词规则</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">配置名称<span class="text-error-500">*</span></label>
+                <input v-model="form.name" type="text" placeholder="请输入配置名称"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
                 <select v-model="form.owner"
@@ -107,6 +114,11 @@
           <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
             <h3 class="mb-4 text-lg font-semibold">编辑关键词规则</h3>
             <form @submit.prevent="submitEdit" class="space-y-4">
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">配置名称<span class="text-error-500">*</span></label>
+                <input v-model="editForm.name" type="text" placeholder="请输入配置名称"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
                 <select v-model="editForm.owner"
@@ -206,6 +218,7 @@ async function fetchRules() {
     const list = Array.isArray(payload) ? payload : []
     rules.value = list.map((r) => ({
       id: r.id,
+      name: r.name || '',
       owner: (r.owner != null) ? r.owner : (r.user_id ?? r.target_user ?? r.user ?? r.userId ?? ''),
       provider: r.provider || r.platform || 'twitter',
       keywords: Array.isArray(r.include_keywords) ? r.include_keywords : (Array.isArray(r.keywords) ? r.keywords : (typeof r.include_keywords === 'string' ? r.include_keywords.split(',').map((s) => s.trim()).filter(Boolean) : (typeof r.keywords === 'string' ? r.keywords.split(',').map((s) => s.trim()).filter(Boolean) : []))),
@@ -224,6 +237,7 @@ onMounted(async () => {
 
 const showAdd = ref(false)
 const form = ref({
+  name: '',
   provider: 'twitter',
   owner: '',
   include_keywords: '',
@@ -234,6 +248,7 @@ const showEdit = ref(false)
 const editLoading = ref(false)
 const editForm = ref({
   id: 0,
+  name: '',
   provider: 'twitter',
   owner: '',
   include_keywords: '',
@@ -247,17 +262,18 @@ function openAdd() {
 
 function closeAdd() {
   showAdd.value = false
-  form.value = { provider: 'twitter', owner: '', include_keywords: '', match_mode: 'any', enabled: true }
+  form.value = { name: '', provider: 'twitter', owner: '', include_keywords: '', match_mode: 'any', enabled: true }
 }
 
 async function submitAdd() {
   console.log(form.value);
 
-  if (!form.value.owner || !form.value.provider || !form.value.include_keywords || !form.value.match_mode) {
+  if (!form.value.name || !form.value.owner || !form.value.provider || !form.value.include_keywords || !form.value.match_mode) {
     return
   }
   const keywordsArray = form.value.include_keywords.split(',').map(s => s.trim()).filter(Boolean)
   const payload = {
+    name: form.value.name,
     owner: form.value.owner,
     provider: form.value.provider,
     include_keywords: keywordsArray,
@@ -290,6 +306,7 @@ async function onEdit(item) {
     const r = detail || {}
     const normalized = {
       id: r.id ?? item.id,
+      name: r.name ?? item.name ?? '',
       owner: (r.owner != null) ? r.owner : (r.user_id ?? r.target_user ?? r.user ?? r.userId ?? item.owner ?? ''),
       provider: r.provider ?? r.platform ?? item.provider ?? 'twitter',
       include_keywords: Array.isArray(r.include_keywords)
@@ -311,11 +328,12 @@ function closeEdit() {
 }
 
 async function submitEdit() {
-  if (!editForm.value.owner || !editForm.value.provider || !editForm.value.include_keywords || !editForm.value.match_mode) {
+  if (!editForm.value.name || !editForm.value.owner || !editForm.value.provider || !editForm.value.include_keywords || !editForm.value.match_mode) {
     return
   }
   const kw = editForm.value.include_keywords.split(',').map(s => s.trim()).filter(Boolean)
   const payload = {
+    name: editForm.value.name,
     owner: editForm.value.owner,
     provider: editForm.value.provider,
     include_keywords: kw,
