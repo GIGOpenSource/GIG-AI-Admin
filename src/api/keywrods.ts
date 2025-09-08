@@ -1,6 +1,11 @@
 import { get, post, put, patch, del } from '@/lib/http'
-export const getKeywordsRules = (params:any) => get('/core/keywords/rules/', params)
 
-export const getKeywordsRulesDetail = (id:string) => get(`/core/keywords/rules/${id}/`)
+export const getKeywordsConfigs = (params:any) => get('/keywords/configs/', params)
 
-export const createKeywordsRules = (data:any) => post('/core/keywords/rules/admin-create/', data)
+export const getKeywordsConfigsDetail = (id:string) => get(`/keywords/configs/${id}/`)
+
+export const createKeywordsConfigs = (data:any) => post('/keywords/configs/', data)
+
+export const updateKeywordsConfigs = (id:string, data:any) => put(`/keywords/configs/${id}/`, data)
+
+export const deleteKeywordsConfigs = (id:string) => del(`/keywords/configs/${id}/`)
