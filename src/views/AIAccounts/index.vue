@@ -44,6 +44,7 @@
                       size="sm"
                       variant="outline"
                       :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
+                      v-if="!acc.is_superuser"
                       @click="onDelete(acc)"
                     >
                       删除
@@ -201,9 +202,12 @@ async function submitForm() {
     const idx = accounts.value.findIndex(a => a.id === form.value.id)
     if (idx !== -1) {
       const payload = {
-        is_active: form.value.is_active,
+        username: form.value.username,
         ...(form.value.password ? { password: form.value.password } : {}),
+        is_active: form.value.is_active,
         ...(form.value.email ? { email: form.value.email } : {}),
+        is_staff: false,
+        is_superuser: false,
       }
       try {
         // 优先调用通用更新接口
@@ -233,6 +237,8 @@ async function submitForm() {
         email: form.value.email || undefined,
         password: form.value.password,
         is_active: form.value.is_active,
+        is_staff: false,
+        is_superuser: false,
       })
       await getList()
     } catch (e) {

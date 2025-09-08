@@ -6,7 +6,7 @@ export const login = (data: { username: string, password: string, remember_me: b
 export const getUser = (params: any) => get('/accounts/users/', params)
 
 // update user (password/status, etc.)
-export const updateUser = (id: string, data: any) => put(`/accounts/users/${id}/`, data)
+export const updateUser = (id: string, data: any) => patch(`/accounts/users/${id}/`, data)
 
 // delete user
 export const deleteUser = (id: string) => del(`/accounts/users/${id}/`)
