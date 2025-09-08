@@ -60,7 +60,7 @@
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
-                <select v-model="form.target_user"
+                <select v-model="form.user_id"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                   <option value="" disabled>请选择用户</option>
                   <option v-for="u in userOptions" :key="u.id" :value="u.id">{{ u.name }}</option>
@@ -124,7 +124,7 @@
             <form @submit.prevent="submitEdit" class="space-y-4">
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
-                <select v-model="editForm.target_user"
+                <select v-model="editForm.user_id"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                   <option value="" disabled>请选择用户</option>
                   <option v-for="u in userOptions" :key="u.id" :value="u.id">{{ u.name }}</option>
@@ -192,7 +192,7 @@ import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { getKeywordsRules, getKeywordsRulesDetail } from '@/api/keywrods'
+import { getKeywordsRules, getKeywordsRulesDetail, createKeywordsRules } from '@/api/keywrods'
 import { getUser } from '@/api/index'
 
 const currentPageTitle = ref('关键词规则')
@@ -218,7 +218,7 @@ async function fetchRules() {
     const list = Array.isArray(payload) ? payload : []
     rules.value = list.map((r) => ({
       id: r.id,
-      target_user: r.target_user ?? r.user ?? r.user_id ?? '',
+      user_id: (r.user_id != null) ? r.user_id : (r.target_user ?? r.user ?? r.userId ?? ''),
       name: r.name,
       platform: r.platform,
       keywords: Array.isArray(r.keywords) ? r.keywords : (typeof r.keywords === 'string' ? r.keywords.split(',').map((s) => s.trim()).filter(Boolean) : []),
@@ -241,7 +241,7 @@ const showAdd = ref(false)
 const form = ref({
   name: '',
   platform: 'twitter',
-  target_user: '',
+  user_id: '',
   keywords: '',
   reply_template: '',
   cooldown_seconds: 600,
@@ -254,7 +254,7 @@ const editForm = ref({
   id: 0,
   name: '',
   platform: 'twitter',
-  target_user: '',
+  user_id: '',
   keywords: '',
   reply_template: '',
   cooldown_seconds: 600,
@@ -268,18 +268,31 @@ function openAdd() {
 
 function closeAdd() {
   showAdd.value = false
-  form.value = { name: '', platform: 'twitter', target_user: '', keywords: '', reply_template: '', cooldown_seconds: 600, daily_cap: 100, enabled: true }
+  form.value = { name: '', platform: 'twitter', user_id: '', keywords: '', reply_template: '', cooldown_seconds: 600, daily_cap: 100, enabled: true }
 }
 
-function submitAdd() {
-  if (!form.value.target_user || !form.value.name || !form.value.platform || !form.value.keywords || !form.value.reply_template) {
+async function submitAdd() {
+  if (!form.value.user_id || !form.value.name || !form.value.platform || !form.value.keywords || !form.value.reply_template) {
     return
   }
-  const nextId = Math.max(0, ...rules.value.map(r => r.id)) + 1
-  const updatedAt = formatDateTime(new Date())
-  const kw = form.value.keywords.split(',').map(s => s.trim()).filter(Boolean)
-  rules.value.unshift({ id: nextId, target_user: form.value.target_user, name: form.value.name, platform: form.value.platform, keywords: kw, reply_template: form.value.reply_template, cooldown_seconds: form.value.cooldown_seconds, daily_cap: form.value.daily_cap, updatedAt, enabled: form.value.enabled })
-  closeAdd()
+  const keywordsArray = form.value.keywords.split(',').map(s => s.trim()).filter(Boolean)
+  const payload = {
+    user_id: form.value.user_id,
+    name: form.value.name,
+    platform: form.value.platform,
+    keywords: keywordsArray,
+    reply_template: form.value.reply_template,
+    cooldown_seconds: form.value.cooldown_seconds,
+    daily_cap: form.value.daily_cap,
+    enabled: form.value.enabled,
+  }
+  try {
+    await createKeywordsRules(payload)
+    await fetchRules()
+    closeAdd()
+  } catch (e) {
+    console.error('create keywords rule failed', e)
+  }
 }
 
 function onDelete(item) {
@@ -294,7 +307,7 @@ async function onEdit(item) {
     const r = detail || {}
     const normalized = {
       id: r.id ?? item.id,
-      target_user: r.target_user ?? r.user ?? r.user_id ?? item.target_user ?? '',
+      user_id: (r.user_id != null) ? r.user_id : (r.target_user ?? r.user ?? r.userId ?? item.user_id ?? ''),
       name: r.name ?? item.name ?? '',
       platform: r.platform ?? item.platform ?? 'twitter',
       keywords: Array.isArray(r.keywords)
@@ -316,7 +329,7 @@ function closeEdit() {
 }
 
 function submitEdit() {
-  if (!editForm.value.target_user || !editForm.value.name || !editForm.value.platform || !editForm.value.keywords || !editForm.value.reply_template) {
+  if (!editForm.value.user_id || !editForm.value.name || !editForm.value.platform || !editForm.value.keywords || !editForm.value.reply_template) {
     return
   }
   const kw = editForm.value.keywords.split(',').map(s => s.trim()).filter(Boolean)
@@ -325,7 +338,7 @@ function submitEdit() {
     if (r.id === editForm.value.id) {
       return {
         ...r,
-        target_user: editForm.value.target_user,
+        user_id: editForm.value.user_id,
         name: editForm.value.name,
         platform: editForm.value.platform,
         keywords: kw,
