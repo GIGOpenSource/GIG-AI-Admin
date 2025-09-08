@@ -10,7 +10,7 @@
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
             <TableRow>
-              <TableHead class="whitespace-nowrap">ID</TableHead>
+              <TableHead class="whitespace-nowrap">序号</TableHead>
               <TableHead class="whitespace-nowrap">模板名称</TableHead>
               <TableHead class="whitespace-nowrap">模板类型</TableHead>
               <TableHead class="whitespace-nowrap">所属用户</TableHead>
@@ -20,8 +20,8 @@
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="item in templates" :key="item.id">
-              <TableCell class="whitespace-nowrap">{{ item.id }}</TableCell>
+            <TableRow v-for="(item,index ) in templates" :key="item.id">
+              <TableCell class="whitespace-nowrap">{{ index + 1}}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.name }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ getTemplateTypeText(item.type) }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.user }}</TableCell>
@@ -36,15 +36,42 @@
             </TableRow>
           </TableBody>
         </Table>
+        <div class="mt-4 flex items-center justify-between">
+          <div class="text-sm text-gray-500">
+            共 {{ total }} 条记录，第 {{ page }} 页
+          </div>
+          <div class="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="!hasPrevious"
+              @click="handlePrevious"
+            >
+              上一页
+            </Button>
+            <span class="px-3 py-1 text-sm bg-gray-100 rounded-md">
+              {{ page }}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="!hasNext"
+              @click="handleNext"
+            >
+              下一页
+            </Button>
+          </div>
+        </div>
       </ComponentCard>
 
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
         <template #body>
           <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <h3 class="mb-4 text-lg font-semibold">新增提示词模板</h3>
+            <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑提示词模板' : '新增提示词模板' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模板名称<span class="text-error-500">*</span></label>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模板名称<span
+                    class="text-error-500">*</span></label>
                 <input v-model="form.name" type="text" placeholder="如：客服问候模板"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
@@ -74,24 +101,11 @@
                 </select>
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">内容<span class="text-error-500">*</span></label>
-                <textarea v-model="form.content" rows="3" placeholder="请输入模板内容"
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">系统提示词<span
+                    class="text-error-500">*</span></label>
+                <textarea v-model="form.system_prompt" rows="3" placeholder="请输入系统提示词模板"
                   class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
               </div>
-              <div class="flex justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" @click="closeAdd">取消</Button>
-                <Button type="submit">保存</Button>
-              </div>
-            </form>
-          </div>
-        </template>
-      </Modal>
-
-      <Modal v-if="showEdit" :fullScreenBackdrop="true" @close="closeEdit">
-        <template #body>
-          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <h3 class="mb-4 text-lg font-semibold">编辑提示词模板</h3>
-            <form @submit.prevent="submitEdit" class="space-y-4">
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模板名称<span class="text-error-500">*</span></label>
                 <input v-model="editForm.name" type="text" placeholder="如：客服问候模板"
@@ -122,19 +136,18 @@
                   <option :value="false">否</option>
                 </select>
               </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">内容<span class="text-error-500">*</span></label>
-                <textarea v-model="editForm.content" rows="3" placeholder="请输入模板内容"
-                  class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
-              </div>
               <div class="flex justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" @click="closeEdit">取消</Button>
-                <Button type="submit">保存</Button>
+                <Button type="button" variant="outline" @click="closeAdd" :disabled="isLoading">取消</Button>
+                <Button type="submit" :disabled="isLoading">
+                  <span v-if="isLoading" class="mr-2">处理中...</span>
+                  {{ isEditMode ? '更新' : '保存' }}
+                </Button>
               </div>
             </form>
           </div>
         </template>
       </Modal>
+
     </div>
   </AdminLayout>
 </template>
@@ -147,6 +160,8 @@ import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { getlist, addlist, detailslist, updatelist, deletelist} from '@/api/promptTemplates.ts'
+import { toast } from 'vue-sonner'
 import { getUser } from '@/api/index'
 import { getPromptsConfigs, createPromptsConfig, updatePromptsConfig, deletePromptsConfig, getPromptsConfig } from '@/api/prompts'
 
@@ -186,6 +201,9 @@ async function fetchTemplates() {
 }
 
 const showAdd = ref(false)
+const isEditMode = ref(false)
+const editingId = ref(null)
+const isLoading = ref(false)
 const form = ref({
   name: '',
   scene: '',
@@ -205,6 +223,22 @@ const editForm = ref({
 })
 
 function openAdd() {
+  // 重置为新增模式
+  isEditMode.value = false
+  editingId.value = null
+
+  // 重置表单数据
+  form.value = {
+    name: '',
+    template_type: '',
+    system_prompt: '',
+    user_prompt_template: '',
+    is_active: true,
+    user: '',
+    ai_config: ''
+  }
+
+  // 直接打开弹窗，不需要调用接口
   showAdd.value = true
 }
 
@@ -313,5 +347,3 @@ onMounted(() => {
   fetchTemplates()
 })
 </script>
-
-
