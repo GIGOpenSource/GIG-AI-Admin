@@ -28,6 +28,10 @@ const http: AxiosInstance = axios.create({
 
 http.interceptors.request.use(
   (config) => {
+    // Allow specific requests to opt-out of auth header via non-standard flag
+    const skipAuth = (config as any).skipAuth
+    if (skipAuth) return config
+
     const token = getAuthToken()
     if (token) {
       config.headers = config.headers || {}

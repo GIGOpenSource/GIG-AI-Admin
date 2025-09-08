@@ -172,7 +172,7 @@
                     </div>
                   </div>
                 </form>
-                <!-- <div class="mt-5">
+                <div class="mt-5">
                   <p
                     class="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start"
                   >
@@ -183,7 +183,7 @@
                       >Sign Up</router-link
                     >
                   </p>
-                </div> -->
+                </div>
               </div>
             </div>
           </div>
