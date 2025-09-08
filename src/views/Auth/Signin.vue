@@ -140,12 +140,12 @@
                         <label for="keepLoggedIn"
                           class="flex items-center text-sm font-normal text-gray-700 cursor-pointer select-none dark:text-gray-400">
                           <div class="relative">
-                            <input v-model="keepLoggedIn" type="checkbox" id="keepLoggedIn" class="sr-only" />
-                            <div :class="keepLoggedIn
+                            <input v-model="remember_me" type="checkbox" id="keepLoggedIn" class="sr-only" />
+                            <div :class="remember_me
                                 ? 'border-brand-500 bg-brand-500'
                                 : 'bg-transparent border-gray-300 dark:border-gray-700'
                               " class="mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]">
-                              <span :class="keepLoggedIn ? '' : 'opacity-0'">
+                              <span :class="remember_me ? '' : 'opacity-0'">
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                   xmlns="http://www.w3.org/2000/svg">
                                   <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="white" stroke-width="1.94437"
@@ -172,7 +172,7 @@
                     </div>
                   </div>
                 </form>
-                <div class="mt-5">
+                <!-- <div class="mt-5">
                   <p
                     class="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start"
                   >
@@ -183,7 +183,7 @@
                       >Sign Up</router-link
                     >
                   </p>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -217,9 +217,9 @@ import { login } from '@/api'
 const router = useRouter()
 
 const username = ref('admin')
-const password = ref('admin123')
+const password = ref('woshishei')
 const showPassword = ref(false)
-const keepLoggedIn = ref(false)
+const remember_me = ref(false)
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
@@ -230,17 +230,18 @@ const handleSubmit = async () => {
   console.log('Form submitted', {
     username: username.value,
     password: password.value,
-    keepLoggedIn: keepLoggedIn.value,
+    remember_me: remember_me.value,
   })
 
   const res = await login({
     username: username.value,
     password: password.value,
+    remember_me: remember_me.value,
   })
   console.log(res)
-  if (res && res.token) {
-    localStorage.setItem('token', res.token)
-    localStorage.setItem('profile', JSON.stringify(res.profile))
+  if (res && res.access) {
+    localStorage.setItem('token', res.access)
+    localStorage.setItem('profile', JSON.stringify(res.user))
     router.replace({ path: '/' })
   } else {
     console.log('登录失败', res.message);

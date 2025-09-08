@@ -14,49 +14,52 @@
               <TableHead class="whitespace-nowrap">用户名</TableHead>
               <TableHead class="whitespace-nowrap">电子邮件地址</TableHead>
               <TableHead class="whitespace-nowrap">角色</TableHead>
-              <TableHead class="whitespace-nowrap">最大爬虫账号数</TableHead>
-              <TableHead class="whitespace-nowrap">最大每日任务数</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="acc in accounts" :key="acc.id">
-              <TableCell class="whitespace-nowrap">{{ acc.id }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.username }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.email }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.role }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.max_crawler_accounts }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.max_daily_tasks }}</TableCell>
-              <TableCell class="whitespace-nowrap">
-                <span
-                  :class="[
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    acc.is_active
-                      ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
-                      : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
-                  ]"
-                >
-                  {{ acc.is_active ? '启用' : '停用' }}
-                </span>
-              </TableCell>
-              <TableCell class="text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
-                    @click="onDelete(acc)"
+            <template v-if="accounts.length > 0">
+              <TableRow v-for="acc in accounts" :key="acc.id">
+                <TableCell class="whitespace-nowrap">{{ acc.id }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.username }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.email || '-' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.is_superuser ? '超级管理员' : (acc.is_staff ? '管理员' : '用户') }}</TableCell>
+                <TableCell class="whitespace-nowrap">
+                  <span
+                    :class="[
+                      'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                      acc.is_active
+                        ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
+                        : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
+                    ]"
                   >
-                    删除
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
+                    {{ acc.is_active ? '启用' : '停用' }}
+                  </span>
+                </TableCell>
+                <TableCell class="text-right whitespace-nowrap">
+                  <div class="flex items-center justify-end gap-2">
+                    <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
+                      @click="onDelete(acc)"
+                    >
+                      删除
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </template>
+            <template v-else>
+              <TableRow>
+                <TableCell :colspan="6" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+              </TableRow>
+            </template>
           </TableBody>
         </Table>
-        <div class="mt-4">
+        <div class="mt-4" v-if="total > 0">
           <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
             <PaginationContent v-slot="{ items }">
               <PaginationFirst />
@@ -85,18 +88,13 @@
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">电子邮件地址</label>
-                  <input v-model.trim="form.email" type="email" placeholder="name@example.com"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                </div>
-                <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">密码<span class="text-error-500">*</span></label>
                   <input v-model="form.password" type="password" required placeholder="输入密码"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">确认密码<span class="text-error-500">*</span></label>
-                  <input v-model="form.password_confirm" type="password" required placeholder="再次输入密码"
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">电子邮件地址</label>
+                  <input v-model.trim="form.email" type="email" placeholder="name@example.com"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
               </div>
@@ -146,7 +144,7 @@ import Button from '@/components/ui/Button.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import Modal from '@/components/ui/Modal.vue'
-import { getUser, updateUserStatus, deleteUser, createUser, updateUser } from '@/api'
+import { getUser, getUserDetail, deleteUser, createUser, updateUser } from '@/api'
 
 
 const currentPageTitle = ref('AI 用户列表')
@@ -157,7 +155,7 @@ const accounts = ref([])
 // 分页参数
 const page = ref(1)
 const pageSize = ref(10)
-const total = computed(() => accounts.value.length)
+const total = ref(0)
 
 function onEdit(account) {
   openEdit(account)
@@ -175,19 +173,19 @@ async function onDelete(account) {
 // 弹窗与表单状态（新增/编辑）
 const showModal = ref(false)
 const isEdit = ref(false)
-const form = ref({ id: 0, username: '', email: '', password: '', password_confirm: '', is_active: true })
+const form = ref({ id: 0, username: '', email: '', password: '', is_active: true })
 
 // 打开编辑弹窗
 function openEdit(acc) {
   isEdit.value = true
-  form.value = { id: acc.id, username: acc.username, email: acc.email || '', password: '', password_confirm: '', is_active: acc.is_active }
+  form.value = { id: acc.id, username: acc.username, email: acc.email || '', password: '', is_active: acc.is_active }
   showModal.value = true
 }
 
 // 打开新增弹窗
 function openCreate() {
   isEdit.value = false
-  form.value = { id: 0, username: '', email: '', password: '', password_confirm: '', is_active: true }
+  form.value = { id: 0, username: '', email: '', password: '', is_active: true }
   showModal.value = true
 }
 
@@ -229,16 +227,11 @@ async function submitForm() {
       console.error('username required')
       return
     }
-    if (form.value.password !== form.value.password_confirm) {
-      console.error('password not match')
-      return
-    }
     try {
       await createUser({
         username: form.value.username,
         email: form.value.email || undefined,
         password: form.value.password,
-        password_confirm: form.value.password_confirm,
         is_active: form.value.is_active,
       })
       await getList()
