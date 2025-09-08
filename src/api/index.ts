@@ -12,8 +12,11 @@ export const getUser = (params: any) => get('/accounts/profiles/', params)
 // update user status
 export const updateUserStatus = (id: string, data: any) => patch(`/accounts/profiles/${id}/update_status/`, data)
 
+// update user (password/status, etc.)
+export const updateUser = (id: string, data: any) => patch(`/accounts/profiles/${id}/`, data)
+
 // delete user
 export const deleteUser = (id: string) => del('/accounts/profiles/'+ id)
 
 // create user
-export const createUser = (data: { username: string, password: string, password_confirm: string, is_active: boolean }) => post('/accounts/profiles/', data)
+export const createUser = (data: { username: string, password: string, password_confirm: string, is_active: boolean, email?: string }) => post('/accounts/profiles/', data)

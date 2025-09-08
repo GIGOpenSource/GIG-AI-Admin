@@ -10,26 +10,26 @@
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
             <TableRow>
-              <TableHead class="whitespace-nowrap">ID</TableHead>
-              <TableHead class="whitespace-nowrap">平台</TableHead>
-              <TableHead class="whitespace-nowrap">类型</TableHead>
-              <TableHead class="whitespace-nowrap">关键词</TableHead>
+              <TableHead class="whitespace-nowrap">序号</TableHead>
+              <TableHead class="whitespace-nowrap">平台名称</TableHead>
+              <TableHead class="whitespace-nowrap">触发关键词</TableHead>
               <TableHead class="whitespace-nowrap">提示词</TableHead>
-              <TableHead class="whitespace-nowrap">循环周期</TableHead>
-              <TableHead class="whitespace-nowrap">创建时间</TableHead>
+              <TableHead class="whitespace-nowrap">任务类型</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
+              <TableHead class="whitespace-nowrap">循环周期</TableHead>
+              <TableHead class="whitespace-nowrap">循环类型</TableHead>
+              <TableHead class="whitespace-nowrap">执行时间</TableHead>
+              <TableHead class="whitespace-nowrap">创建时间</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="item in tasks" :key="item.id">
-              <TableCell class="whitespace-nowrap">{{ item.id }}</TableCell>
+            <TableRow v-for="(item, idx) in tasks" :key="item.id">
+              <TableCell class="whitespace-nowrap">{{ idx + 1 }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.platform }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.type }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.keyword }}</TableCell>
               <TableCell class="max-w-[380px] truncate" :title="item.prompt">{{ item.prompt }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ formatCycle(item) }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.createdAt }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.type }}</TableCell>
               <TableCell class="whitespace-nowrap">
                 <span
                   :class="[
@@ -42,6 +42,10 @@
                   {{ item.status }}
                 </span>
               </TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.cycleValue }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.cycleType }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.executeTime }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.createdAt }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
@@ -79,10 +83,21 @@
                 </div>
               </div>
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div class="sm:col-span-3">
+                <div class="sm:col-span-2">
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">关键词<span class="text-error-500">*</span></label>
-                  <input v-model="form.keyword" type="text" placeholder="如：下单"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                  <select v-model="form.keyword"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                    <option disabled value="">请选择关键词</option>
+                    <option v-for="opt in keywordOptions" :key="opt" :value="opt">{{ opt }}</option>
+                  </select>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提示词<span class="text-error-500">*</span></label>
+                  <select v-model="form.prompt"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                    <option disabled value="">请选择提示词</option>
+                    <option v-for="opt in availablePrompts" :key="opt" :value="opt">{{ opt }}</option>
+                  </select>
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">循环类型<span class="text-error-500">*</span></label>
@@ -104,11 +119,7 @@
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
               </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提示词<span class="text-error-500">*</span></label>
-                <textarea v-model="form.prompt" rows="3" placeholder="请输入提示词（Prompt）"
-                  class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
-              </div>
+
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">状态</label>
                 <select v-model="form.status"
@@ -234,10 +245,21 @@ function formatDateTime(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
-function formatCycle(item) {
-  if (!item.cycleType || !item.cycleValue || !item.executeTime) return '-'
-  return `${item.cycleValue}${item.cycleType} / ${item.executeTime}`
-}
+// keyword/prompt options and linkage
+const keywordOptions = ref(['下单', '你好', '退款', '发货'])
+const promptMap = ref({
+  下单: ['请点击链接下单：xxx', '需要帮助下单吗？点这里：xxx'],
+  你好: ['你好！欢迎关注我们的店铺～', '欢迎～有问题随时留言'],
+  退款: ['关于退款的说明：xxx', '请提供订单号，我们来处理退款'],
+  发货: ['您的订单已发货，物流单号：xxx', '预计到达时间为2-3天，感谢耐心等待']
+})
+
+const availablePrompts = computed(() => {
+  const key = form.value.keyword
+  return key ? (promptMap.value[key] || []) : []
+})
+
+
 </script>
 
 

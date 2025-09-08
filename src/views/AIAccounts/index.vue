@@ -80,24 +80,50 @@
             <form @submit.prevent="submitForm" class="space-y-4">
               <div v-if="!isEdit" class="space-y-3">
                 <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">用户名<span class="text-error-500">*</span></label>
+                  <input v-model.trim="form.username" type="text" required placeholder="输入用户名"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">电子邮件地址</label>
+                  <input v-model.trim="form.email" type="email" placeholder="name@example.com"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">密码<span class="text-error-500">*</span></label>
+                  <input v-model="form.password" type="password" required placeholder="输入密码"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">确认密码<span class="text-error-500">*</span></label>
+                  <input v-model="form.password_confirm" type="password" required placeholder="再次输入密码"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                </div>
+              </div>
+              <div v-else class="space-y-3">
+                <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">用户名</label>
-                  <input v-model.trim="form.username" type="text" required placeholder="输入用户名" class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-gray-900" />
+                  <input v-model="form.username" type="text" disabled placeholder="用户名不可修改"
+                    class="dark:bg-dark-900 h-11 w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 opacity-80 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/70" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">电子邮件地址</label>
+                  <input v-model.trim="form.email" type="email" placeholder="name@example.com"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">密码</label>
-                  <input v-model="form.password" type="password" required placeholder="输入密码" class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-gray-900" />
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">确认密码</label>
-                  <input v-model="form.password_confirm" type="password" required placeholder="再次输入密码" class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-gray-900" />
+                  <input v-model="form.password" type="password" placeholder="留空则不修改"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">账号启用</label>
-                <label class="inline-flex items-center text-sm font-normal text-gray-700 cursor-pointer select-none dark:text-gray-400">
-                  <input v-model="form.is_active" type="checkbox" class="mr-2" />
-                  启用
-                </label>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">是否启用</label>
+                <select v-model="form.is_active"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <option :value="true">启用</option>
+                  <option :value="false">停用</option>
+                </select>
               </div>
               <div class="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" @click="closeModal">取消</Button>
@@ -120,7 +146,7 @@ import Button from '@/components/ui/Button.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import Modal from '@/components/ui/Modal.vue'
-import { getUser, updateUserStatus, deleteUser, createUser } from '@/api'
+import { getUser, updateUserStatus, deleteUser, createUser, updateUser } from '@/api'
 
 
 const currentPageTitle = ref('AI 用户列表')
@@ -149,19 +175,19 @@ async function onDelete(account) {
 // 弹窗与表单状态（新增/编辑）
 const showModal = ref(false)
 const isEdit = ref(false)
-const form = ref({ id: 0, username: '', password: '', password_confirm: '', is_active: true })
+const form = ref({ id: 0, username: '', email: '', password: '', password_confirm: '', is_active: true })
 
 // 打开编辑弹窗
 function openEdit(acc) {
   isEdit.value = true
-  form.value = { id: acc.id, is_active: acc.is_active }
+  form.value = { id: acc.id, username: acc.username, email: acc.email || '', password: '', password_confirm: '', is_active: acc.is_active }
   showModal.value = true
 }
 
 // 打开新增弹窗
 function openCreate() {
   isEdit.value = false
-  form.value = { id: 0, username: '', password: '', password_confirm: '', is_active: true }
+  form.value = { id: 0, username: '', email: '', password: '', password_confirm: '', is_active: true }
   showModal.value = true
 }
 
@@ -178,9 +204,12 @@ async function submitForm() {
     if (idx !== -1) {
       const payload = {
         is_active: form.value.is_active,
+        ...(form.value.password ? { password: form.value.password } : {}),
+        ...(form.value.email ? { email: form.value.email } : {}),
       }
       try {
-        const updated = await updateUserStatus(String(form.value.id), payload)
+        // 优先调用通用更新接口
+        const updated = await updateUser(String(form.value.id), payload)
         const updatedIsActive = (updated && typeof updated.is_active === 'boolean')
           ? updated.is_active
           : (updated && updated.user && typeof updated.user.is_active === 'boolean')
@@ -207,6 +236,7 @@ async function submitForm() {
     try {
       await createUser({
         username: form.value.username,
+        email: form.value.email || undefined,
         password: form.value.password,
         password_confirm: form.value.password_confirm,
         is_active: form.value.is_active,

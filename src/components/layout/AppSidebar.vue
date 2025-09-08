@@ -244,7 +244,7 @@ const menuGroups = [
     title: "Menu",
     items: [
       // { icon: PieChartIcon, name: "控制台", path: "/" },
-       { icon: TableIcon, name: "数据统计", path: "/data-statistics" },
+       { icon: TableIcon, name: "数据统计", path: "/" },
       { icon: TableIcon, name: "AI 用户列表", path: "/ai-accounts" },
       { icon: ListIcon, name: "AI 服务配置", path: "/ai-config" },
       { icon: TaskIcon, name: "任务列表", path: "/auto-reply" },
