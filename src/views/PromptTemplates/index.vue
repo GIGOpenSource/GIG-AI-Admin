@@ -211,16 +211,6 @@ const form = ref({
   enabled: true,
   content: '',
 })
-const showEdit = ref(false)
-const editForm = ref({
-  id: 0,
-  name: '',
-  scene: '',
-  owner: '',
-  enabled: true,
-  content: '',
-  createdAt: '',
-})
 
 function openAdd() {
   // 重置为新增模式
@@ -229,13 +219,11 @@ function openAdd() {
 
   // 重置表单数据
   form.value = {
+    owner: '',
+    scene: '',
     name: '',
-    template_type: '',
-    system_prompt: '',
-    user_prompt_template: '',
-    is_active: true,
-    user: '',
-    ai_config: ''
+    content: '',
+    enabled: true
   }
 
   // 直接打开弹窗，不需要调用接口
@@ -244,26 +232,59 @@ function openAdd() {
 
 function closeAdd() {
   showAdd.value = false
-  form.value = { name: '', scene: '', owner: '', enabled: true, content: '' }
+  isEditMode.value = false
+  editingId.value = null
+  form.value = {
+    owner: '',
+    scene: '',
+    name: '',
+    content: '',
+    enabled: true
+  }
 }
 
 async function submitAdd() {
+  // 防止重复提交
+  if (isLoading.value) return
+
+  // 表单验证
   if (!form.value.owner || !form.value.name || !form.value.content) {
+    toast.error('请填写必填字段')
     return
   }
+
+  isLoading.value = true
+
   try {
-    const payload = {
-      name: form.value.name,
-      scene: form.value.scene,
+    // 准备提交数据
+    const submitData = {
       owner: form.value.owner,
-      enabled: !!form.value.enabled,
-      content: form.value.content,
+      scene: form.value.scene,
+      name: form.value.name.trim(),
+      content: form.value.content.trim(),
+      enabled: form.value.enabled
     }
-    await createPromptsConfig(payload)
-    await fetchTemplates() // Refresh the list
+
+    // 根据模式调用不同的接口
+    if (isEditMode.value) {
+      // 编辑模式：调用更新接口
+      await updatelist(editingId.value, submitData)
+      toast.success('模板更新成功')
+    } else {
+      // 新增模式：调用新增接口
+      await addlist(submitData)
+      toast.success('模板新增成功')
+    }
+
+    // 成功后关闭弹窗并刷新列表
     closeAdd()
+    await fetchTemplates()
+
   } catch (error) {
-    console.error('Failed to create template:', error)
+    console.error(isEditMode.value ? '更新失败:' : '新增失败:', error)
+    toast.error(isEditMode.value ? '更新失败，请重试' : '新增失败，请重试')
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -294,37 +315,20 @@ async function openEdit(item) {
   }
 }
 
-function closeEdit() {
-  showEdit.value = false
-  editForm.value = { id: 0, name: '', scene: '', owner: '', enabled: true, content: '', createdAt: '' }
-}
-
-async function submitEdit() {
-  if (!editForm.value.owner || !editForm.value.name || !editForm.value.content) {
-    return
-  }
-  try {
-    const payload = {
-      name: editForm.value.name,
-      scene: editForm.value.scene,
-      owner: editForm.value.owner,
-      enabled: !!editForm.value.enabled,
-      content: editForm.value.content,
-    }
-    await updatePromptsConfig(String(editForm.value.id), payload)
-    await fetchTemplates() // Refresh the list
-    closeEdit()
-  } catch (error) {
-    console.error('Failed to update template:', error)
-  }
-}
 
 async function onDelete(item) {
+  // 确认删除
+  if (!confirm(`确定要删除模板 "${item.name}" 吗？此操作不可撤销。`)) {
+    return
+  }
+
   try {
-    await deletePromptsConfig(String(item.id))
-    await fetchTemplates() // Refresh the list
+    await deletelist(item.id)
+    toast.success('删除成功')
+    await fetchTemplates()
   } catch (error) {
-    console.error('Failed to delete template:', error)
+    console.error('删除失败:', error)
+    toast.error('删除失败，请重试')
   }
 }
 

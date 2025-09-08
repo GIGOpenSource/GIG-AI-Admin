@@ -130,7 +130,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
-import { getlist, addlist, details, updatelist ,deletelist} from '@/api/aiCofig.ts'
+import { getdate} from '@/api/index.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
@@ -337,13 +337,7 @@ const clearSearch = () => {
 }
 
 const fetchlist = async () => {
-  let res = await getlist({
-    search: searchQuery.value,
-    // ordering: '',
-    // page: 1,
-    // pageSize: 10
-  })
-
+  let res = await getdate({})
   accounts.value = res.results
 
 }
