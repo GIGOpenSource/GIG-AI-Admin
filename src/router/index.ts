@@ -11,7 +11,7 @@ const router = createRouter({
       name: 'Ecommerce',
       component: () => import('../views/Ecommerce.vue'),
       meta: {
-        title: 'eCommerce Dashboard',
+        title: '控制台',
       },
     },
     {
@@ -44,6 +44,14 @@ const router = createRouter({
       component: () => import('../views/AIAccounts/index.vue'),
       meta: {
         title: 'AI Accounts',
+      },
+    },
+    {
+      path: '/ai-config',
+      name: 'AI Config',
+      component: () => import('../views/AIConfig/index.vue'),
+      meta: {
+        title: 'AI Config',
       },
     },
     {
