@@ -47,25 +47,26 @@
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
             <TableRow>
-              <TableHead class="whitespace-nowrap">id</TableHead>
+              <TableHead class="whitespace-nowrap">序号</TableHead>
               <TableHead class="whitespace-nowrap">配置名称</TableHead>
-              <TableHead class="whitespace-nowrap">平台</TableHead>
-               <TableHead class="whitespace-nowrap">key</TableHead>
+              <TableHead class="whitespace-nowrap">平台名称</TableHead>
+              <TableHead class="whitespace-nowrap">key</TableHead>
               <TableHead class="whitespace-nowrap">模型名称</TableHead>
               <TableHead class="whitespace-nowrap">所属用户</TableHead>
               <TableHead class="whitespace-nowrap">默认配置</TableHead>
               <TableHead class="whitespace-nowrap">是否激活</TableHead>
-              <!-- <TableHead class="whitespace-nowrap">状态</TableHead> -->
+              <TableHead class="whitespace-nowrap">状态</TableHead>
+              <TableHead class="whitespace-nowrap">优先级</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="acc in accounts" :key="acc.id">
-              <TableCell class="whitespace-nowrap">{{ acc.id }}</TableCell>
+            <TableRow v-for="(acc, index) in accounts" :key="acc.id">
+              <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ formdata[acc.service_type] }}</TableCell>
-               <TableCell class="whitespace-nowrap">{{ acc.api_base }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ acc.api_base }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.model_name }}</TableCell>
               <!-- <TableCell class="whitespace-nowrap">
                 <a
@@ -88,6 +89,8 @@
                   {{ acc.is_active ? '是' : '否' }}
                 </span>
               </TableCell>
+              <TableCell class="whitespace-nowrap">--</TableCell>
+              <TableCell class="whitespace-nowrap">--</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.created_at }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
@@ -102,21 +105,31 @@
             </TableRow>
           </TableBody>
         </Table>
-        <div class="mt-4">
-          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
-            <PaginationContent v-slot="{ items }">
-              <PaginationFirst />
-              <PaginationPrevious />
-              <template v-for="(item, index) in items" :key="index">
-                <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
-                  {{ item.value }}
-                </PaginationItem>
-                <PaginationEllipsis v-else :index="index" />
-              </template>
-              <PaginationNext />
-              <PaginationLast />
-            </PaginationContent>
-          </Pagination>
+        <div class="mt-4 flex items-center justify-between">
+          <div class="text-sm text-gray-500">
+            共 {{ total }} 条记录，第 {{ page }} 页
+          </div>
+          <div class="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="!hasPrevious"
+              @click="handlePrevious"
+            >
+              上一页
+            </Button>
+            <span class="px-3 py-1 text-sm bg-gray-100 rounded-md">
+              {{ page }}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="!hasNext"
+              @click="handleNext"
+            >
+              下一页
+            </Button>
+          </div>
         </div>
       </ComponentCard>
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
@@ -135,8 +148,8 @@
                     class="text-error-500">*</span></label>
                 <select v-model="form.service_type"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="" >请选择平台</option>
-                  <option :value="item.value" v-for="(item,index) in type" :key="index">{{ item.title }}</option>
+                  <option value="">请选择平台</option>
+                  <option :value="item.value" v-for="(item, index) in type" :key="index">{{ item.title }}</option>
                 </select>
               </div>
               <div>
@@ -197,15 +210,17 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
-import { getlist, addlist, details, updatelist ,deletelist} from '@/api/aiCofig.ts'
+import { getlist, addlist, details, updatelist, deletelist } from '@/api/aiCofig.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 const currentPageTitle = ref('AI 服务配置')
 const accounts = ref([])
 const page = ref(1)
-const pageSize = ref(10)
-const total = computed(() => accounts.value.length)
+const pageSize = ref(20) // 默认一页20条
+const total = ref(0)
+const hasNext = ref(false)
+const hasPrevious = ref(false)
 const searchQuery = ref('')
 const searchTimeout = ref(null)
 const isSearching = ref(false)
@@ -214,44 +229,44 @@ const type = ref([
     title: 'OpenAI',
     value: 'openai'
   },
-   {
+  {
     title: 'Azure OpenAI',
     value: 'azure'
   },
-   {
+  {
     title: 'Google Gemini',
     value: 'gemini'
   }, {
     title: 'Anthropic Claude',
     value: 'anthropic'
-  },{
+  }, {
     title: 'Together Al',
     value: 'together'
-  },{
+  }, {
     title: 'Deepseek',
     value: 'deepseek'
-  },{
+  }, {
     title: 'Moonshot',
     value: 'moonshot'
-  },{
+  }, {
     title: '智谱AI',
     value: 'zhipuai'
-  },{
+  }, {
     title: '自定义OpenAl兼容接口',
     value: 'custom'
   },
 
 ])
 const formdata = {
-   openai:'OpenAI',
-   azure:'Azure OpenAI',
-   gemini:'Google Gemini',
-   anthropic:'Anthropic Claude',
-   together:'Together Al',
-   deepseek:'Deepseek',
-   moonshot:'Moonshot',
-   zhipuai:'智谱AI',
-   custom:'自定义OpenAl兼容接口'
+  openai: 'OpenAI',
+  azure: 'Azure OpenAI',
+  gemini: 'Google Gemini',
+  anthropic: 'Anthropic Claude',
+  together: 'Together Al',
+  deepseek: 'Deepseek',
+  moonshot: 'Moonshot',
+  zhipuai: '智谱AI',
+  custom: '自定义OpenAl兼容接口'
 }
 async function onEdit(account) {
   try {
@@ -282,10 +297,10 @@ async function onEdit(account) {
   }
 }
 
- async function onDelete(account) {
+async function onDelete(account) {
   // console.log('delete', account)
   const res = await deletelist(account.id)
-  console.log(res,'resresssss');
+  console.log(res, 'resresssss');
   await fetchlist()
 
 }
@@ -390,6 +405,7 @@ const handleSearchClick = async () => {
   if (isSearching.value) return
 
   isSearching.value = true
+  page.value = 1 // 搜索时重置到第一页
   try {
     await fetchlist()
   } finally {
@@ -400,19 +416,50 @@ const handleSearchClick = async () => {
 // 清除搜索
 const clearSearch = () => {
   searchQuery.value = ''
+  page.value = 1 // 重置到第一页
   fetchlist()
 }
 
+// 分页处理函数
+const handlePageChange = (newPage) => {
+  page.value = newPage
+  fetchlist()
+}
+
+// 上一页
+const handlePrevious = () => {
+  if (hasPrevious.value && page.value > 1) {
+    page.value = page.value - 1
+    fetchlist()
+  }
+}
+
+// 下一页
+const handleNext = () => {
+  if (hasNext.value) {
+    page.value = page.value + 1
+    fetchlist()
+  }
+}
+
 const fetchlist = async () => {
-  let res = await getlist({
-    search: searchQuery.value,
-    // ordering: '',
-    // page: 1,
-    // pageSize: 10
-  })
+  try {
+    let res = await getlist({
+      search: searchQuery.value,
+      page: page.value
+    })
 
-  accounts.value = res.results
+    accounts.value = res.results
+    total.value = res.count
 
+    // 设置分页状态
+    hasNext.value = res.next !== null
+    hasPrevious.value = res.previous !== null
+
+  } catch (error) {
+    console.error('获取列表失败:', error)
+    toast.error('获取列表失败')
+  }
 }
 onMounted(() => {
   fetchlist()

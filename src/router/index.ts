@@ -54,6 +54,14 @@ const router = createRouter({
         title: 'AI Config',
       },
     },
+        {
+      path: '/data-statistics',
+      name: 'Data statistics',
+      component: () => import('../views/Datastatistics/index.vue'),
+      meta: {
+        title: 'Data statistics',
+      },
+    },
     {
       path: '/auto-reply',
       name: 'Auto Reply',

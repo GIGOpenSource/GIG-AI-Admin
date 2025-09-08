@@ -14,9 +14,7 @@ export interface AIConfigData {
 
 export interface AIConfigListParams {
   search: string
-  // ordering: string
-  // page: number
-  // pageSize: number
+  page: number
 }
 
 // 获取AI配置列表
