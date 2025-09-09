@@ -30,7 +30,7 @@ const router = createRouter({
         title: 'AI Config',
       },
     },
-        {
+    {
       path: '/data-statistics',
       name: 'Data statistics',
       component: () => import('../views/Datastatistics/index.vue'),
@@ -103,20 +103,20 @@ export default router
 
 router.beforeEach((to, from, next) => {
   document.title = `${to.meta.title} | AiDS`
-
-  // Check if user is authenticated
+  document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
   const token = localStorage.getItem('token')
-
-  // If user is not authenticated and trying to access protected routes
+  const profile = JSON.parse(localStorage.getItem('profile') || '{}')
   if (!token && to.path !== '/signin') {
     next('/signin')
-  }
-  // If user is authenticated and trying to access login page, redirect to home
-  else if (token && to.path === '/signin') {
+  } else if (token && to.path === '/signin') {
     next('/')
-  }
-  // Otherwise, proceed normally
-  else {
+  } else if (token && to.path === '/ai-config') {
+    if (!profile || !profile.is_superuser || !profile.is_staff) {
+      next('/')
+    } else {
+      next()
+    }
+  } else {
     next()
   }
 })
