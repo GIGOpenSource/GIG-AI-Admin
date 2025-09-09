@@ -31,14 +31,6 @@ const router = createRouter({
       },
     },
     {
-      path: '/data-statistics',
-      name: 'Data statistics',
-      component: () => import('../views/Datastatistics/index.vue'),
-      meta: {
-        title: 'Data statistics',
-      },
-    },
-    {
       path: '/auto-reply',
       name: 'Auto Reply',
       component: () => import('../views/AutoReply/index.vue'),
