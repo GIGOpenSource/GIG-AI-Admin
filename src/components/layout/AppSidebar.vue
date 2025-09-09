@@ -213,7 +213,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, reactive ,onMounted} from "vue";
 import { useRoute } from "vue-router";
 
 import {
@@ -237,24 +237,37 @@ import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
+const userinfo = JSON.parse(localStorage.getItem('profile'))
+console.log(userinfo,'userinfouserinfo');
 
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 
-const menuGroups = [
+const menuGroups = ref(
+  [
   {
     title: "Menu",
     items: [
-      // { icon: PieChartIcon, name: "控制台", path: "/" },
        { icon: GridIcon, name: "数据统计", path: "/" },
       { icon: TableIcon, name: "AI 用户列表", path: "/ai-accounts" },
-      { icon: ListIcon, name: "AI 服务配置", path: "/ai-config" },
       { icon: TaskIcon, name: "任务列表", path: "/auto-reply" },
       { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
       { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
     ],
   },
-];
+]
+)
+onMounted(() => {
+  menu()
+})
+const menu = () =>{
+  console.log(userinfo,'userinfo.is_staffuserinfo.is_staff');
 
+   if(userinfo.is_staff && userinfo.is_superuser){
+       menuGroups.value[0].items.push({ icon: ListIcon, name: "AI 服务配置", path: "/ai-config" })
+   }else{
+    menuGroups.value = menuGroups.value
+   }
+}
 const isActive = (path) => route.path === path;
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
@@ -263,7 +276,7 @@ const toggleSubmenu = (groupIndex, itemIndex) => {
 };
 
 const isAnySubmenuRouteActive = computed(() => {
-  return menuGroups.some((group) =>
+  return menuGroups.value.some((group) =>
     group.items.some(
       (item) =>
         item.subItems && item.subItems.some((subItem) => isActive(subItem.path))
@@ -276,7 +289,7 @@ const isSubmenuOpen = (groupIndex, itemIndex) => {
   return (
     openSubmenu.value === key ||
     (isAnySubmenuRouteActive.value &&
-      menuGroups[groupIndex].items[itemIndex].subItems?.some((subItem) =>
+      menuGroups.value[groupIndex].items[itemIndex].subItems?.some((subItem) =>
         isActive(subItem.path)
       ))
   );

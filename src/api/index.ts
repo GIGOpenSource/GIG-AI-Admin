@@ -12,7 +12,7 @@ export const updateUser = (id: string, data: any) => patch(`/accounts/users/${id
 export const deleteUser = (id: string) => del(`/accounts/users/${id}/`)
 
 // create user
-export const createUser = (data: { username: string, password: string}) => post('/accounts/users/', data)
+export const createUser = (data: { username: string, password: string}) => post('/accounts/auth/register/', data)
 
 // user detail
 export const getUserDetail = (id: string) => get(`/accounts/users/${id}/`)
