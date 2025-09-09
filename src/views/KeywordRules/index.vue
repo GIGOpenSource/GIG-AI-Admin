@@ -83,7 +83,7 @@
                 <input v-model="form.name" type="text" placeholder="请输入配置名称"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
-              <div>
+              <div v-if="userRole === 'admin'">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
                 <select v-model="form.owner_id"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
@@ -141,7 +141,7 @@
                 <input v-model="editForm.name" type="text" placeholder="请输入配置名称"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
-              <div>
+              <div v-if="userRole === 'admin'">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
                 <select v-model="editForm.owner_id"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
@@ -201,7 +201,8 @@ import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
-import { getKeywordsConfigs, getKeywordsConfigsDetail, createKeywordsConfigs, updateKeywordsConfigs, deleteKeywordsConfigs } from '@/api/keywrods'
+import { getKeywordsConfigs, getKeywordsConfigsDetail, createKeywordsConfigs, createUserKeywordsConfigs, updateKeywordsConfigs, deleteKeywordsConfigs } from '@/api/keywrods'
+import { getUser } from '@/api/index'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
 
@@ -209,12 +210,51 @@ const currentPageTitle = ref('关键词规则')
 
 const rules = ref([])
 const loading = ref(false)
+// 当前用户信息
+const currentUser = ref(null)
+const userRole = ref('')
+// 用户选项
+const userOptions = ref([])
 
 // 分页参数
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 
+
+// 获取当前用户信息
+function getCurrentUserInfo() {
+  try {
+    const profileStr = localStorage.getItem('profile')
+    const role = localStorage.getItem('role')
+
+    if (profileStr) {
+      currentUser.value = JSON.parse(profileStr)
+    }
+    if (role) {
+      userRole.value = role
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+  }
+}
+
+// 获取用户列表
+async function fetchUsers() {
+  try {
+    const res = await getUser()
+    const users = Array.isArray(res) ? res : (res?.results || [])
+    userOptions.value = users.map(user => ({
+      id: user.id,
+      name: user.username || user.name || `用户${user.id}`
+    }))
+  } catch (error) {
+    console.error('获取用户列表失败:', error)
+    toast.error('获取用户列表失败', {
+      description: error.response?.data?.message || error.message || '获取用户列表时发生错误'
+    })
+  }
+}
 
 function getMatchModeText(matchMode) {
   const modeMap = {
@@ -265,9 +305,16 @@ watch(page, () => {
 
 onMounted(async () => {
   try {
-    await fetchRules()
+    getCurrentUserInfo()
+
+    // 只有管理员才需要获取用户列表
+    if (userRole.value === 'admin') {
+      await Promise.all([fetchUsers(), fetchRules()])
+    } else {
+      await fetchRules()
+    }
   } catch (e) {
-    console.error('fetch rules failed', e)
+    console.error('fetch data failed', e)
   }
 })
 
@@ -292,8 +339,18 @@ const editForm = ref({
   enabled: true,
 })
 
-function openAdd() {
+async function openAdd() {
   showAdd.value = true
+
+  // 如果用户角色为 user，自动设置 owner_id 为当前用户 ID
+  if (userRole.value === 'user' && currentUser.value?.id) {
+    form.value.owner_id = currentUser.value.id
+  }
+
+  // 如果是管理员且用户列表为空，则获取用户列表
+  if (userRole.value === 'admin' && userOptions.value.length === 0) {
+    await fetchUsers()
+  }
 }
 
 function closeAdd() {
@@ -309,7 +366,8 @@ async function submitAdd() {
     })
     return
   }
-  if (!form.value.owner_id) {
+  // 只有管理员需要验证目标用户字段
+  if (userRole.value === 'admin' && !form.value.owner_id) {
     toast.error('目标用户不能为空', {
       description: '请选择目标用户'
     })
@@ -326,13 +384,19 @@ async function submitAdd() {
   const payload = {
     name: form.value.name,
     owner_id: form.value.owner_id,
+    owner: form.value.owner_id,
     provider: form.value.provider,
     include_keywords: keywordsArray,
     match_mode: form.value.match_mode,
     enabled: form.value.enabled,
   }
   try {
-    await createKeywordsConfigs(payload)
+    // 根据用户角色使用不同的创建方法
+    if (userRole.value === 'user') {
+      await createUserKeywordsConfigs(payload)
+    } else {
+      await createKeywordsConfigs(payload)
+    }
     toast.success('关键词规则创建成功')
     await fetchRules()
     closeAdd()
@@ -360,6 +424,12 @@ async function onDelete(item) {
 async function onEdit(item) {
   showEdit.value = true
   editLoading.value = true
+
+  // 如果是管理员且用户列表为空，则获取用户列表
+  if (userRole.value === 'admin' && userOptions.value.length === 0) {
+    await fetchUsers()
+  }
+
   try {
     const detail = await getKeywordsConfigsDetail(String(item.id))
     const r = detail || {}
@@ -399,7 +469,8 @@ async function submitEdit() {
     })
     return
   }
-  if (!editForm.value.owner_id) {
+  // 只有管理员需要验证目标用户字段
+  if (userRole.value === 'admin' && !editForm.value.owner_id) {
     toast.error('目标用户不能为空', {
       description: '请选择目标用户'
     })
@@ -416,6 +487,7 @@ async function submitEdit() {
   const payload = {
     name: editForm.value.name,
     owner_id: editForm.value.owner_id,
+    owner: editForm.value.owner_id,
     provider: editForm.value.provider,
     include_keywords: kw,
     match_mode: editForm.value.match_mode,

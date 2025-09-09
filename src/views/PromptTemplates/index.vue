@@ -111,7 +111,7 @@
                 <input v-model="form.name" type="text" placeholder="如：客服问候模板"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
-              <div>
+              <div v-if="userRole === 'admin'">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">所属用户<span
                     class="text-error-500">*</span></label>
                 <select v-model="form.owner_id"
@@ -168,7 +168,7 @@ import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { getUser } from '@/api/index'
-import { getPromptsConfigs, createPromptsConfig, updatePromptsConfig, deletePromptsConfig, getPromptsConfig } from '@/api/prompts'
+import { getPromptsConfigs, createPromptsConfig, createUserPromptsConfig, updatePromptsConfig, deletePromptsConfig, getPromptsConfig } from '@/api/prompts'
 import { toast } from 'vue-sonner'
 import { formatTime } from '@/lib/utils'
 const currentPageTitle = ref('提示词模板')
@@ -180,12 +180,32 @@ const editingId = ref('')
 const userOptions = ref([])
 // 统一的弹窗显示状态
 const showModal = ref(false)
+// 当前用户信息
+const currentUser = ref(null)
+const userRole = ref('')
 // 分页相关
 const page = ref(1)
 const pageSize = ref(20) // 默认一页20条
 const total = ref(0)
 const searchQuery = ref('')
 const isSearching = ref(false)
+
+// 获取当前用户信息
+function getCurrentUserInfo() {
+  try {
+    const profileStr = localStorage.getItem('profile')
+    const role = localStorage.getItem('role')
+
+    if (profileStr) {
+      currentUser.value = JSON.parse(profileStr)
+    }
+    if (role) {
+      userRole.value = role
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+  }
+}
 
 async function fetchUsers() {
   const res = await getUser({})
@@ -237,10 +257,21 @@ const form = ref({
 })
 
 // 打开新增弹窗
-function openAdd() {
+async function openAdd() {
   isEditMode.value = false
   editingId.value = ''
   resetForm()
+
+  // 如果用户角色为 user，自动设置 owner_id 为当前用户 ID
+  if (userRole.value === 'user' && currentUser.value?.id) {
+    form.value.owner_id = currentUser.value.id
+  }
+
+  // 如果是管理员且用户列表为空，则获取用户列表
+  if (userRole.value === 'admin' && userOptions.value.length === 0) {
+    await fetchUsers()
+  }
+
   showModal.value = true
 }
 
@@ -249,6 +280,11 @@ async function openEdit(item) {
   isEditMode.value = true
   editingId.value = item.id
   showModal.value = true
+
+  // 如果是管理员且用户列表为空，则获取用户列表
+  if (userRole.value === 'admin' && userOptions.value.length === 0) {
+    await fetchUsers()
+  }
 
   try {
     const detail = await getPromptsConfig(String(item.id))
@@ -312,7 +348,8 @@ async function submitForm() {
     return
   }
 
-  if (!form.value.owner_id || form.value.owner_id === '') {
+  // 只有管理员需要验证所属用户字段
+  if (userRole.value === 'admin' && (!form.value.owner_id || form.value.owner_id === '')) {
     toast.error('请选择所属用户', {
       description: '所属用户不能为空'
     })
@@ -332,6 +369,7 @@ async function submitForm() {
     // 准备提交数据
     const submitData = {
       owner_id: form.value.owner_id,
+      owner: form.value.owner_id,
       scene: form.value.scene,
       name: form.value.name.trim(),
       content: form.value.content.trim(),
@@ -344,14 +382,18 @@ async function submitForm() {
       await updatePromptsConfig(editingId.value, submitData)
       // toast.success('模板更新成功')
     } else {
-      // 新增模式：调用新增接口
-      await createPromptsConfig(submitData)
+      // 新增模式：根据用户角色使用不同的创建方法
+      if (userRole.value === 'user') {
+        await createUserPromptsConfig(submitData)
+      } else {
+        await createPromptsConfig(submitData)
+      }
       // toast.success('模板新增成功')
     }
 
     // 成功后关闭弹窗并刷新列表
-    closeModal()
     toast.success(isEditMode.value ? '模板更新成功' : '模板新增成功')
+    closeModal()
     await fetchTemplates()
 
   } catch (error) {
@@ -439,8 +481,14 @@ watch(page, async (newPage) => {
   }
 })
 
-onMounted(() => {
-  fetchUsers()
-  fetchTemplates()
+onMounted(async () => {
+  getCurrentUserInfo()
+
+  // 只有管理员才需要获取用户列表
+  if (userRole.value === 'admin') {
+    await Promise.all([fetchUsers(), fetchTemplates()])
+  } else {
+    await fetchTemplates()
+  }
 })
 </script>
