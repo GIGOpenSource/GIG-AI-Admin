@@ -107,7 +107,13 @@ router.beforeEach((to, from, next) => {
     } else {
       next()
     }
-  } else {
+  } else if (token && to.path === '/ai-accounts') {
+    if (!profile || !profile.is_superuser || !profile.is_staff) {
+      next('/')
+    } else {
+      next()
+    }
+  }  else {
     next()
   }
 })

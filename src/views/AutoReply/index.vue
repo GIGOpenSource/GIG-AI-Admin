@@ -24,7 +24,8 @@
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="(item, idx) in tasks" :key="item.id">
+          <template v-if="tasks.length">
+               <TableRow v-for="(item, idx) in tasks" :key="item.id">
               <TableCell class="whitespace-nowrap">{{ idx + 1 }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.provider }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.keyword_config_id }}</TableCell>
@@ -53,6 +54,14 @@
                 </div>
               </TableCell>
             </TableRow>
+          </template>
+           <template v-else>
+              <TableRow>
+                <TableCell :colspan="10" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+              </TableRow>
+            </template>
+
+
           </TableBody>
         </Table>
         <div class="mt-4" v-if="total > 0">
@@ -76,7 +85,7 @@
           <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
             <h3 class="mb-4 text-lg font-semibold">{{ isEditing ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitForm" class="space-y-4">
-              <div>
+              <div v-if="role == 'admin'">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
                 <select v-model="form.owner"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
@@ -178,7 +187,8 @@ import { getPromptsConfigs } from '@/api/prompts'
 import { getUser } from '@/api/index'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
-
+const role = localStorage.getItem('role')
+const userinfo = JSON.parse(localStorage.getItem('profile'))
 const currentPageTitle = ref('任务列表')
 
 const tasks = ref([])
@@ -194,7 +204,7 @@ const total = ref(0)
 const showForm = ref(false)
 const editingId = ref(null)
 const form = ref({
-  owner: '',
+  owner: role == 'user' ?userinfo.id :'',
   provider: 'Twitter',
   type: 'reply_message',
   keyword: '',
@@ -389,6 +399,7 @@ async function fetchTasks() {
 }
 
 async function fetchUsers() {
+  if(role == 'user') return
   try {
     const res = await getUser({})
     const list = (res && res.results) ? res.results : res
