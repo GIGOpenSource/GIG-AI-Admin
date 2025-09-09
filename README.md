@@ -151,12 +151,6 @@ src/
 ```env
 # API 基础地址
 VITE_API_BASE_URL=http://localhost:3000/api
-
-# 应用标题
-VITE_APP_TITLE=AI 智能客服管理系统
-
-# 是否启用开发工具
-VITE_DEV_TOOLS=true
 ```
 
 ### 生产环境变量
@@ -166,12 +160,6 @@ VITE_DEV_TOOLS=true
 ```env
 # API 基础地址
 VITE_API_BASE_URL=https://api.yourdomain.com
-
-# 应用标题
-VITE_APP_TITLE=AI 智能客服管理系统
-
-# 是否启用开发工具
-VITE_DEV_TOOLS=false
 ```
 
 ## 📦 构建部署
@@ -183,6 +171,9 @@ VITE_DEV_TOOLS=false
 npm run build
 # 或
 yarn build
+
+# 若上面构建失败，使用这个
+npm run build-only
 ```
 
 构建完成后，`dist` 目录包含所有静态文件。
@@ -196,99 +187,6 @@ npm run preview
 yarn preview
 ```
 
-### 部署方式
-
-#### 1. 静态文件部署
-
-将 `dist` 目录上传到 Web 服务器：
-
-```bash
-# 使用 nginx 示例配置
-server {
-    listen 80;
-    server_name yourdomain.com;
-    root /path/to/dist;
-    index index.html;
-    
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
-#### 2. Docker 部署
-
-创建 `Dockerfile`：
-
-```dockerfile
-# 构建阶段
-FROM node:20-alpine as build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# 生产阶段
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-构建和运行：
-
-```bash
-# 构建镜像
-docker build -t ai-customer-service .
-
-# 运行容器
-docker run -p 80:80 ai-customer-service
-```
-
-#### 3. 云平台部署
-
-**Vercel 部署：**
-
-```bash
-# 安装 Vercel CLI
-npm i -g vercel
-
-# 部署
-vercel --prod
-```
-
-**Netlify 部署：**
-
-```bash
-# 安装 Netlify CLI
-npm i -g netlify-cli
-
-# 部署
-netlify deploy --prod --dir=dist
-```
-
-## 🔐 API 接口
-
-### 认证接口
-
-```typescript
-// 用户登录
-POST /api/auth/login
-{
-  "username": "string",
-  "password": "string"
-}
-
-// 用户注册
-POST /api/auth/register
-{
-  "username": "string",
-  "email": "string",
-  "password": "string"
-}
-```
 
 ## 🎨 自定义主题
 
@@ -328,11 +226,7 @@ module.exports = {
 
 ## 📱 响应式设计
 
-系统采用移动优先的响应式设计：
-
-- **移动端**: < 768px
-- **平板端**: 768px - 1024px  
-- **桌面端**: > 1024px
+系统采用移动优先的响应式设计
 
 ## 🔍 浏览器支持
 
@@ -340,25 +234,6 @@ module.exports = {
 - Firefox
 - Safari
 - Edge
-
-## 🤝 贡献指南
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 📞 技术支持
-
-如有问题或建议，请通过以下方式联系：
-
-- 提交 [Issue](https://github.com/your-repo/issues)
-- 发送邮件至 support@yourdomain.com
 
 ## 🎯 路线图
 
