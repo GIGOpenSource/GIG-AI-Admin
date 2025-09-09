@@ -46,7 +46,7 @@
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
             <TableRow>
-              <TableHead class="whitespace-nowrap">ID</TableHead>
+              <TableHead class="whitespace-nowrap">序号</TableHead>
               <TableHead class="whitespace-nowrap">模板名称</TableHead>
               <TableHead class="whitespace-nowrap">模板类型</TableHead>
               <TableHead class="whitespace-nowrap">所属用户</TableHead>
@@ -169,6 +169,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { getUser } from '@/api/index'
 import { getPromptsConfigs, createPromptsConfig, updatePromptsConfig, deletePromptsConfig, getPromptsConfig } from '@/api/prompts'
+import { toast } from 'vue-sonner'
 const currentPageTitle = ref('提示词模板')
 const isLoading = ref(false)
 const isEditMode = ref(false)
@@ -230,6 +231,9 @@ async function fetchTemplates() {
     console.error('Failed to fetch templates:', error)
     templates.value = []
     total.value = 0
+    toast.error('获取模板列表失败', {
+      description: error.response?.data?.message || error.message || '获取模板列表时发生错误'
+    })
   }
 }
 
@@ -271,6 +275,9 @@ async function openEdit(item) {
     }
   } catch (error) {
     console.error('Failed to fetch template detail:', error)
+    toast.error('获取模板详情失败', {
+      description: error.response?.data?.message || error.message || '获取模板详情时发生错误'
+    })
     form.value = {
       id: item.id,
       name: item.name,
@@ -309,9 +316,25 @@ async function submitForm() {
   // 防止重复提交
   if (isLoading.value) return
 
-  // 表单验证
-  if (!form.value.owner || !form.value.name || !form.value.content) {
-    // toast.error('请填写必填字段')
+  // 表单验证 - 逐个检查并提示具体字段
+  if (!form.value.name || form.value.name.trim() === '') {
+    toast.error('请填写模板名称', {
+      description: '模板名称不能为空'
+    })
+    return
+  }
+
+  if (!form.value.owner || form.value.owner === '') {
+    toast.error('请选择所属用户', {
+      description: '所属用户不能为空'
+    })
+    return
+  }
+
+  if (!form.value.content || form.value.content.trim() === '') {
+    toast.error('请填写模板内容', {
+      description: '模板内容不能为空'
+    })
     return
   }
 
@@ -340,11 +363,14 @@ async function submitForm() {
 
     // 成功后关闭弹窗并刷新列表
     closeModal()
+    toast.success(isEditMode.value ? '模板更新成功' : '模板新增成功')
     await fetchTemplates()
 
   } catch (error) {
     console.error(isEditMode.value ? '更新失败:' : '新增失败:', error)
-    // toast.error(isEditMode.value ? '更新失败，请重试' : '新增失败，请重试')
+    toast.error(isEditMode.value ? '更新失败' : '新增失败', {
+      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新模板时发生错误' : '新增模板时发生错误')
+    })
   } finally {
     isLoading.value = false
   }
@@ -354,17 +380,19 @@ async function submitForm() {
 
 async function onDelete(item) {
   // 确认删除
-  if (!confirm(`确定要删除模板 "${item.name}" 吗？此操作不可撤销。`)) {
-    return
-  }
+  // if (!confirm(`确定要删除模板 "${item.name}" 吗？此操作不可撤销。`)) {
+  //   return
+  // }
 
   try {
     await deletePromptsConfig(item.id)
-    // toast.success('删除成功')
+    toast.success('删除成功')
     await fetchTemplates()
   } catch (error) {
     console.error('删除失败:', error)
-    // toast.error('删除失败，请重试')
+    toast.error('删除失败', {
+      description: error.response?.data?.message || error.message || '删除模板时发生错误'
+    })
   }
 }
 
@@ -390,6 +418,11 @@ const handleSearchClick = async () => {
   page.value = 1 // 搜索时重置到第一页
   try {
     await fetchTemplates()
+  } catch (error) {
+    console.error('搜索失败:', error)
+    toast.error('搜索失败', {
+      description: error.response?.data?.message || error.message || '搜索模板时发生错误'
+    })
   } finally {
     isSearching.value = false
   }
@@ -399,13 +432,27 @@ const handleSearchClick = async () => {
 const clearSearch = () => {
   searchQuery.value = ''
   page.value = 1 // 重置到第一页
-  fetchTemplates()
+  try {
+    fetchTemplates()
+  } catch (error) {
+    console.error('清除搜索失败:', error)
+    toast.error('清除搜索失败', {
+      description: error.response?.data?.message || error.message || '清除搜索时发生错误'
+    })
+  }
 }
 
 // 监听分页变化
-watch(page, (newPage) => {
+watch(page, async (newPage) => {
   console.log('Page changed to:', newPage)
-  fetchTemplates()
+  try {
+    await fetchTemplates()
+  } catch (error) {
+    console.error('分页加载失败:', error)
+    toast.error('分页加载失败', {
+      description: error.response?.data?.message || error.message || '分页加载时发生错误'
+    })
+  }
 })
 
 onMounted(() => {

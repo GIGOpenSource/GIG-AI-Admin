@@ -236,10 +236,13 @@ async function onEdit(account) {
 }
 
 async function onDelete(account) {
+
+
+
   // 确认删除
-  if (!confirm(`确定要删除配置 "${account.name}" 吗？此操作不可撤销。`)) {
-    return
-  }
+  // if (!confirm(`确定要删除配置 "${account.name}" 吗？此操作不可撤销。`)) {
+  //   return
+  // }
 
   try {
     await deletelist(account.id)
@@ -247,7 +250,9 @@ async function onDelete(account) {
     await fetchlist()
   } catch (error) {
     console.error('删除失败:', error)
-    toast.error('删除失败，请重试')
+    toast.error('删除失败', {
+      description: error.response?.data?.message || error.message || '删除配置时发生错误'
+    })
   }
 }
 
@@ -275,10 +280,6 @@ function openAdd() {
     model: ''
   }
   showAdd.value = true
-
-  nextTick(() => {
-    console.log('DOM更新后打印:', form.value)
-  })
 }
 
 function closeAdd() {
@@ -295,16 +296,48 @@ function closeAdd() {
 }
 
 async function submitAdd() {
+  // 防止重复提交
+  if (isLoading.value) return
 
+  // 表单验证 - 逐个检查并提示具体字段
+  if (!form.value.name || form.value.name.trim() === '') {
+    toast.error('请填写配置名称', {
+      description: '配置名称不能为空'
+    })
+    return
+  }
+
+  if (!form.value.provider || form.value.provider === '') {
+    toast.error('请选择平台名称', {
+      description: '平台名称不能为空'
+    })
+    return
+  }
+
+  if (!form.value.api_key || form.value.api_key.trim() === '') {
+    toast.error('请填写API Key', {
+      description: 'API Key不能为空'
+    })
+    return
+  }
+
+  if (!form.value.model || form.value.model.trim() === '') {
+    toast.error('请填写模型名称', {
+      description: '模型名称不能为空'
+    })
+    return
+  }
+
+  isLoading.value = true
 
   try {
     // 准备提交数据
     const submitData = {
-      name: form.value.name,
+      name: form.value.name.trim(),
       provider: form.value.provider,
       priority: form.value.priority,
-      api_key: form.value.api_key,
-      model: form.value.model
+      api_key: form.value.api_key.trim(),
+      model: form.value.model.trim()
     }
 
     // 根据模式调用不同的接口
@@ -324,18 +357,9 @@ async function submitAdd() {
 
   } catch (error) {
     console.error(isEditMode.value ? '更新失败:' : '新增失败:', error)
-
-    // 更详细的错误处理
-    let errorMessage = isEditMode.value ? '更新失败' : '新增失败'
-    if (error.response?.data?.message) {
-      errorMessage += `: ${error.response.data.message}`
-    } else if (error.message) {
-      errorMessage += `: ${error.message}`
-    } else {
-      errorMessage += '，请重试'
-    }
-
-    toast.error(errorMessage)
+    toast.error(isEditMode.value ? '更新失败' : '新增失败', {
+      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新配置时发生错误' : '新增配置时发生错误')
+    })
   } finally {
     isLoading.value = false
   }
@@ -379,7 +403,9 @@ const fetchlist = async () => {
 
   } catch (error) {
     console.error('获取列表失败:', error)
-    toast.error('获取列表失败')
+    toast.error('获取列表失败', {
+      description: error.response?.data?.message || error.message || '获取配置列表时发生错误'
+    })
   }
 }
 
@@ -393,3 +419,7 @@ onMounted(() => {
   fetchlist()
 })
 </script>
+
+<style>
+
+</style>
