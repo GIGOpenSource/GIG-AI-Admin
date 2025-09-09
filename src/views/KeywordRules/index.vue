@@ -21,7 +21,8 @@
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="item in rules" :key="item.id">
+              <template v-if="rules.length">
+               <TableRow v-for="item in rules" :key="item.id">
               <TableCell class="whitespace-nowrap">{{ item.id }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.name || '-' }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ getUserName(item.owner) }}</TableCell>
@@ -47,6 +48,13 @@
                 </div>
               </TableCell>
             </TableRow>
+
+              </template>
+               <template v-else>
+              <TableRow>
+                <TableCell :colspan="7" class="py-16 text-center text-gray-400 dark:text-white/50">暂无数据</TableCell>
+              </TableRow>
+            </template>
           </TableBody>
         </Table>
         <div class="mt-4" v-if="total > 0">
