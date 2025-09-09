@@ -1,220 +1,373 @@
-# TailAdmin Vue - Free Vue.js Tailwind CSS Admin Dashboard Template
+# AI 智能客服管理系统
 
-TailAdmin Vue is a free, open-source admin dashboard template **built on Vue.js**, popular and progressive JavaScript
-framework, and **Tailwind CSS**. This **powerful combination** provides developers with an extensive library of
-essential components, elements, and pages to launch a comprehensive and data-centric back-end, dashboard, or admin panel
-solution for any Vue.js based web projects.
+基于 Vue 3 + TypeScript + Tailwind CSS 构建的现代化 AI 智能客服管理后台系统，提供完整的客服自动化解决方案。
 
-![TailAdmin Vue.js Dashboard Preview](./banner.png)
 
-With TailAdmin Vue, you can leverage **Vue.js 3** features such as declarative rendering, component-based architecture,
-Vue Router for routing, and Pinia for state management. It also utilizes the power of Tailwind CSS for rapid UI
-development with its low-level utility classes and responsive design capabilities.
+## 📋 项目概述
 
-## Overview
+这是一个功能完整的 AI 智能客服管理系统，集成了多种 AI 服务配置、关键词规则管理、提示词模板、自动回复任务等核心功能。系统采用现代化的前端技术栈，提供直观易用的管理界面。
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and control panels. It's built on:
+## ✨ 核心功能
 
-- Vue 3.x (Vite)
-- Tailwind CSS 4.x
-- TypeScript
+### 🤖 AI 服务配置
+- 支持多种 AI 平台（OpenAI、Azure OpenAI、Google Gemini、Anthropic 等）
+- API Key 安全管理
+- 模型配置与优先级设置
+- 服务状态监控
 
-### Quick Links
+### 🔍 关键词规则管理
+- 智能关键词匹配（任意匹配、全部匹配、正则匹配）
+- 多平台支持（Twitter、Facebook、Instagram）
+- 用户定向配置
+- 规则启用/停用控制
 
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1463141366275764364)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
+### 📝 提示词模板
+- 多场景模板（回复评论、回复消息、发帖）
+- 模板内容管理
+- 用户权限控制
+- 模板激活状态管理
 
-### Demos
+### ⚡ 自动回复任务
+- 定时任务调度
+- 循环类型配置（日/周/月）
+- 执行时间设置
+- 任务状态监控
 
-- [Free Version](https://free-vue-demo.tailadmin.com/)
-- [Pro Version](https://vue-demo.tailadmin.com)
+### 📊 数据统计
+- 实时数据可视化
+- 图表展示（柱状图、折线图）
+- 数据导出功能
 
-### Other Versions
+## 🛠️ 技术栈
 
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [React Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
-- [Angular Version](https://github.com/TailAdmin/free-angular-tailwind-dashboard)
+### 前端框架
+- **Vue 3.5.13** - 渐进式 JavaScript 框架
+- **TypeScript 5.7.3** - 类型安全的 JavaScript
+- **Vite 6.0.11** - 快速构建工具
 
-## Installation
+### UI 框架
+- **Tailwind CSS 4.0** - 实用优先的 CSS 框架
+- **Reka UI 2.5.0** - 现代化组件库
+- **Lucide Vue Next** - 图标库
 
-### Prerequisites
+### 状态管理与路由
+- **Vue Router 4.5.0** - 官方路由管理器
+- **Pinia** - Vue 状态管理库
 
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
+### 数据可视化
+- **ApexCharts 4.4.0** - 交互式图表库
+- **JSVectorMap 1.6.0** - 矢量地图
 
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
-- Recommended IDE Setup: [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+### 工具库
+- **Axios 1.11.0** - HTTP 客户端
+- **Vue Sonner 2.0.8** - 通知组件
+- **VueUse 13.9.0** - Vue 组合式 API 工具集
 
-#### Type Support for `.vue` Imports in TS
+## 🚀 快速开始
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+### 环境要求
 
-### Cloning the Repository
+- **Node.js** 18.x 或更高版本（推荐 20.x+）
+- **npm** 或 **yarn** 包管理器
+- **Git** 版本控制工具
 
-Clone the repository using the following command:
+### 安装依赖
 
 ```bash
-git clone https://github.com/TailAdmin/vue-tailwind-admin-dashboard.git
+# 克隆项目
+git clone <repository-url>
+cd tailwin-admin
+
+# 安装依赖
+npm install
+# 或
+yarn install
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+### 开发环境
 
-1. Install dependencies:
+```bash
+# 启动开发服务器
+npm run dev
+# 或
+yarn dev
+```
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+访问 [http://localhost:5173](http://localhost:5173) 查看应用
 
-2. Start the development server:
+### 代码质量
 
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+```bash
+# 代码检查
+npm run lint
 
-3. Production build:
-   ```bash
-   npm run build
-   # or
-   yarn build
-   ```
+# 代码格式化
+npm run format
 
-## Feature Comparison
+# 类型检查
+npm run type-check
+```
 
-### Free Version
+## 🏗️ 项目结构
 
-- 1 Unique Dashboard
-- 50+ Dashboard UI components
-- Basic Figma design files
-- Community support
+```
+src/
+├── api/                    # API 接口层
+│   ├── aiCofig.ts         # AI 配置接口
+│   ├── keywrods.ts        # 关键词接口
+│   ├── prompts.ts         # 提示词接口
+│   └── task.ts            # 任务接口
+├── assets/                # 静态资源
+├── components/            # 公共组件
+│   ├── charts/           # 图表组件
+│   ├── common/           # 通用组件
+│   ├── forms/            # 表单组件
+│   ├── layout/           # 布局组件
+│   ├── profile/          # 用户资料组件
+│   ├── tables/           # 表格组件
+│   └── ui/               # UI 组件库
+├── composables/          # 组合式函数
+├── icons/                # 图标组件
+├── lib/                  # 工具库
+│   ├── http.ts           # HTTP 请求封装
+│   └── utils.ts          # 通用工具函数
+├── router/               # 路由配置
+└── views/                # 页面组件
+    ├── AIAccounts/       # AI 账户管理
+    ├── AIConfig/         # AI 配置管理
+    ├── AutoReply/        # 自动回复任务
+    ├── KeywordRules/     # 关键词规则
+    ├── PromptTemplates/  # 提示词模板
+    ├── Datastatistics/   # 数据统计
+    └── Auth/             # 认证页面
+```
 
-### Pro Version
+## 🔧 环境配置
 
-- 7 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, Stocks (more coming soon)
-- 500+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+### 开发环境变量
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+创建 `.env.development` 文件：
 
-## Components
+```env
+# API 基础地址
+VITE_API_BASE_URL=http://localhost:3000/api
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using Vue.js and Tailwind CSS. The template includes:
+# 应用标题
+VITE_APP_TITLE=AI 智能客服管理系统
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Prebuilt profile management and 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- Can't forget Dark Mode 🕶️
+# 是否启用开发工具
+VITE_DEV_TOOLS=true
+```
 
-All components are built with Vue and styled using Tailwind CSS for easy customization.
+### 生产环境变量
 
-## Features
+创建 `.env.production` 文件：
 
-**💎 High-quality, Premium Modern Design:**
-A thoughtfully designed dashboard template with a deep focus on UX/UI, already trusted and utilized by over 10K+ web apps worldwide.
+```env
+# API 基础地址
+VITE_API_BASE_URL=https://api.yourdomain.com
 
-**✨ Vue 3:**
-Get enhanced performance with the latest Vue version.
+# 应用标题
+VITE_APP_TITLE=AI 智能客服管理系统
 
-**⚡ Vite Build System:**
-Enjoy quick development with Vite, ensuring fast code compilation.
+# 是否启用开发工具
+VITE_DEV_TOOLS=false
+```
 
-**🔀 Vue Router:**
-Manage app navigation with ease using Vue Router for seamless transitions.
+## 📦 构建部署
 
-**💡 Reactive Utilities:**
-Enhance component reactivity with @vueuse/core utilities.
+### 生产构建
 
-**📊 Charting with ApexCharts:**
-Visualize data with ApexCharts for beautiful analytics.
+```bash
+# 构建生产版本
+npm run build
+# 或
+yarn build
+```
 
-**🗺️ Vector Maps with JSVectorMap:**
-Easily integrate interactive vector maps with JSVectorMap.
+构建完成后，`dist` 目录包含所有静态文件。
 
-**🖌️ UI with Tailwind CSS:**
-Frontend UI built on the powerful and versatile Tailwind CSS framework.
+### 预览构建结果
 
-**💫 TypeScript Support:**
-Write safer, maintainable code with TailAdmin Vue's TypeScript Support.
+```bash
+# 本地预览构建结果
+npm run preview
+# 或
+yarn preview
+```
 
-**✅ Linting and Formatting:**
-Maintain a clean codebase with built-in linting and formatting.
+### 部署方式
 
-**🗃️ State Management with Pinia:**
-Handle your app's state with Pinia for clean, organized code.
+#### 1. 静态文件部署
 
-## Update Logs
+将 `dist` 目录上传到 Web 服务器：
 
-### Version 2.0.1 - [February 27, 2025]
+```bash
+# 使用 nginx 示例配置
+server {
+    listen 80;
+    server_name yourdomain.com;
+    root /path/to/dist;
+    index index.html;
+    
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
 
-#### Update Overview
+#### 2. Docker 部署
 
-- Upgraded to Tailwind CSS v4 for better performance and efficiency.
-- Updated class usage to match the latest syntax and features.
-- Replaced deprecated class and optimized styles.
+创建 `Dockerfile`：
 
-#### Next Steps
+```dockerfile
+# 构建阶段
+FROM node:20-alpine as build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
 
-- Run npm install or yarn install to update dependencies.
-- Check for any style changes or compatibility issues.
-- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-- This update keeps the project up to date with the latest Tailwind improvements. 🚀
+# 生产阶段
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
 
-### Version 2.0.0 - [February 2025]
+构建和运行：
 
-Major update with Vue 3 migration and comprehensive redesign.
+```bash
+# 构建镜像
+docker build -t ai-customer-service .
 
-#### Major Improvements
+# 运行容器
+docker run -p 80:80 ai-customer-service
+```
 
-- Complete migration to Vue 3 Composition API
-- Updated to Vue Router 4
-- Enhanced user interface with new Vue 3 components
-- Improved performance with Vue 3's virtual DOM
-- Better accessibility and responsive design
+#### 3. 云平台部署
 
-#### New Features
+**Vercel 部署：**
 
-- Redesigned dashboards (Ecommerce, Analytics, Marketing, CRM)
-- Collapsible sidebar with Vue 3 integration
-- Enhanced navigation with Vue Router 4
-- Real-time chat functionality
-- Full-featured calendar with drag-and-drop
-- Advanced table components
-- Updated data visualization with ApexCharts
+```bash
+# 安装 Vercel CLI
+npm i -g vercel
 
-#### Breaking Changes
+# 部署
+vercel --prod
+```
 
-- Requires Vue 3 and Vue Router 4
-- Chart components migrated to ApexCharts for Vue 3
-- Modified routing implementation
-- Updated component APIs for Vue 3 compatibility
+**Netlify 部署：**
 
-[Read more](https://tailadmin.com/docs/update-logs/vue) on this release.
+```bash
+# 安装 Netlify CLI
+npm i -g netlify-cli
 
-### Version 1.0.2 - [June 19, 2024]
+# 部署
+netlify deploy --prod --dir=dist
+```
 
-#### Issues
+## 🔐 API 接口
 
-- Fix Mobile Menu Hamburger Icon issue.
+### 认证接口
 
-### Version 1.0.1 - [Feb 08, 2024]
+```typescript
+// 用户登录
+POST /api/auth/login
+{
+  "username": "string",
+  "password": "string"
+}
 
-#### Enhancements
+// 用户注册
+POST /api/auth/register
+{
+  "username": "string",
+  "email": "string",
+  "password": "string"
+}
+```
 
-- Make it functional [Multiselect Dropdown/Form Elements].
-- Delete SelectGroup Components then create a SelectGroup folder and create two files under this
-  folder SelectGroupOne.vue SelectGroupTwo.vue [Select Group/Form Elements & Layout].
-- Update style.css file.
+## 🎨 自定义主题
 
-### Version 1.0.0 - Initial Release - [Jan 22, 2024]
+### 颜色配置
 
-- Initial release of TailAdmin Vue.
+在 `tailwind.config.js` 中自定义主题：
+
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          50: '#eff6ff',
+          500: '#3b82f6',
+          900: '#1e3a8a',
+        }
+      }
+    }
+  }
+}
+```
+
+### 组件样式
+
+使用 CSS 变量进行主题定制：
+
+```css
+:root {
+  --primary-color: #3b82f6;
+  --secondary-color: #64748b;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+}
+```
+
+## 📱 响应式设计
+
+系统采用移动优先的响应式设计：
+
+- **移动端**: < 768px
+- **平板端**: 768px - 1024px  
+- **桌面端**: > 1024px
+
+## 🔍 浏览器支持
+
+- Chrome (推荐)
+- Firefox
+- Safari
+- Edge
+
+## 🤝 贡献指南
+
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 打开 Pull Request
+
+## 📄 许可证
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+
+## 📞 技术支持
+
+如有问题或建议，请通过以下方式联系：
+
+- 提交 [Issue](https://github.com/your-repo/issues)
+- 发送邮件至 support@yourdomain.com
+
+## 🎯 路线图
+
+- [ ] 多语言支持
+- [ ] 实时消息推送
+- [ ] 高级数据分析
+- [ ] 移动端应用
+- [ ] 第三方集成
+
+---
+
+⭐ 如果这个项目对您有帮助，请给我们一个 Star！
