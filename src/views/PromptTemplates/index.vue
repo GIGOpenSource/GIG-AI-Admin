@@ -62,7 +62,18 @@
                 <TableCell class="whitespace-nowrap">{{ item.name }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getTemplateTypeText(item.type) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ item.user }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ item.isActive ? '是' : '否' }}</TableCell>
+                <TableCell class="whitespace-nowrap">
+                  <span
+                    :class="[
+                      'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                      item.isActive
+                        ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
+                        : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
+                    ]"
+                  >
+                    {{ item.isActive ? '启用' : '停用' }}
+                  </span>
+                </TableCell>
                 <TableCell class="whitespace-nowrap">{{ formatTime(item.createdAt) }}</TableCell>
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">

@@ -42,10 +42,12 @@
               </TableCell>
               <TableCell class="whitespace-nowrap">{{ formatTime(item.createdAt || item.updatedAt) }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <Button size="sm" variant="outline" @click="onEdit(item)">编辑</Button>
-                  <Button size="sm" variant="outline" @click="onDelete(item)">删除</Button>
-                </div>
+                  <div class="flex items-center justify-end gap-2">
+                    <Button size="sm" variant="outline" @click="onEdit(item)">编辑</Button>
+                    <Button size="sm" variant="outline"
+                    :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
+                    @click="onDelete(item)">删除</Button>
+                  </div>
               </TableCell>
             </TableRow>
 
