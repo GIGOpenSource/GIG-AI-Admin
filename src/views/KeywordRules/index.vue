@@ -39,7 +39,7 @@
                   {{ item.enabled ? '启用' : '停用' }}
                 </span>
               </TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.createdAt || item.updatedAt }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ formatTime(item.createdAt || item.updatedAt) }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" @click="onEdit(item)">编辑</Button>
@@ -196,6 +196,7 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, Pagi
 import { getKeywordsConfigs, getKeywordsConfigsDetail, createKeywordsConfigs, updateKeywordsConfigs, deleteKeywordsConfigs } from '@/api/keywrods'
 import { getUser } from '@/api/index'
 import { toast } from "vue-sonner"
+import { formatTime } from '@/lib/utils'
 
 const currentPageTitle = ref('关键词规则')
 
@@ -446,10 +447,6 @@ async function submitEdit() {
   }
 }
 
-function formatDateTime(date) {
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-}
 </script>
 
 

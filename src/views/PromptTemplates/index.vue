@@ -63,7 +63,7 @@
                 <TableCell class="whitespace-nowrap">{{ getTemplateTypeText(item.type) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ item.user }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ item.isActive ? '是' : '否' }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ item.createdAt }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ formatTime(item.createdAt) }}</TableCell>
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
@@ -170,6 +170,7 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, Pag
 import { getUser } from '@/api/index'
 import { getPromptsConfigs, createPromptsConfig, updatePromptsConfig, deletePromptsConfig, getPromptsConfig } from '@/api/prompts'
 import { toast } from 'vue-sonner'
+import { formatTime } from '@/lib/utils'
 const currentPageTitle = ref('提示词模板')
 const isLoading = ref(false)
 const isEditMode = ref(false)
@@ -396,10 +397,6 @@ async function onDelete(item) {
   }
 }
 
-function formatDateTime(date) {
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-}
 
 function getTemplateTypeText(type) {
   const typeMap = {

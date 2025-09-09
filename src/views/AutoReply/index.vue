@@ -45,7 +45,7 @@
               <TableCell class="whitespace-nowrap">{{ item.day_of_month }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ getRecurrenceTypeText(item.recurrence_type) }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.time_of_day }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ item.created_at }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ formatTime(item.created_at) }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
@@ -177,6 +177,7 @@ import { getKeywordsConfigs } from '@/api/keywrods'
 import { getPromptsConfigs } from '@/api/prompts'
 import { getUser } from '@/api/index'
 import { toast } from "vue-sonner"
+import { formatTime } from '@/lib/utils'
 
 const currentPageTitle = ref('任务列表')
 
@@ -329,10 +330,6 @@ async function onDelete(item) {
   }
 }
 
-function formatDateTime(date) {
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-}
 
 function getRecurrenceTypeText(recurrenceType) {
   const typeMap = {

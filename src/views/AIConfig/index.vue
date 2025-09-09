@@ -66,7 +66,7 @@
                 </TableCell>
                 <!--{{ item.priority }}  -->
                 <TableCell class="whitespace-nowrap">222</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.created_at }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ formatTime(acc.created_at) }}</TableCell>
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
@@ -170,6 +170,7 @@ import { getlist, addlist, details, updatelist, deletelist } from '@/api/aiCofig
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { formatTime } from '@/lib/utils'
 const currentPageTitle = ref('AI 服务配置')
 const accounts = ref([])
 const page = ref(1)
@@ -365,10 +366,6 @@ async function submitAdd() {
   }
 }
 
-function formatDateTime(date) {
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-}
 
 // 手动搜索按钮点击
 const handleSearchClick = async () => {
