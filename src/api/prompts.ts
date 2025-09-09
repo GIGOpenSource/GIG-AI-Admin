@@ -1,6 +1,6 @@
 import { get, post, put, patch, del } from '@/lib/http'
 
-export const getPromptsConfigs = () => get('/prompts/configs/')
+export const getPromptsConfigs = (data:any) => get('/prompts/configs/',{params:data})
 
 export const createPromptsConfig = (data: any) => post('/prompts/configs/', data)
 
