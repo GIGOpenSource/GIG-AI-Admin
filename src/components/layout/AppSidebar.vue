@@ -238,8 +238,6 @@ import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
 const userinfo = JSON.parse(localStorage.getItem('profile'))
-console.log(userinfo,'userinfouserinfo');
-
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 
 const menuGroups = ref(
@@ -248,7 +246,6 @@ const menuGroups = ref(
     title: "Menu",
     items: [
        { icon: GridIcon, name: "数据统计", path: "/" },
-      { icon: TableIcon, name: "AI 用户列表", path: "/ai-accounts" },
       { icon: TaskIcon, name: "任务列表", path: "/auto-reply" },
       { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
       { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
@@ -260,10 +257,11 @@ onMounted(() => {
   menu()
 })
 const menu = () =>{
-  console.log(userinfo,'userinfo.is_staffuserinfo.is_staff');
-
    if(userinfo.is_staff && userinfo.is_superuser){
-       menuGroups.value[0].items.push({ icon: ListIcon, name: "AI 服务配置", path: "/ai-config" })
+       menuGroups.value[0].items.push(
+        { icon: TableIcon, name: "AI 用户列表", path: "/ai-accounts" },
+        { icon: ListIcon, name: "AI 服务配置", path: "/ai-config" }
+      )
    }else{
     menuGroups.value = menuGroups.value
    }

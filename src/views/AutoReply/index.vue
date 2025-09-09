@@ -76,7 +76,7 @@
           <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
             <h3 class="mb-4 text-lg font-semibold">{{ isEditing ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitForm" class="space-y-4">
-              <div>
+              <div v-if="userinfo.is_superuser && userinfo.is_staff">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
                 <select v-model="form.owner"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
@@ -178,7 +178,7 @@ import { getPromptsConfigs } from '@/api/prompts'
 import { getUser } from '@/api/index'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
-
+const userinfo = JSON.parse(localStorage.getItem('profile'))
 const currentPageTitle = ref('任务列表')
 
 const tasks = ref([])
@@ -194,7 +194,7 @@ const total = ref(0)
 const showForm = ref(false)
 const editingId = ref(null)
 const form = ref({
-  owner: '',
+  owner: userinfo.is_superuser && userinfo.is_staff ?'':userinfo.id,
   provider: 'Twitter',
   type: 'reply_message',
   keyword: '',
@@ -389,6 +389,7 @@ async function fetchTasks() {
 }
 
 async function fetchUsers() {
+  if(!userinfo.is_superuser || !userinfo.is_staff) return
   try {
     const res = await getUser({})
     const list = (res && res.results) ? res.results : res
