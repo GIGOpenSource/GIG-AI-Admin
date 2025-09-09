@@ -146,7 +146,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import Modal from '@/components/ui/Modal.vue'
 import { getUser, getUserDetail, deleteUser, createUser, updateUser } from '@/api'
-
+import { toast } from "vue-sonner"
 
 const currentPageTitle = ref('AI 用户列表')
 
@@ -267,6 +267,13 @@ watch(page, () => {
 
 // 初始化加载列表
 onMounted(()=>{
+  toast('Event has been created', {
+          description: 'Sunday, December 03, 2023 at 9:00 AM',
+          action: {
+            label: 'Undo',
+            onClick: () => console.log('Undo'),
+          },
+        });
   getList()
 })
 </script>
