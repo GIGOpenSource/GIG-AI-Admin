@@ -251,6 +251,17 @@ const handleSubmit = async () => {
     if (res && res.access) {
       localStorage.setItem('token', res.access)
       localStorage.setItem('profile', JSON.stringify(res.user))
+
+      // 根据用户角色设置 role 标识
+      const user = res.user
+      let role = 'user' // 默认角色
+
+      if (user.is_staff === true || user.is_superuser === true) {
+        role = 'admin'
+      }
+
+      localStorage.setItem('role', role)
+
       toast.success('登录成功')
       router.replace({ path: '/' })
     } else {

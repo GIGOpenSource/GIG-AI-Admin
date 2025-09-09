@@ -95,7 +95,6 @@ export default router
 
 router.beforeEach((to, from, next) => {
   document.title = `${to.meta.title} | AiDS`
-  document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
   const token = localStorage.getItem('token')
   const profile = JSON.parse(localStorage.getItem('profile') || '{}')
   if (!token && to.path !== '/signin') {
