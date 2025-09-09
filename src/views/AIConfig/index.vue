@@ -5,7 +5,7 @@
       <ComponentCard>
         <div class="mb-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="relative">
+            <!-- <div class="relative">
               <input v-model="searchQuery" type="text" placeholder="请搜索配置名称"
                 class="w-80 h-10 pl-10 pr-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                 @keyup.enter="handleSearchClick" />
@@ -26,7 +26,7 @@
             </Button>
             <Button size="sm" variant="outline" @click="clearSearch" class="text-gray-500 hover:text-gray-700">
               重置
-            </Button>
+            </Button> -->
           </div>
           <div class="flex gap-2">
             <Button size="sm" @click="openAdd">新增</Button>
