@@ -1,6 +1,6 @@
 import { get, post, put, patch, del } from '@/lib/http'
 
-export const getScheduledTasks = () => get('/tasks/scheduled/')
+export const getScheduledTasks = (params:any) => get('/tasks/scheduled/',{params})
 
 export const getScheduledTask = (id: string) => get(`/tasks/scheduled/${id}/`)
 

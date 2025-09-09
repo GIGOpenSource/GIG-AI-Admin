@@ -55,6 +55,20 @@
             </TableRow>
           </TableBody>
         </Table>
+        <div class="mt-4" v-if="total > 0">
+          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
+            <PaginationContent v-slot="{ items }">
+              <PaginationPrevious />
+              <template v-for="(item, index) in items" :key="index">
+                <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
+                  {{ item.value }}
+                </PaginationItem>
+                <PaginationEllipsis v-else :index="index" />
+              </template>
+              <PaginationNext />
+            </PaginationContent>
+          </Pagination>
+        </div>
       </ComponentCard>
 
       <Modal v-if="showForm" :fullScreenBackdrop="true" @close="closeForm">
@@ -150,13 +164,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { getScheduledTasks, createScheduledTask, getScheduledTask, updateScheduledTask, deleteScheduledTask } from '@/api/task'
 import { getKeywordsConfigs } from '@/api/keywrods'
 import { getPromptsConfigs } from '@/api/prompts'
@@ -168,6 +183,11 @@ const tasks = ref([])
 
 // 用户下拉选项
 const userOptions = ref([])
+
+// 分页参数
+const page = ref(1)
+const pageSize = ref(20)
+const total = ref(0)
 
 const showForm = ref(false)
 const editingId = ref(null)
@@ -301,7 +321,10 @@ const availablePrompts = computed(() => {
 
 async function fetchTasks() {
   try {
-    const res = await getScheduledTasks()
+    const res = await getScheduledTasks({
+      page: page.value,
+      page_size: pageSize.value,
+    })
     const list = (res && res.results) ? res.results : res
     tasks.value = Array.isArray(list) ? list.map((item) => ({
       id: item.id,
@@ -316,6 +339,7 @@ async function fetchTasks() {
       enabled: item.enabled,
       created_at: item.created_at,
     })) : []
+    total.value = res.count || 0
   } catch (error) {
     console.error('Failed to fetch tasks:', error)
     tasks.value = []
@@ -370,6 +394,11 @@ async function fetchPrompts() {
     promptOptions.value = []
   }
 }
+
+// 监听页码变化，自动刷新列表
+watch(page, () => {
+  fetchTasks()
+})
 
 onMounted(async () => {
   await Promise.all([
