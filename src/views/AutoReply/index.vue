@@ -176,6 +176,7 @@ import { getScheduledTasks, createScheduledTask, getScheduledTask, updateSchedul
 import { getKeywordsConfigs } from '@/api/keywrods'
 import { getPromptsConfigs } from '@/api/prompts'
 import { getUser } from '@/api/index'
+import { toast } from "vue-sonner"
 
 const currentPageTitle = ref('任务列表')
 
@@ -227,6 +228,9 @@ async function openEdit(item) {
     }
   } catch (error) {
     console.error('Failed to fetch task detail:', error)
+    toast.error('获取任务详情失败', {
+      description: error.response?.data?.message || error.message || '获取任务详情时发生错误'
+    })
     form.value = {
       owner: item.owner,
       provider: item.provider,
@@ -249,9 +253,38 @@ function closeForm() {
 }
 
 async function submitForm() {
-  // if (!form.value.owner || !form.value.provider || !form.value.type || !form.value.keyword || !form.value.prompt || !form.value.recurrence_type || !form.value.day_of_month || !form.value.time_of_day) {
-  //   return
-  // }
+  // 表单验证
+  if (!form.value.owner) {
+    toast.error('目标用户不能为空', {
+      description: '请选择目标用户'
+    })
+    return
+  }
+  if (!form.value.keyword) {
+    toast.error('关键词不能为空', {
+      description: '请选择关键词'
+    })
+    return
+  }
+  if (!form.value.prompt) {
+    toast.error('提示词不能为空', {
+      description: '请选择提示词'
+    })
+    return
+  }
+  if (!form.value.day_of_month) {
+    toast.error('循环周期不能为空', {
+      description: '请输入循环周期'
+    })
+    return
+  }
+  if (!form.value.time_of_day) {
+    toast.error('执行时间不能为空', {
+      description: '请选择执行时间'
+    })
+    return
+  }
+
   try {
     const payload = {
       owner: form.value.owner,
@@ -267,23 +300,32 @@ async function submitForm() {
 
     if (isEditing.value) {
       await updateScheduledTask(String(editingId.value), payload)
+      toast.success('任务更新成功')
     } else {
       await createScheduledTask(payload)
+      toast.success('任务创建成功')
     }
 
     await fetchTasks() // Refresh the list
     closeForm()
   } catch (error) {
     console.error('Failed to save task:', error)
+    toast.error(isEditing.value ? '更新失败' : '创建失败', {
+      description: error.response?.data?.message || error.message || (isEditing.value ? '更新任务时发生错误' : '创建任务时发生错误')
+    })
   }
 }
 
 async function onDelete(item) {
   try {
     await deleteScheduledTask(String(item.id))
+    toast.success('任务删除成功')
     await fetchTasks() // Refresh the list after deletion
   } catch (error) {
     console.error('Failed to delete task:', error)
+    toast.error('删除失败', {
+      description: error.response?.data?.message || error.message || '删除任务时发生错误'
+    })
   }
 }
 
@@ -342,6 +384,9 @@ async function fetchTasks() {
     total.value = res.count || 0
   } catch (error) {
     console.error('Failed to fetch tasks:', error)
+    toast.error('获取任务列表失败', {
+      description: error.response?.data?.message || error.message || '获取任务列表时发生错误'
+    })
     tasks.value = []
   }
 }
@@ -356,6 +401,9 @@ async function fetchUsers() {
     })) : []
   } catch (error) {
     console.error('Failed to fetch users:', error)
+    toast.error('获取用户列表失败', {
+      description: error.response?.data?.message || error.message || '获取用户列表时发生错误'
+    })
     userOptions.value = []
   }
 }
@@ -374,10 +422,11 @@ async function fetchKeywords() {
     ).filter(Boolean) : []
   } catch (error) {
     console.error('Failed to fetch keywords:', error)
+    toast.error('获取关键词列表失败', {
+      description: error.response?.data?.message || error.message || '获取关键词列表时发生错误'
+    })
     keywordOptions.value = []
   }
-  console.log(keywordOptions.value);
-
 }
 
 async function fetchPrompts() {
@@ -391,6 +440,9 @@ async function fetchPrompts() {
     })) : []
   } catch (error) {
     console.error('Failed to fetch prompts:', error)
+    toast.error('获取提示词列表失败', {
+      description: error.response?.data?.message || error.message || '获取提示词列表时发生错误'
+    })
     promptOptions.value = []
   }
 }

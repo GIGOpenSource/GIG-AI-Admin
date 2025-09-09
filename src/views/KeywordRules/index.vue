@@ -195,6 +195,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { getKeywordsConfigs, getKeywordsConfigsDetail, createKeywordsConfigs, updateKeywordsConfigs, deleteKeywordsConfigs } from '@/api/keywrods'
 import { getUser } from '@/api/index'
+import { toast } from "vue-sonner"
 
 const currentPageTitle = ref('关键词规则')
 
@@ -222,12 +223,20 @@ function getMatchModeText(matchMode) {
 }
 
 async function fetchUsers() {
-  const res = await getUser({})
-  const list = (res && res.results) ? res.results : res
-  userOptions.value = Array.isArray(list) ? list.map((u) => ({
-    id: u.id ?? u.pk ?? u.uuid,
-    name: u.username || u.name || u.email || `用户${u.id}`,
-  })) : []
+  try {
+    const res = await getUser({})
+    const list = (res && res.results) ? res.results : res
+    userOptions.value = Array.isArray(list) ? list.map((u) => ({
+      id: u.id ?? u.pk ?? u.uuid,
+      name: u.username || u.name || u.email || `用户${u.id}`,
+    })) : []
+  } catch (error) {
+    console.error('Failed to fetch users:', error)
+    toast.error('获取用户列表失败', {
+      description: error.response?.data?.message || error.message || '获取用户列表时发生错误'
+    })
+    userOptions.value = []
+  }
 }
 
 async function fetchRules() {
@@ -250,6 +259,12 @@ async function fetchRules() {
       enabled: (typeof r.enabled === 'boolean') ? r.enabled : (r.status ? r.status === '启用' : true),
     }))
     total.value = res.count || 0
+  } catch (error) {
+    console.error('Failed to fetch rules:', error)
+    toast.error('获取关键词规则失败', {
+      description: error.response?.data?.message || error.message || '获取关键词规则时发生错误'
+    })
+    rules.value = []
   } finally {
     loading.value = false
   }
@@ -299,11 +314,26 @@ function closeAdd() {
 }
 
 async function submitAdd() {
-  console.log(form.value);
-
-  if (!form.value.name || !form.value.owner || !form.value.provider || !form.value.include_keywords || !form.value.match_mode) {
+  // 表单验证
+  if (!form.value.name) {
+    toast.error('配置名称不能为空', {
+      description: '请输入配置名称'
+    })
     return
   }
+  if (!form.value.owner) {
+    toast.error('目标用户不能为空', {
+      description: '请选择目标用户'
+    })
+    return
+  }
+  if (!form.value.include_keywords) {
+    toast.error('关键词不能为空', {
+      description: '请输入关键词'
+    })
+    return
+  }
+
   const keywordsArray = form.value.include_keywords.split(',').map(s => s.trim()).filter(Boolean)
   const payload = {
     name: form.value.name,
@@ -315,19 +345,27 @@ async function submitAdd() {
   }
   try {
     await createKeywordsConfigs(payload)
+    toast.success('关键词规则创建成功')
     await fetchRules()
     closeAdd()
   } catch (e) {
     console.error('create keywords config failed', e)
+    toast.error('创建失败', {
+      description: e.response?.data?.message || e.message || '创建关键词规则时发生错误'
+    })
   }
 }
 
 async function onDelete(item) {
   try {
     await deleteKeywordsConfigs(String(item.id))
+    toast.success('关键词规则删除成功')
     rules.value = rules.value.filter(r => r.id !== item.id)
   } catch (e) {
     console.error('delete keywords config failed', e)
+    toast.error('删除失败', {
+      description: e.response?.data?.message || e.message || '删除关键词规则时发生错误'
+    })
   }
 }
 
@@ -351,6 +389,11 @@ async function onEdit(item) {
       enabled: (typeof r.enabled === 'boolean') ? r.enabled : (r.status ? r.status === '启用' : (item.enabled != null ? item.enabled : true)),
     }
     editForm.value = normalized
+  } catch (error) {
+    console.error('Failed to fetch rule detail:', error)
+    toast.error('获取规则详情失败', {
+      description: error.response?.data?.message || error.message || '获取规则详情时发生错误'
+    })
   } finally {
     editLoading.value = false
   }
@@ -361,9 +404,26 @@ function closeEdit() {
 }
 
 async function submitEdit() {
-  if (!editForm.value.name || !editForm.value.owner || !editForm.value.provider || !editForm.value.include_keywords || !editForm.value.match_mode) {
+  // 表单验证
+  if (!editForm.value.name) {
+    toast.error('配置名称不能为空', {
+      description: '请输入配置名称'
+    })
     return
   }
+  if (!editForm.value.owner) {
+    toast.error('目标用户不能为空', {
+      description: '请选择目标用户'
+    })
+    return
+  }
+  if (!editForm.value.include_keywords) {
+    toast.error('关键词不能为空', {
+      description: '请输入关键词'
+    })
+    return
+  }
+
   const kw = editForm.value.include_keywords.split(',').map(s => s.trim()).filter(Boolean)
   const payload = {
     name: editForm.value.name,
@@ -375,10 +435,14 @@ async function submitEdit() {
   }
   try {
     await updateKeywordsConfigs(String(editForm.value.id), payload)
+    toast.success('关键词规则更新成功')
     await fetchRules()
     closeEdit()
   } catch (e) {
     console.error('update keywords config failed', e)
+    toast.error('更新失败', {
+      description: e.response?.data?.message || e.message || '更新关键词规则时发生错误'
+    })
   }
 }
 

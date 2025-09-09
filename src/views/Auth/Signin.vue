@@ -212,6 +212,7 @@ import { useRouter } from 'vue-router'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import { login } from '@/api'
+import { toast } from "vue-sonner"
 
 
 const router = useRouter()
@@ -226,25 +227,42 @@ const togglePasswordVisibility = () => {
 }
 
 const handleSubmit = async () => {
-  // Handle form submission
-  console.log('Form submitted', {
-    username: username.value,
-    password: password.value,
-    remember_me: remember_me.value,
-  })
+  // 表单验证
+  if (!username.value) {
+    toast.error('用户名不能为空', {
+      description: '请输入用户名'
+    })
+    return
+  }
+  if (!password.value) {
+    toast.error('密码不能为空', {
+      description: '请输入密码'
+    })
+    return
+  }
 
-  const res = await login({
-    username: username.value,
-    password: password.value,
-    remember_me: remember_me.value,
-  })
-  console.log(res)
-  if (res && res.access) {
-    localStorage.setItem('token', res.access)
-    localStorage.setItem('profile', JSON.stringify(res.user))
-    router.replace({ path: '/' })
-  } else {
-    console.log('登录失败', res.message);
+  try {
+    const res = await login({
+      username: username.value,
+      password: password.value,
+      remember_me: remember_me.value,
+    })
+
+    if (res && res.access) {
+      localStorage.setItem('token', res.access)
+      localStorage.setItem('profile', JSON.stringify(res.user))
+      toast.success('登录成功')
+      router.replace({ path: '/' })
+    } else {
+      toast.error('登录失败', {
+        description: res?.message || '用户名或密码错误'
+      })
+    }
+  } catch (error: any) {
+    console.error('Login failed:', error)
+    toast.error('登录失败', {
+      description: error.response?.data?.message || error.message || '登录时发生错误，请稍后重试'
+    })
   }
 }
 </script>

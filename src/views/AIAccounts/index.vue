@@ -166,8 +166,12 @@ async function onDelete(account) {
   try {
     await deleteUser(String(account.id))
     accounts.value = accounts.value.filter(a => a.id !== account.id)
+    toast.success('用户删除成功')
   } catch (e) {
     console.error('delete failed', e)
+    toast.error('删除失败', {
+      description: e.response?.data?.message || e.message || '删除用户时发生错误'
+    })
   }
 }
 
@@ -221,14 +225,26 @@ async function submitForm() {
           ...accounts.value[idx],
           is_active: updatedIsActive,
         }
+        toast.success('用户更新成功')
       } catch (e) {
         console.error('update failed', e)
+        toast.error('更新失败', {
+          description: e.response?.data?.message || e.message || '更新用户时发生错误'
+        })
         return
       }
     }
   } else {
     if (!form.value.username) {
-      console.error('username required')
+      toast.error('用户名不能为空', {
+        description: '请输入用户名'
+      })
+      return
+    }
+    if (!form.value.password) {
+      toast.error('密码不能为空', {
+        description: '请输入密码'
+      })
       return
     }
     try {
@@ -240,9 +256,13 @@ async function submitForm() {
         is_staff: false,
         is_superuser: false,
       })
+      toast.success('用户创建成功')
       await getList()
     } catch (e) {
       console.error('create failed', e)
+      toast.error('创建失败', {
+        description: e.response?.data?.message || e.message || '创建用户时发生错误'
+      })
       return
     }
   }
@@ -250,14 +270,21 @@ async function submitForm() {
 }
 
 // 获取用户列表
-const getList = async ()=>{
-  const res = await getUser({
-    page: page.value,
-    page_size: pageSize.value,
-  })
+const getList = async () => {
+  try {
+    const res = await getUser({
+      page: page.value,
+      page_size: pageSize.value,
+    })
 
-  accounts.value = res.results
-  total.value = res.count
+    accounts.value = res.results
+    total.value = res.count
+  } catch (e) {
+    console.error('getList failed', e)
+    toast.error('获取用户列表失败', {
+      description: e.response?.data?.message || e.message || '获取用户列表时发生错误'
+    })
+  }
 }
 
 // 监听页码变化，自动刷新列表
@@ -266,14 +293,7 @@ watch(page, () => {
 })
 
 // 初始化加载列表
-onMounted(()=>{
-  toast('Event has been created', {
-          description: 'Sunday, December 03, 2023 at 9:00 AM',
-          action: {
-            label: 'Undo',
-            onClick: () => console.log('Undo'),
-          },
-        });
+onMounted(() => {
   getList()
 })
 </script>
