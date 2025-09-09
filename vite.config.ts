@@ -17,4 +17,16 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    proxy: {
+      '/api': {
+        // For local-only frontend with remote backend, proxy to your domain to avoid CORS
+        target: 'https://gigaisystem.com',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 })

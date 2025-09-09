@@ -279,7 +279,7 @@ import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { createUser } from '@/api'
+import { register } from '@/api'
 
 const firstName = ref('')
 const lastName = ref('')
@@ -308,9 +308,11 @@ const handleSubmit = async () => {
     password: password.value,
     password_confirm: passwordConfirm.value,
   })
-  const res = await createUser({
+  const res = await register({
     username: username.value,
+    email: email.value,
     password: password.value,
+    password_confirm: passwordConfirm.value,
   })
   console.log(res)
   // On success, navigate to sign-in without keeping history
