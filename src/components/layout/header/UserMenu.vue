@@ -4,11 +4,11 @@
       class="flex items-center text-gray-700 dark:text-gray-400"
       @click.prevent="toggleDropdown"
     >
-      <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
-        <img src="/images/user/owner.jpg" alt="User" />
+      <span class="mr-3 overflow-hidden rounded-full h-11 w-11 flex items-center justify-center bg-blue-500 text-white font-semibold text-lg">
+        {{ avatarLetter }}
       </span>
 
-      <span class="block mr-1 font-medium text-theme-sm">Musharof </span>
+      <span class="block mr-1 font-medium text-theme-sm">{{ username }}</span>
 
       <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" />
     </button>
@@ -59,11 +59,28 @@
 
 <script setup>
 import { UserCircleIcon, ChevronDownIcon, LogoutIcon, SettingsIcon, InfoCircleIcon } from '@/icons'
-import { RouterLink } from 'vue-router'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
+const router = useRouter()
+
+// Get username from localStorage
+const username = computed(() => {
+  try {
+    const profile = JSON.parse(localStorage.getItem('profile') || '{}')
+    return profile.username || 'User'
+  } catch (error) {
+    console.error('Error parsing profile from localStorage:', error)
+    return 'User'
+  }
+})
+
+// Get first letter of username for avatar
+const avatarLetter = computed(() => {
+  return username.value.charAt(0).toUpperCase()
+})
 
 const menuItems = [
   { href: '/profile', icon: UserCircleIcon, text: 'Edit profile' },
@@ -80,9 +97,15 @@ const closeDropdown = () => {
 }
 
 const signOut = () => {
-  // Implement sign out logic here
-  console.log('Signing out...')
+  // Clear user data from localStorage
+  localStorage.removeItem('token')
+  localStorage.removeItem('profile')
+
+  // Close dropdown
   closeDropdown()
+
+  // Redirect to login page
+  router.push('/signin')
 }
 
 const handleClickOutside = (event) => {

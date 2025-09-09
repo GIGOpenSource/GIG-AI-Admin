@@ -103,5 +103,20 @@ export default router
 
 router.beforeEach((to, from, next) => {
   document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
-  next()
+
+  // Check if user is authenticated
+  const token = localStorage.getItem('token')
+
+  // If user is not authenticated and trying to access protected routes
+  if (!token && to.path !== '/signin') {
+    next('/signin')
+  }
+  // If user is authenticated and trying to access login page, redirect to home
+  else if (token && to.path === '/signin') {
+    next('/')
+  }
+  // Otherwise, proceed normally
+  else {
+    next()
+  }
 })
