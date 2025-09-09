@@ -3,7 +3,7 @@ import { get, post, put, patch, del } from '@/lib/http'
 export const login = (data: { username: string, password: string, remember_me: boolean }) => post('/accounts/auth/login/', data, { skipAuth: true } as any)
 
 // get user
-export const getUser = (params: any) => get('/accounts/users/', params)
+export const getUser = (params: any) => get(`${params.page ? '/accounts/users/?page='+ params.page : '/accounts/users/'}`, params)
 
 // update user (password/status, etc.)
 export const updateUser = (id: string, data: any) => patch(`/accounts/users/${id}/`, data)

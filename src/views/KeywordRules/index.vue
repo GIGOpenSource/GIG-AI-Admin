@@ -49,6 +49,20 @@
             </TableRow>
           </TableBody>
         </Table>
+        <div class="mt-4" v-if="total > 0">
+          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
+            <PaginationContent v-slot="{ items }">
+              <PaginationPrevious />
+              <template v-for="(item, index) in items" :key="index">
+                <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
+                  {{ item.value }}
+                </PaginationItem>
+                <PaginationEllipsis v-else :index="index" />
+              </template>
+              <PaginationNext />
+            </PaginationContent>
+          </Pagination>
+        </div>
       </ComponentCard>
 
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
@@ -171,13 +185,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { getKeywordsConfigs, getKeywordsConfigsDetail, createKeywordsConfigs, updateKeywordsConfigs, deleteKeywordsConfigs } from '@/api/keywrods'
 import { getUser } from '@/api/index'
 
@@ -186,6 +201,11 @@ const currentPageTitle = ref('关键词规则')
 const rules = ref([])
 const loading = ref(false)
 const userOptions = ref([])
+
+// 分页参数
+const page = ref(1)
+const pageSize = ref(20)
+const total = ref(0)
 
 function getUserName(userId) {
   const user = userOptions.value.find(u => u.id == userId)
@@ -213,7 +233,10 @@ async function fetchUsers() {
 async function fetchRules() {
   try {
     loading.value = true
-    const res = await getKeywordsConfigs({})
+    const res = await getKeywordsConfigs({
+      page: page.value,
+      page_size: pageSize.value,
+    })
     const payload = (res && res.results) ? res.results : res
     const list = Array.isArray(payload) ? payload : []
     rules.value = list.map((r) => ({
@@ -226,13 +249,23 @@ async function fetchRules() {
       createdAt: r.created_at || r.createdAt || r.updated_at || r.updatedAt || '',
       enabled: (typeof r.enabled === 'boolean') ? r.enabled : (r.status ? r.status === '启用' : true),
     }))
+    total.value = res.count || 0
   } finally {
     loading.value = false
   }
 }
 
+// 监听页码变化，自动刷新列表
+watch(page, () => {
+  fetchRules()
+})
+
 onMounted(async () => {
-  await Promise.all([fetchUsers(), fetchRules()])
+  try {
+    await Promise.all([fetchUsers(), fetchRules()])
+  } catch (e) {
+    console.error('fetch users and rules failed', e)
+  }
 })
 
 const showAdd = ref(false)

@@ -63,7 +63,7 @@
         <div class="mt-4" v-if="total > 0">
           <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
             <PaginationContent v-slot="{ items }">
-              <PaginationFirst />
+              <!-- <PaginationFirst /> -->
               <PaginationPrevious />
               <template v-for="(item, index) in items" :key="index">
                 <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
@@ -72,7 +72,7 @@
                 <PaginationEllipsis v-else :index="index" />
               </template>
               <PaginationNext />
-              <PaginationLast />
+              <!-- <PaginationLast /> -->
             </PaginationContent>
           </Pagination>
         </div>
@@ -137,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
@@ -155,7 +155,7 @@ const accounts = ref([])
 
 // 分页参数
 const page = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(20)
 const total = ref(0)
 
 function onEdit(account) {
@@ -255,11 +255,15 @@ const getList = async ()=>{
     page: page.value,
     page_size: pageSize.value,
   })
-  console.log('res',res);
 
   accounts.value = res.results
   total.value = res.count
 }
+
+// 监听页码变化，自动刷新列表
+watch(page, () => {
+  getList()
+})
 
 // 初始化加载列表
 onMounted(()=>{
