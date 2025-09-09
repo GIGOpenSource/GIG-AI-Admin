@@ -1,5 +1,10 @@
 version: "3.9"
 
+networks:
+  clipai_net:
+    external: true
+    name: clipai_net
+
 services:
   app:
     build:
@@ -16,9 +21,11 @@ services:
       - .env
     environment:
       - NODE_ENV=development
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3000/api}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-/api}
     command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
     restart: unless-stopped
+    networks:
+      - clipai_net
 
 volumes:
   app_node_modules:
