@@ -18,5 +18,5 @@ export const createUser = (data: { username: string, password: string}) => post(
 export const getUserDetail = (id: string) => get(`/accounts/users/${id}/`)
 
 //数据统计
-export const getdate = () => get('/stats/overview/', {})
+export const getdate = (data:{page:number}) => get('/stats/overview/', {params:data})
 

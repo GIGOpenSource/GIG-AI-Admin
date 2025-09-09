@@ -5,40 +5,28 @@
       <ComponentCard>
         <div class="mb-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <!-- <div class="relative">
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="请搜索配置名称"
+            <div class="relative">
+              <input v-model="searchQuery" type="text" placeholder="请搜索配置名称"
                 class="w-80 h-10 pl-10 pr-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                @keyup.enter="handleSearchClick"
-              />
+                @keyup.enter="handleSearchClick" />
               <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
               </div>
             </div>
-            <Button
-              size="sm"
-              @click="handleSearchClick"
-              :disabled="isSearching"
-            >
+            <Button size="sm" @click="handleSearchClick" :disabled="isSearching">
               <span v-if="isSearching" class="mr-2">搜索中...</span>
               <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
               搜索
             </Button>
-            <Button
-              v-if="searchQuery"
-              size="sm"
-              variant="outline"
-              @click="clearSearch"
-              class="text-gray-500 hover:text-gray-700"
-            >
-              清除
-            </Button> -->
+            <Button size="sm" variant="outline" @click="clearSearch" class="text-gray-500 hover:text-gray-700">
+              重置
+            </Button>
           </div>
           <div class="flex gap-2">
             <Button size="sm" @click="openAdd">新增</Button>
@@ -58,56 +46,62 @@
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="(acc, index) in accounts" :key="acc.id">
-              <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
-              <!--  -->
-              <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.api_key_masked }}</TableCell>
-              <TableCell class="whitespace-nowrap">
+            <template v-if="accounts.length">
+              <TableRow v-for="(acc, index) in accounts" :key="acc.id">
+                <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
+                <!--  -->
+                <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.api_key_masked }}</TableCell>
+                <TableCell class="whitespace-nowrap">
 
-               <span
-                  :class="[
+                  <span :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
                     acc.enabled
                       ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
                       : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
-                  ]"
-                >
-                  {{ acc.enabled ?'正常':'禁用'}}
-                </span>
-              </TableCell>
-              <!--{{ item.priority }}  -->
-              <TableCell class="whitespace-nowrap">222</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.created_at }}</TableCell>
-              <TableCell class="text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
-                  <Button size="sm" variant="outline"
-                    :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
-                    @click="onDelete(acc)">
-                    删除
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
+                  ]">
+                    {{ acc.enabled ? '正常' : '禁用' }}
+                  </span>
+                </TableCell>
+                <!--{{ item.priority }}  -->
+                <TableCell class="whitespace-nowrap">222</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.created_at }}</TableCell>
+                <TableCell class="text-right whitespace-nowrap">
+                  <div class="flex items-center justify-end gap-2">
+                    <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
+                    <Button size="sm" variant="outline"
+                      :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
+                      @click="onDelete(acc)">
+                      删除
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </template>
+
+            <template v-else>
+              <TableRow>
+                <TableCell :colspan="6" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+              </TableRow>
+            </template>
           </TableBody>
         </Table>
-        <div class="mt-4 flex items-center justify-between">
-          <div class="text-sm text-gray-500">
-            共 {{ total }} 条记录，第 {{ page }} 页
-          </div>
-          <div class="flex items-center gap-2">
-            <Button size="sm" variant="outline" :disabled="!hasPrevious" @click="handlePrevious">
-              上一页
-            </Button>
-            <span class="px-3 py-1 text-sm bg-gray-100 rounded-md">
-              {{ page }}
-            </span>
-            <Button size="sm" variant="outline" :disabled="!hasNext" @click="handleNext">
-              下一页
-            </Button>
-          </div>
+        <div class="mt-4" v-if="total > 0">
+          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
+            <PaginationContent v-slot="{ items }">
+              <!-- <PaginationFirst>首页</PaginationFirst> -->
+              <PaginationPrevious/>
+              <template v-for="(item, index) in items" :key="index">
+                <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
+                  {{ item.value }}
+                </PaginationItem>
+                <PaginationEllipsis v-else :index="index" />
+              </template>
+              <PaginationNext/>
+              <!-- <PaginationLast>末页</PaginationLast> -->
+            </PaginationContent>
+          </Pagination>
         </div>
       </ComponentCard>
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
@@ -166,7 +160,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted ,nextTick} from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
@@ -181,8 +175,6 @@ const accounts = ref([])
 const page = ref(1)
 const pageSize = ref(20) // 默认一页20条
 const total = ref(0)
-const hasNext = ref(false)
-const hasPrevious = ref(false)
 const searchQuery = ref('')
 const searchTimeout = ref(null)
 const isSearching = ref(false)
@@ -374,27 +366,6 @@ const clearSearch = () => {
   fetchlist()
 }
 
-// 分页处理函数
-const handlePageChange = (newPage) => {
-  page.value = newPage
-  fetchlist()
-}
-
-// 上一页
-const handlePrevious = () => {
-  if (hasPrevious.value && page.value > 1) {
-    page.value = page.value - 1
-    fetchlist()
-  }
-}
-
-// 下一页
-const handleNext = () => {
-  if (hasNext.value) {
-    page.value = page.value + 1
-    fetchlist()
-  }
-}
 
 const fetchlist = async () => {
   try {
@@ -405,15 +376,19 @@ const fetchlist = async () => {
 
     accounts.value = res.results
     total.value = res.count
-    // 设置分页状态
-    hasNext.value = res.next !== null
-    hasPrevious.value = res.previous !== null
 
   } catch (error) {
     console.error('获取列表失败:', error)
     toast.error('获取列表失败')
   }
 }
+
+// 监听分页变化
+watch(page, (newPage) => {
+  console.log('Page changed to:', newPage)
+  fetchlist()
+})
+
 onMounted(() => {
   fetchlist()
 })

@@ -54,66 +54,46 @@
               <TableHead class="whitespace-nowrap">FB</TableHead>
               <TableHead class="whitespace-nowrap">发帖数</TableHead>
               <TableHead class="whitespace-nowrap">回复评论数</TableHead>
-              <TableHead class="whitespace-nowrap"></TableHead>
               <TableHead class="whitespace-nowrap">回复消息数</TableHead>
-              <TableHead class="whitespace-nowrap text-right">总曝光量 </TableHead>
+              <TableHead class="whitespace-nowrap">总曝光量 </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="acc in accounts" :key="acc.id">
+             <template v-if="accounts.length">
+                <TableRow v-for="acc in accounts" :key="acc.id">
               <TableCell class="whitespace-nowrap">{{ acc.date }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.account_count }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.ins }}</TableCell>
                <TableCell class="whitespace-nowrap">{{ acc.x }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.fb }}</TableCell>
-              <!-- <TableCell class="whitespace-nowrap">
-                <a
-                  :href="acc.homepage"
-                  target="_blank"
-                  rel="noopener"
-                  class="text-brand-600 hover:underline"
-                >
-                  {{ acc.homepage }}
-                </a>
-              </TableCell> -->
               <TableCell class="whitespace-nowrap">{{ acc.post_count }}</TableCell>
-              <TableCell class="max-w-[280px] truncate" :title="acc.model_name">{{ acc.reply_comment_count }} </TableCell>
-              <TableCell class="whitespace-nowrap">
-               {{ acc.reply_message_count }}
-              </TableCell>
-               <TableCell class="whitespace-nowrap">
-              </TableCell>
+               <TableCell class="whitespace-nowrap">{{ acc.reply_comment_count }}</TableCell>
+               <TableCell class="whitespace-nowrap">{{ acc.reply_message_count }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.total_impressions }}</TableCell>
-                 <!-- <TableCell class="whitespace-nowrap">111</TableCell> -->
-
             </TableRow>
+             </template>
+             <template v-else>
+              <TableRow>
+                <TableCell :colspan="6" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+              </TableRow>
+            </template>
           </TableBody>
         </Table>
-        <div class="mt-4 flex items-center justify-between">
-          <div class="text-sm text-gray-500">
-            共 {{ total }} 条记录，第 {{ page }} 页
-          </div>
-          <div class="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              :disabled="!hasPrevious"
-              @click="handlePrevious"
-            >
-              上一页
-            </Button>
-            <span class="px-3 py-1 text-sm bg-gray-100 rounded-md">
-              {{ page }}
-            </span>
-            <Button
-              size="sm"
-              variant="outline"
-              :disabled="!hasNext"
-              @click="handleNext"
-            >
-              下一页
-            </Button>
-          </div>
+        <div class="mt-4" v-if="total > 0">
+          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
+            <PaginationContent v-slot="{ items }">
+              <!-- <PaginationFirst>首页</PaginationFirst> -->
+              <PaginationPrevious/>
+              <template v-for="(item, index) in items" :key="index">
+                <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
+                  {{ item.value }}
+                </PaginationItem>
+                <PaginationEllipsis v-else :index="index" />
+              </template>
+              <PaginationNext/>
+              <!-- <PaginationLast>末页</PaginationLast> -->
+            </PaginationContent>
+          </Pagination>
         </div>
       </ComponentCard>
     </div>
@@ -121,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
@@ -134,10 +114,8 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, Pag
 const currentPageTitle = ref('数据统计')
 const accounts = ref([])
 const page = ref(1)
-const pageSize = ref(20) // 默认一页20条
+const pageSize = ref(20) // 与AIAccounts保持一致
 const total = ref(0)
-const hasNext = ref(false)
-const hasPrevious = ref(false)
 const searchQuery = ref('')
 const searchTimeout = ref(null)
 const isSearching = ref(false)
@@ -337,53 +315,29 @@ const clearSearch = () => {
   fetchlist()
 }
 
-// 分页处理函数
-const handlePageChange = (newPage) => {
-  page.value = newPage
-  fetchlist()
-}
-
-// 上一页
-const handlePrevious = () => {
-  if (hasPrevious.value && page.value > 1) {
-    page.value = page.value - 1
-    fetchlist()
-  }
-}
-
-// 下一页
-const handleNext = () => {
-  if (hasNext.value) {
-    page.value = page.value + 1
-    fetchlist()
-  }
-}
 
 const fetchlist = async () => {
   try {
     let res = await getdate({
       page: page.value,
-      pageSize: pageSize.value
+      // page_size: pageSize.value
     })
 
-    // 假设API返回格式与AIConfig一致
-    if (res.results) {
-      accounts.value = res.results
-      total.value = res.count
-      hasNext.value = res.next !== null
-      hasPrevious.value = res.previous !== null
-    } else {
-      // 如果API返回格式不同，需要根据实际情况调整
-      accounts.value = res
-      total.value = res.length
-      hasNext.value = false
-      hasPrevious.value = false
-    }
+    // 与AIAccounts保持一致的API返回格式处理
+    accounts.value = res.results || res
+    total.value = res.count || res.length || 0
+    console.log('Data fetched successfully, total:', total.value)
   } catch (error) {
     console.error('获取数据统计失败:', error)
     toast.error('获取数据统计失败')
   }
 }
+// 监听分页变化
+watch(page, (newPage) => {
+  console.log('Page changed to:', newPage)
+  fetchlist()
+})
+
 onMounted(() => {
   fetchlist()
 })
