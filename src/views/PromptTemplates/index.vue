@@ -114,7 +114,7 @@
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">所属用户<span
                     class="text-error-500">*</span></label>
-                <select v-model="form.owner"
+                <select v-model="form.owner_id"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                   <option value="" disabled>请选择用户</option>
                   <option v-for="u in userOptions" :key="u.id" :value="u.id">{{ u.name }}</option>
@@ -208,25 +208,12 @@ async function fetchTemplates() {
         id: item.id,
         name: item.name,
         type: item.scene || item.type,
-        user: item.owner || item.user,
+        user: item.owner_detail?.username || item.user,
         isActive: item.enabled !== undefined ? item.enabled : item.isActive,
         content: item.content,
         createdAt: item.createdAt || item.created_at,
       })) : []
       total.value = res.count || 0
-    } else {
-      // 兼容旧格式
-      const list = Array.isArray(res) ? res : []
-      templates.value = list.map((item) => ({
-        id: item.id,
-        name: item.name,
-        type: item.scene || item.type,
-        user: item.owner || item.user,
-        isActive: item.enabled !== undefined ? item.enabled : item.isActive,
-        content: item.content,
-        createdAt: item.createdAt || item.created_at,
-      }))
-      total.value = list.length
     }
   } catch (error) {
     console.error('Failed to fetch templates:', error)
@@ -243,7 +230,7 @@ const form = ref({
   id: '',
   name: '',
   scene: '',
-  owner: '',
+  owner_id: '',
   enabled: true,
   content: '',
   createdAt: '',
@@ -269,7 +256,7 @@ async function openEdit(item) {
       id: detail.id ?? item.id,
       name: detail.name ?? item.name,
       scene: detail.scene ?? item.type,
-      owner: detail.owner ?? item.user,
+      owner_id: detail.owner_id ?? detail.owner ?? item.user,
       enabled: typeof detail.enabled === 'boolean' ? detail.enabled : (typeof detail.isActive === 'boolean' ? detail.isActive : item.isActive),
       content: detail.content ?? item.content,
       createdAt: detail.createdAt ?? detail.created_at ?? item.createdAt,
@@ -283,7 +270,7 @@ async function openEdit(item) {
       id: item.id,
       name: item.name,
       scene: item.type,
-      owner: item.user,
+      owner_id: item.user,
       enabled: item.isActive,
       content: item.content,
       createdAt: item.createdAt,
@@ -305,7 +292,7 @@ function resetForm() {
     id: '',
     name: '',
     scene: '',
-    owner: '',
+    owner_id: '',
     enabled: true,
     content: '',
     createdAt: '',
@@ -325,7 +312,7 @@ async function submitForm() {
     return
   }
 
-  if (!form.value.owner || form.value.owner === '') {
+  if (!form.value.owner_id || form.value.owner_id === '') {
     toast.error('请选择所属用户', {
       description: '所属用户不能为空'
     })
@@ -344,7 +331,7 @@ async function submitForm() {
   try {
     // 准备提交数据
     const submitData = {
-      owner: form.value.owner,
+      owner_id: form.value.owner_id,
       scene: form.value.scene,
       name: form.value.name.trim(),
       content: form.value.content.trim(),

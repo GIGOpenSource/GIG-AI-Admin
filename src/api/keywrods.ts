@@ -4,7 +4,7 @@ export const getKeywordsConfigs = (params:any) => get(`${params?.page ? '/keywor
 
 export const getKeywordsConfigsDetail = (id:string) => get(`/keywords/configs/${id}/`)
 
-export const createKeywordsConfigs = (data:any) => post('/keywords/configs/', data)
+export const createKeywordsConfigs = (data:any) => post('/keywords/configs/admin_create/', data)
 
 export const updateKeywordsConfigs = (id:string, data:any) => put(`/keywords/configs/${id}/`, data)
 

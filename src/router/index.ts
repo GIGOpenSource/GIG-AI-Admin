@@ -102,7 +102,7 @@ const router = createRouter({
 export default router
 
 router.beforeEach((to, from, next) => {
-  document.title = `${to.meta.title} | AI Admin`
+  document.title = `${to.meta.title} | AiDS`
 
   // Check if user is authenticated
   const token = localStorage.getItem('token')

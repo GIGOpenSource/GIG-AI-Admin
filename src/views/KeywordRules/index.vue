@@ -25,7 +25,7 @@
                <TableRow v-for="item in rules" :key="item.id">
               <TableCell class="whitespace-nowrap">{{ item.id }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ item.name || '-' }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ getUserName(item.owner) }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.owner_detail?.username || '-' }}</TableCell>
               <TableCell class="max-w-[320px] truncate" :title="item.keywords.join(', ')">{{ item.keywords.join(', ') }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ getMatchModeText(item.match_mode) }}</TableCell>
               <TableCell class="whitespace-nowrap">
@@ -85,7 +85,7 @@
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
-                <select v-model="form.owner"
+                <select v-model="form.owner_id"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                   <option value="" disabled>请选择用户</option>
                   <option v-for="u in userOptions" :key="u.id" :value="u.id">{{ u.name }}</option>
@@ -143,7 +143,7 @@
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span class="text-error-500">*</span></label>
-                <select v-model="editForm.owner"
+                <select v-model="editForm.owner_id"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                   <option value="" disabled>请选择用户</option>
                   <option v-for="u in userOptions" :key="u.id" :value="u.id">{{ u.name }}</option>
@@ -202,7 +202,6 @@ import Modal from '@/components/ui/Modal.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { getKeywordsConfigs, getKeywordsConfigsDetail, createKeywordsConfigs, updateKeywordsConfigs, deleteKeywordsConfigs } from '@/api/keywrods'
-import { getUser } from '@/api/index'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
 
@@ -210,17 +209,12 @@ const currentPageTitle = ref('关键词规则')
 
 const rules = ref([])
 const loading = ref(false)
-const userOptions = ref([])
 
 // 分页参数
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 
-function getUserName(userId) {
-  const user = userOptions.value.find(u => u.id == userId)
-  return user ? user.name : `用户${userId}`
-}
 
 function getMatchModeText(matchMode) {
   const modeMap = {
@@ -231,22 +225,6 @@ function getMatchModeText(matchMode) {
   return modeMap[matchMode] || '任意匹配'
 }
 
-async function fetchUsers() {
-  try {
-    const res = await getUser({})
-    const list = (res && res.results) ? res.results : res
-    userOptions.value = Array.isArray(list) ? list.map((u) => ({
-      id: u.id ?? u.pk ?? u.uuid,
-      name: u.username || u.name || u.email || `用户${u.id}`,
-    })) : []
-  } catch (error) {
-    console.error('Failed to fetch users:', error)
-    toast.error('获取用户列表失败', {
-      description: error.response?.data?.message || error.message || '获取用户列表时发生错误'
-    })
-    userOptions.value = []
-  }
-}
 
 async function fetchRules() {
   try {
@@ -261,6 +239,7 @@ async function fetchRules() {
       id: r.id,
       name: r.name || '',
       owner: (r.owner != null) ? r.owner : (r.user_id ?? r.target_user ?? r.user ?? r.userId ?? ''),
+      owner_detail: r.owner_detail || null,
       provider: r.provider || r.platform || 'twitter',
       keywords: Array.isArray(r.include_keywords) ? r.include_keywords : (Array.isArray(r.keywords) ? r.keywords : (typeof r.include_keywords === 'string' ? r.include_keywords.split(',').map((s) => s.trim()).filter(Boolean) : (typeof r.keywords === 'string' ? r.keywords.split(',').map((s) => s.trim()).filter(Boolean) : []))),
       match_mode: r.match_mode || 'any',
@@ -286,9 +265,9 @@ watch(page, () => {
 
 onMounted(async () => {
   try {
-    await Promise.all([fetchUsers(), fetchRules()])
+    await fetchRules()
   } catch (e) {
-    console.error('fetch users and rules failed', e)
+    console.error('fetch rules failed', e)
   }
 })
 
@@ -296,7 +275,7 @@ const showAdd = ref(false)
 const form = ref({
   name: '',
   provider: 'twitter',
-  owner: '',
+  owner_id: '',
   include_keywords: '',
   match_mode: 'any',
   enabled: true,
@@ -307,7 +286,7 @@ const editForm = ref({
   id: 0,
   name: '',
   provider: 'twitter',
-  owner: '',
+  owner_id: '',
   include_keywords: '',
   match_mode: 'any',
   enabled: true,
@@ -319,7 +298,7 @@ function openAdd() {
 
 function closeAdd() {
   showAdd.value = false
-  form.value = { name: '', provider: 'twitter', owner: '', include_keywords: '', match_mode: 'any', enabled: true }
+  form.value = { name: '', provider: 'twitter', owner_id: '', include_keywords: '', match_mode: 'any', enabled: true }
 }
 
 async function submitAdd() {
@@ -330,7 +309,7 @@ async function submitAdd() {
     })
     return
   }
-  if (!form.value.owner) {
+  if (!form.value.owner_id) {
     toast.error('目标用户不能为空', {
       description: '请选择目标用户'
     })
@@ -346,7 +325,7 @@ async function submitAdd() {
   const keywordsArray = form.value.include_keywords.split(',').map(s => s.trim()).filter(Boolean)
   const payload = {
     name: form.value.name,
-    owner: form.value.owner,
+    owner_id: form.value.owner_id,
     provider: form.value.provider,
     include_keywords: keywordsArray,
     match_mode: form.value.match_mode,
@@ -387,7 +366,7 @@ async function onEdit(item) {
     const normalized = {
       id: r.id ?? item.id,
       name: r.name ?? item.name ?? '',
-      owner: (r.owner != null) ? r.owner : (r.user_id ?? r.target_user ?? r.user ?? r.userId ?? item.owner ?? ''),
+      owner_id: (r.owner_id != null) ? r.owner_id : (r.owner != null) ? r.owner : (r.user_id ?? r.target_user ?? r.user ?? r.userId ?? item.owner ?? ''),
       provider: r.provider ?? r.platform ?? item.provider ?? 'twitter',
       include_keywords: Array.isArray(r.include_keywords)
         ? r.include_keywords.join(', ')
@@ -420,7 +399,7 @@ async function submitEdit() {
     })
     return
   }
-  if (!editForm.value.owner) {
+  if (!editForm.value.owner_id) {
     toast.error('目标用户不能为空', {
       description: '请选择目标用户'
     })
@@ -436,7 +415,7 @@ async function submitEdit() {
   const kw = editForm.value.include_keywords.split(',').map(s => s.trim()).filter(Boolean)
   const payload = {
     name: editForm.value.name,
-    owner: editForm.value.owner,
+    owner_id: editForm.value.owner_id,
     provider: editForm.value.provider,
     include_keywords: kw,
     match_mode: editForm.value.match_mode,
