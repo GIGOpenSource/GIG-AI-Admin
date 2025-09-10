@@ -126,57 +126,6 @@
           </Pagination>
         </div>
       </ComponentCard>
-      <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
-        <template #body>
-          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑服务配置' : '新增服务配置' }}</h3>
-            <form @submit.prevent="submitAdd" class="space-y-4">
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">配置名称<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.name" type="text" placeholder="如：OpenAI GPT-4配置"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台名称<span
-                    class="text-error-500">*</span></label>
-                <select v-model="form.provider"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="">请选择平台</option>
-                  <option :value="item.value" v-for="(item, index) in type" :key="index">{{ item.title }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">key<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.api_key" type="password" placeholder="请输入key"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模型名称<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.model" type="text" placeholder="如：gpt-4、claude-3-sonnet"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">优先级</label>
-                <input v-model="form.priority" type="number" placeholder="如：8"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <div class="flex justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" @click="closeAdd" :disabled="isLoading">取消</Button>
-                <Button type="submit" :disabled="isLoading">
-                  <span v-if="isLoading" class="mr-2">处理中...</span>
-                  {{ isEditMode ? '更新' : '保存' }}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </template>
-      </Modal>
 
       <!-- 删除确认气泡弹窗 -->
       <DeleteConfirmDialog :isOpen="showDeleteDialog" :title="'删除'" :description="'确定要删除吗？此操作不可撤销。'"
@@ -192,7 +141,6 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
-import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 // import { getlist, addlist, details, updatelist, deletelist } from '@/api/aiCofig.ts'
 import { getAccount, getConfigs,deletePlatform,deleteAccount} from '@/api/platform.ts'
@@ -200,6 +148,9 @@ import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
 const currentPageTitle = ref('平台账号配置')
 const accounts = ref([])
 const page = ref(1)
@@ -230,7 +181,11 @@ const type = ref([
   },
 
 ])
-async function onEdit(account) {
+
+function openAdd (){
+  router.push('/platform-accounts/new')
+}
+ function onEdit(account) {
 
   // 跳转到编辑页面并携带查询参数
   router.push({
@@ -281,121 +236,6 @@ function closeDeleteDialog() {
   showDeleteDialog.value = false
   itemToDelete.value = null
   deleteLoading.value = false
-}
-
-const showAdd = ref(false)
-const isEditMode = ref(false)
-const editingId = ref(null)
-const isLoading = ref(false)
-
-// 删除确认弹窗相关状态
-const showDeleteDialog = ref(false)
-const deleteLoading = ref(false)
-const itemToDelete = ref(null)
-const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
-const form = ref({
-  name: '',
-  provider: '',
-  priority: '',
-  api_key: '',
-  model: ''
-})
-
-function openAdd() {
-  // 重置为新增模式
-  isEditMode.value = false
-  editingId.value = null
-  form.value = {
-    name: '',
-    provider: '',
-    priority: '',
-    api_key: '',
-    model: ''
-  }
-  showAdd.value = true
-}
-
-function closeAdd() {
-  showAdd.value = false
-  isEditMode.value = false
-  editingId.value = null
-  form.value = {
-    name: '',
-    provider: '',
-    priority: '',
-    api_key: '',
-    model: ''
-  }
-}
-
-async function submitAdd() {
-  // 防止重复提交
-  if (isLoading.value) return
-
-  // 表单验证 - 逐个检查并提示具体字段
-  if (!form.value.name || form.value.name.trim() === '') {
-    toast.error('请填写配置名称', {
-      description: '配置名称不能为空'
-    })
-    return
-  }
-
-  if (!form.value.provider || form.value.provider === '') {
-    toast.error('请选择平台名称', {
-      description: '平台名称不能为空'
-    })
-    return
-  }
-
-  if (!form.value.api_key || form.value.api_key.trim() === '') {
-    toast.error('请填写API Key', {
-      description: 'API Key不能为空'
-    })
-    return
-  }
-
-  if (!form.value.model || form.value.model.trim() === '') {
-    toast.error('请填写模型名称', {
-      description: '模型名称不能为空'
-    })
-    return
-  }
-
-  isLoading.value = true
-
-  try {
-    // 准备提交数据
-    const submitData = {
-      name: form.value.name.trim(),
-      provider: form.value.provider,
-      priority: form.value.priority,
-      api_key: form.value.api_key.trim(),
-      model: form.value.model.trim()
-    }
-
-    // 根据模式调用不同的接口
-    if (isEditMode.value) {
-      // 编辑模式：调用更新接口
-      await updatelist(editingId.value, submitData)
-      toast.success('配置更新成功')
-    } else {
-      // 新增模式：调用新增接口
-      await addlist(submitData)
-      toast.success('配置新增成功')
-    }
-
-    // 成功后关闭弹窗并刷新列表
-    closeAdd()
-    await fetchlist()
-
-  } catch (error) {
-    console.error(isEditMode.value ? '更新失败:' : '新增失败:', error)
-    toast.error(isEditMode.value ? '更新失败' : '新增失败', {
-      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新配置时发生错误' : '新增配置时发生错误')
-    })
-  } finally {
-    isLoading.value = false
-  }
 }
 
 
