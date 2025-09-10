@@ -65,13 +65,14 @@
               <!-- API版本 -->
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  API版本
+                  API版本 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.api_version"
                   type="text"
                   placeholder="如：1.0、2.1"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  required
                 />
               </div>
             </div>
@@ -80,26 +81,28 @@
               <!-- 回调地址 -->
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  回调地址
+                  回调地址 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.redirect_uris"
                   type="url"
                   placeholder="https://example.com/callback"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  required
                 />
               </div>
 
               <!-- App ID -->
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  App ID / Client ID
+                  App ID / Client ID <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.app_id"
                   type="text"
                   placeholder="请输入App ID或Client ID"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  required
                 />
               </div>
             </div>
@@ -108,26 +111,28 @@
               <!-- App 密钥 -->
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  App 密钥 / Client Secret
+                  App 密钥 / Client Secret <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.app_secret"
                   type="password"
                   placeholder="请输入App密钥或Client Secret"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  required
                 />
               </div>
 
               <!-- 读取使用Token -->
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  读取使用Token
+                  读取使用Token <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.bearer_token"
                   type="password"
                   placeholder="根据平台要求输入"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  required
                 />
               </div>
             </div>
@@ -165,6 +170,7 @@
                   type="text"
                   placeholder="根据平台要求输入"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  :readonly="form.provider === 'twitter'"
                 />
               </div>
             </div>
@@ -173,26 +179,28 @@
               <!-- 输入Token -->
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  输入Token
+                  输入Token <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.account_access_token"
                   type="password"
                   placeholder="根据平台要求输入"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  required
                 />
               </div>
 
               <!-- 输入密钥 -->
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  输入密钥
+                  输入密钥 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.account_refresh_token"
                   type="password"
                   placeholder="根据平台要求输入"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  required
                 />
               </div>
             </div>
@@ -248,7 +256,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
-import { createPlatform, createAccount } from '@/api/platform.ts'
+import { createPlatform, createAccount, getAccountById, getConfigById } from '@/api/platform.ts'
 import { toast } from 'vue-sonner'
 
 const route = useRoute()
@@ -257,7 +265,7 @@ const router = useRouter()
 // 页面数据
 const loading = ref(false)
 const userList = ref([])
-const isEditMode = computed(() => !!route.params.id)
+const isEditMode = computed(() => !!route.query.id)
 
 const currentPageTitle = computed(() =>
   isEditMode.value ? '编辑平台账户配置' : '新增平台账户配置'
@@ -303,6 +311,26 @@ const handleSubmit = async () => {
   }
   if (!form.value.is_default) {
     toast.error('请选择是否默认')
+    return
+  }
+  if (!form.value.api_version) {
+    toast.error('请填写API版本')
+    return
+  }
+  if (!form.value.redirect_uris) {
+    toast.error('请填写回调地址')
+    return
+  }
+  if (!form.value.app_id) {
+    toast.error('请填写App ID或Client ID')
+    return
+  }
+  if (!form.value.app_secret) {
+    toast.error('请填写App密钥或Client Secret')
+    return
+  }
+  if (!form.value.bearer_token) {
+    toast.error('请填写读取使用Token')
     return
   }
   if (!form.value.account_external_username) {
@@ -362,7 +390,7 @@ const handleSubmit = async () => {
     toast.success('配置创建成功')
 
     // 保存成功后返回列表页
-    // router.push('/platform-accounts')
+    router.push('/platform-accounts')
   } catch (error) {
     console.error('保存失败:', error)
     toast.error('保存失败', {
@@ -401,33 +429,43 @@ const getUserList = async () => {
 // 加载编辑数据
 const loadEditData = async () => {
   if (!isEditMode.value) return
+  const id = String(route.query.id || '')
+  const configId = String(route.query.config || '')
 
   loading.value = true
   try {
-    // TODO: 调用API获取数据
-    // const data = await getPlatformAccount(route.params.id)
-    // form.value = { ...data }
+    const [accountRes, configRes] = await Promise.all([
+      id ? getAccountById(id) : Promise.resolve(null),
+      configId ? getConfigById(configId) : Promise.resolve(null)
+    ])
 
-    // 模拟数据
-    form.value = {
-      // 平台配置信息
-      provider: 'openai',
-      name: 'OpenAI GPT-4 项目',
-      is_default: 'true',
-      api_version: 'v1',
-      redirect_uris: 'https://example.com/callback',
-      app_id: 'app_123456789',
-      app_secret: 'sk-***',
-      bearer_token: 'bearer_***',
-      // 用户信息
-      account_external_username: 'john_doe',
-      account_external_user_id: 'user_123456',
-      account_access_token: 'access_***',
-      account_refresh_token: 'refresh_***'
+    // 渲染平台配置
+    if (configRes) {
+      form.value.provider = configRes.provider || ''
+      form.value.name = configRes.name || ''
+      form.value.is_default = String(!!configRes.is_default)
+      form.value.api_version = configRes.api_version || ''
+      form.value.redirect_uris = configRes.redirect_uris || ''
+      // 兼容 twitter 与其他平台的ID/secret
+      form.value.app_id = configRes.client_id || configRes.app_id || ''
+      form.value.app_secret = configRes.client_secret || configRes.app_secret || ''
+      form.value.bearer_token = configRes.bearer_token || ''
+    }
+
+    // 渲染账户信息
+    if (accountRes) {
+      form.value.account_external_username = accountRes.account_external_username || ''
+      form.value.account_external_user_id = accountRes.account_external_user_id || ''
+      form.value.account_access_token = accountRes.account_access_token || ''
+      form.value.account_refresh_token = accountRes.account_refresh_token || ''
+      // 若接口返回归属用户
+      if (accountRes.owner) {
+        form.value.owner = accountRes.owner
+      }
     }
   } catch (error) {
     console.error('加载数据失败:', error)
-    // TODO: 显示错误提示
+    toast.error('加载数据失败', { description: error?.response?.data?.message || error.message })
   } finally {
     loading.value = false
   }

@@ -244,29 +244,12 @@ const formdata = {
   custom: '自定义OpenAl兼容接口'
 }
 async function onEdit(account) {
-  try {
-    // 获取详细信息
-    const detailData = await details(account.id)
 
-    // pe
-    isEditMode.value = true
-    editingId.value = account.id
-
-    // 填充表单数据
-    form.value = {
-      name: detailData.name || '',
-      provider: detailData.provider || '',
-      priority: detailData.priority || '',
-      api_key: detailData.api_key_masked || '',
-      model: detailData.model || ''
-    }
-
-    // 打开弹窗
-    showAdd.value = true
-  } catch (error) {
-    console.error('获取详情失败:', error)
-    toast.error('获取详情失败')
-  }
+  // 跳转到编辑页面并携带查询参数
+  router.push({
+    path: '/platform-accounts/edit',
+    query: { id: account.account_id, config: account.config }
+  })
 }
 
 function onDelete(account, event) {

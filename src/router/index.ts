@@ -72,7 +72,7 @@ const router = createRouter({
       },
     },
     {
-      path: '/platform-accounts/:id/edit',
+      path: '/platform-accounts/edit',
       name: 'Platform Accounts Edit',
       component: () => import('../views/PlatformAccounts/Form.vue'),
       meta: {
