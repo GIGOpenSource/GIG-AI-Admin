@@ -70,13 +70,13 @@
                 <TableCell class="whitespace-nowrap">{{ acc.is_default ? '是' : '否' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.api_version || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.redirect_uris || '--' }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.app_id || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.client_id || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.refresh_token || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.bearer_token_masked || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.external_user_id || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.external_username || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.access_token || '--' }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.updated_at || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ formatTime(acc.updated_at) || '--' }}</TableCell>
                 <!-- <TableCell class="whitespace-nowrap">{{ acc.status }}</TableCell> -->
                 <TableCell class="whitespace-nowrap">
 
@@ -143,14 +143,17 @@ import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 // import { getlist, addlist, details, updatelist, deletelist } from '@/api/aiCofig.ts'
-import { getAccount, getConfigs,deletePlatform,deleteAccount} from '@/api/platform.ts'
+import { getAccount, getConfigs, deletePlatform, deleteAccount } from '@/api/platform.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
 import { useRouter } from 'vue-router'
 const router = useRouter()
-
+const itemToDelete = ref({})
+const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
+const showDeleteDialog = ref(false)
+const deleteLoading = ref(false)
 const currentPageTitle = ref('平台账号配置')
 const accounts = ref([])
 const page = ref(1)
@@ -182,10 +185,10 @@ const type = ref([
 
 ])
 
-function openAdd (){
+function openAdd() {
   router.push('/platform-accounts/new')
 }
- function onEdit(account) {
+function onEdit(account) {
 
   // 跳转到编辑页面并携带查询参数
   router.push({
@@ -196,8 +199,13 @@ function openAdd (){
 
 function onDelete(account, event) {
   itemToDelete.value = account
+  console.log(event, 'evet');
+
   // 获取触发按钮的位置信息
   const buttonRect = event.target.getBoundingClientRect()
+
+  console.log(buttonRect, 'buttonRect');
+
   triggerRect.value = {
     top: buttonRect.top,
     left: buttonRect.left,
@@ -261,7 +269,7 @@ const clearSearch = () => {
 }
 const fetchlist = async () => {
   try {
-    const accountResponse = await getAccount({page: page.value})
+    const accountResponse = await getAccount({ page: page.value })
     const accountData = accountResponse.results || accountResponse || []
     const configsResponse = await getConfigs({
       search: searchQuery.value,
@@ -302,8 +310,9 @@ const fetchlist = async () => {
     let filteredAccounts = mergedAccounts
     accounts.value = filteredAccounts
     total.value = accountResponse.count
-    if(configsData.length == 0 || accountData.length == 0){
-           accounts.value = []
+    if (configsData.length == 0 || accountData.length == 0) {
+      accounts.value = []
+      total.value = 0
     }
   } catch (error) {
     console.error('获取列表失败:', error)
