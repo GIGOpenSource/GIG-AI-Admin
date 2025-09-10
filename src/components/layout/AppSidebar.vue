@@ -268,7 +268,24 @@ const menu = () =>{
     menuGroups.value = menuGroups.value
    }
 }
-const isActive = (path) => route.path === path;
+const isActive = (path) => {
+  // 检查当前路径是否完全匹配
+  if (route.path === path) {
+    return true;
+  }
+
+  // 检查当前路径是否是子路由，如果是则高亮父菜单
+  if (route.meta && route.meta.parentRoute && route.meta.parentRoute === path) {
+    return true;
+  }
+
+  // 检查当前路径是否以该路径开头（用于处理子路由）
+  if (route.path.startsWith(path + '/')) {
+    return true;
+  }
+
+  return false;
+};
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
   const key = `${groupIndex}-${itemIndex}`;

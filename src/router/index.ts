@@ -63,6 +63,24 @@ const router = createRouter({
       },
     },
     {
+      path: '/platform-accounts/new',
+      name: 'Platform Accounts New',
+      component: () => import('../views/PlatformAccounts/Form.vue'),
+      meta: {
+        title: 'New Platform Account',
+        parentRoute: '/platform-accounts',
+      },
+    },
+    {
+      path: '/platform-accounts/:id/edit',
+      name: 'Platform Accounts Edit',
+      component: () => import('../views/PlatformAccounts/Form.vue'),
+      meta: {
+        title: 'Edit Platform Account',
+        parentRoute: '/platform-accounts',
+      },
+    },
+    {
       path: '/blank',
       name: 'Blank',
       component: () => import('../views/Pages/BlankPage.vue'),
