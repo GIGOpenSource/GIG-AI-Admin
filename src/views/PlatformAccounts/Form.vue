@@ -152,7 +152,7 @@
                   用户名 <span class="text-error-500">*</span>
                 </label>
                 <input
-                  v-model="form.account_external_username"
+                  v-model="form.external_username"
                   type="text"
                   placeholder="请输入用户名"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
@@ -166,7 +166,7 @@
                   账户UID
                 </label>
                 <input
-                  v-model="form.account_external_user_id"
+                  v-model="form.external_user_id"
                   type="text"
                   placeholder="根据平台要求输入"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
@@ -182,7 +182,7 @@
                   输入Token <span class="text-error-500">*</span>
                 </label>
                 <input
-                  v-model="form.account_access_token"
+                  v-model="form.access_token"
                   type="password"
                   placeholder="根据平台要求输入"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
@@ -196,7 +196,7 @@
                   输入密钥 <span class="text-error-500">*</span>
                 </label>
                 <input
-                  v-model="form.account_refresh_token"
+                  v-model="form.refresh_token"
                   type="password"
                   placeholder="根据平台要求输入"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
@@ -258,6 +258,7 @@ import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import { createPlatform, createAccount, getAccountById, getConfigById } from '@/api/platform.ts'
 import { toast } from 'vue-sonner'
+import { getUser } from '@/api/index.ts'
 
 const route = useRoute()
 const router = useRouter()
@@ -273,6 +274,7 @@ const currentPageTitle = computed(() =>
 
 // 获取当前用户信息
 const currentUser = JSON.parse(localStorage.getItem('profile') || '{}')
+const currentUserId = currentUser?.id || currentUser?.user_id || ''
 
 // 判断是否为admin角色
 const isAdminRole = computed(() => {
@@ -291,10 +293,10 @@ const form = ref({
   app_secret: '',
   bearer_token: '',
   // 用户信息
-  account_external_username: '',
-  account_external_user_id: '',
-  account_access_token: '',
-  account_refresh_token: '',
+  external_username: '',
+  external_user_id: '',
+  access_token: '',
+  refresh_token: '',
   owner: ''
 })
 
@@ -333,12 +335,20 @@ const handleSubmit = async () => {
     toast.error('请填写读取使用Token')
     return
   }
-  if (!form.value.account_external_username) {
+  if (!form.value.external_username) {
     toast.error('请填写用户名')
     return
   }
   if (isAdminRole.value && !form.value.owner) {
     toast.error('请选择所属用户')
+    return
+  }
+  if (!form.value.access_token) {
+    toast.error('请填写输入Token')
+    return
+  }
+  if (!form.value.refresh_token) {
+    toast.error('请填写输入密钥')
     return
   }
 
@@ -359,19 +369,20 @@ const handleSubmit = async () => {
     // 根据平台类型设置不同的ID和Secret字段
     if (form.value.provider === 'twitter') {
       platformData.client_id = form.value.app_id
-      platformData.client_secret = form.value.app_secret
     } else {
       platformData.app_id = form.value.app_id
-      platformData.app_secret = form.value.app_secret
     }
+    // 新增时同时传递 client_secret 与 app_secret，取值均为 form.app_secret
+    platformData.client_secret = form.value.app_secret
+    platformData.app_secret = form.value.app_secret
 
     // 准备账户数据
     const accountData = {
-      account_external_username: form.value.account_external_username,
-      account_external_user_id: form.value.account_external_user_id,
-      account_access_token: form.value.account_access_token,
-      account_refresh_token: form.value.account_refresh_token,
-      owner: form.value.owner
+      external_username: form.value.external_username,
+      external_user_id: form.value.external_user_id,
+      access_token: form.value.access_token,
+      refresh_token: form.value.refresh_token,
+      owner: isAdminRole.value ? form.value.owner : currentUserId
     }
 
     // 调用API创建平台配置
@@ -409,17 +420,9 @@ const handleCancel = () => {
 // 获取用户列表
 const getUserList = async () => {
   try {
-    // TODO: 调用API获取用户列表
-    // const response = await getUsers()
-    // userList.value = response.data
-
-    // 模拟数据
-    userList.value = [
-      { id: 1, username: 'admin', email: 'admin@example.com' },
-      { id: 2, username: 'user1', email: 'user1@example.com' },
-      { id: 3, username: 'user2', email: 'user2@example.com' },
-      { id: 4, username: 'manager', email: 'manager@example.com' }
-    ]
+    const response = await getUser({ page: 1, page_size: 100 })
+    const results = response?.results || response || []
+    userList.value = results
   } catch (error) {
     console.error('获取用户列表失败:', error)
     // TODO: 显示错误提示
@@ -454,10 +457,10 @@ const loadEditData = async () => {
 
     // 渲染账户信息
     if (accountRes) {
-      form.value.account_external_username = accountRes.account_external_username || ''
-      form.value.account_external_user_id = accountRes.account_external_user_id || ''
-      form.value.account_access_token = accountRes.account_access_token || ''
-      form.value.account_refresh_token = accountRes.account_refresh_token || ''
+      form.value.external_username = accountRes.external_username || ''
+      form.value.external_user_id = accountRes.external_user_id || ''
+      form.value.access_token = accountRes.access_token || ''
+      form.value.refresh_token = accountRes.refresh_token || ''
       // 若接口返回归属用户
       if (accountRes.owner) {
         form.value.owner = accountRes.owner
