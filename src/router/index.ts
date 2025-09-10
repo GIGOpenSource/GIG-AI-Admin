@@ -114,6 +114,14 @@ const router = createRouter({
     //     title: 'Signup',
     //   },
     // },
+    {
+      path: '/profile',
+      name: 'User Profile',
+      component: () => import('../views/Others/UserProfile.vue'),
+      meta: {
+        title: 'User Profile',
+      },
+    },
   ],
 })
 

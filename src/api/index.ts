@@ -20,3 +20,5 @@ export const getUserDetail = (id: string) => get(`/accounts/users/${id}/`)
 //数据统计
 export const getdate = (data:{page:number}) => get('/stats/overview/', {params:data})
 
+// 修改密码
+export const changePassword = (data: { old_password: string, new_password: string }) => post('/accounts/auth/change-password/', data)

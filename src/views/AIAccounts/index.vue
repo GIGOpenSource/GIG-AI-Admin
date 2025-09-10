@@ -40,6 +40,7 @@
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
+                    <!-- <Button size="sm" variant="outline" @click="openChangePwd(acc)">修改密码</Button> -->
                     <button
                       v-if="!acc.is_superuser"
                       class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
@@ -108,11 +109,6 @@
                   <input v-model.trim="form.email" type="email" placeholder="name@example.com"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                 </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">密码</label>
-                  <input v-model="form.password" type="password" placeholder="留空则不修改"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                </div>
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">是否启用</label>
@@ -125,6 +121,34 @@
               <div class="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" @click="closeModal">取消</Button>
                 <Button type="submit">保存</Button>
+              </div>
+            </form>
+          </div>
+        </template>
+      </Modal>
+
+      <!-- 修改密码弹窗 -->
+      <Modal v-if="showPwdModal" :fullScreenBackdrop="true" @close="closePwdModal">
+        <template #body>
+          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+            <h3 class="mb-4 text-lg font-semibold">修改密码</h3>
+            <form @submit.prevent="submitPwd" class="space-y-4">
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">旧密码<span class="text-error-500">*</span></label>
+                <input v-model="pwdForm.old_password" type="password" required placeholder="输入旧密码"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">新密码<span class="text-error-500">*</span></label>
+                <input v-model="pwdForm.new_password" type="password" required placeholder="输入新密码"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+              <div class="flex justify-end gap-3 pt-2">
+                <Button type="button" variant="outline" @click="closePwdModal" :disabled="pwdLoading">取消</Button>
+                <Button type="submit" :disabled="pwdLoading">
+                  <span v-if="pwdLoading" class="mr-2">处理中...</span>
+                  确认
+                </Button>
               </div>
             </form>
           </div>
@@ -155,7 +179,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import { getUser, getUserDetail, deleteUser, createUser, updateUser } from '@/api'
+import { getUser, getUserDetail, deleteUser, createUser, updateUser, changePassword } from '@/api'
 import { toast } from "vue-sonner"
 
 const currentPageTitle = ref('AI 用户列表')
@@ -254,7 +278,6 @@ async function submitForm() {
     if (idx !== -1) {
       const payload = {
         username: form.value.username,
-        ...(form.value.password ? { password: form.value.password } : {}),
         is_active: form.value.is_active,
         ...(form.value.email ? { email: form.value.email } : {}),
         is_staff: false,
@@ -343,6 +366,39 @@ watch(page, () => {
 onMounted(() => {
   getList()
 })
+
+const showPwdModal = ref(false)
+const pwdLoading = ref(false)
+const pwdForm = ref({ id: 0, old_password: '', new_password: '' })
+
+function openChangePwd(acc) {
+  pwdForm.value = { id: acc.id, old_password: '', new_password: '' }
+  showPwdModal.value = true
+}
+
+function closePwdModal() {
+  showPwdModal.value = false
+}
+
+async function submitPwd() {
+  if (!pwdForm.value.old_password || !pwdForm.value.new_password) return
+  pwdLoading.value = true
+  try {
+    await changePassword({
+      old_password: pwdForm.value.old_password,
+      new_password: pwdForm.value.new_password,
+    })
+    toast.success('密码修改成功')
+    closePwdModal()
+  } catch (e) {
+    console.error('change password failed', e)
+    toast.error('修改失败', {
+      description: e.response?.data?.message || e.message || '修改密码时发生错误'
+    })
+  } finally {
+    pwdLoading.value = false
+  }
+}
 </script>
 
 

@@ -46,8 +46,19 @@ http.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     // Unified success handling: unwrap common { code, message, data }
     const res = response.data as ApiResponse
-    if (typeof res === 'object' && res !== null && 'data' in res) {
-      return res.data
+    if (typeof res === 'object' && res !== null) {
+      // If backend wrapper indicates forbidden, force logout & redirect
+      if ((res as any).code === 403) {
+        try {
+          localStorage.removeItem('token')
+          localStorage.removeItem('profile')
+        } catch {}
+        window.location.href = '/signin'
+        return Promise.reject({ status: 403, message: 'Forbidden' })
+      }
+      if ('data' in res) {
+        return res.data
+      }
     }
     // If backend doesn't follow wrapper, return raw response data
     return response.data as any
@@ -62,8 +73,17 @@ http.interceptors.response.use(
       // Optionally clear token and redirect to login
       try {
         localStorage.removeItem('token')
+        localStorage.removeItem('profile')
       } catch {}
       // location.href = '/signin' // enable if desired
+    }
+
+    if (status === 403) {
+      try {
+        localStorage.removeItem('token')
+        localStorage.removeItem('profile')
+      } catch {}
+      window.location.href = '/signin'
     }
 
     return Promise.reject({ status, message, error })
