@@ -50,9 +50,12 @@
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
-                  <Button size="sm" variant="outline"
-                  :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
-                  @click="onDelete(item)">删除</Button>
+                  <button
+                    class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
+                    @click="onDelete(item, $event)"
+                  >
+                    删除
+                  </button>
                 </div>
               </TableCell>
             </TableRow>
@@ -169,6 +172,17 @@
           </div>
         </template>
       </Modal>
+
+      <!-- 删除确认气泡弹窗 -->
+      <DeleteConfirmDialog
+        :isOpen="showDeleteDialog"
+        :title="'删除'"
+        :description="'确定要删除吗？此操作不可撤销。'"
+        :isLoading="deleteLoading"
+        :triggerRect="triggerRect"
+        @close="closeDeleteDialog"
+        @confirm="confirmDelete"
+      />
     </div>
   </AdminLayout>
 
@@ -181,6 +195,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
+import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { getScheduledTasks, createScheduledTask, getScheduledTask, updateScheduledTask, deleteScheduledTask } from '@/api/task'
@@ -216,6 +231,12 @@ const form = ref({
   time_of_day: '09:00',
   enabled: true,
 })
+
+// 删除确认弹窗相关状态
+const showDeleteDialog = ref(false)
+const deleteLoading = ref(false)
+const itemToDelete = ref(null)
+const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
 
 const isEditing = computed(() => editingId.value !== null)
 
@@ -329,17 +350,48 @@ async function submitForm() {
   }
 }
 
-async function onDelete(item) {
+function onDelete(item, event) {
+  itemToDelete.value = item
+
+  // 获取触发按钮的位置信息
+  const buttonRect = event.target.getBoundingClientRect()
+  triggerRect.value = {
+    top: buttonRect.top,
+    left: buttonRect.left,
+    width: buttonRect.width,
+    height: buttonRect.height,
+    bottom: buttonRect.bottom
+  }
+
+  showDeleteDialog.value = true
+}
+
+// 确认删除
+async function confirmDelete() {
+  if (!itemToDelete.value) return
+
+  deleteLoading.value = true
+
   try {
-    await deleteScheduledTask(String(item.id))
+    await deleteScheduledTask(String(itemToDelete.value.id))
     toast.success('任务删除成功')
     await fetchTasks() // Refresh the list after deletion
+    closeDeleteDialog()
   } catch (error) {
     console.error('Failed to delete task:', error)
     toast.error('删除失败', {
       description: error.response?.data?.message || error.message || '删除任务时发生错误'
     })
+  } finally {
+    deleteLoading.value = false
   }
+}
+
+// 关闭删除确认弹窗
+function closeDeleteDialog() {
+  showDeleteDialog.value = false
+  itemToDelete.value = null
+  deleteLoading.value = false
 }
 
 

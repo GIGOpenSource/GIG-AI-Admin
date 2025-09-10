@@ -74,7 +74,7 @@
              </template>
              <template v-else>
               <TableRow>
-                <TableCell :colspan="6" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+                <TableCell :colspan="8" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
               </TableRow>
             </template>
           </TableBody>

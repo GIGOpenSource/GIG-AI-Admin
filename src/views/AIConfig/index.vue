@@ -70,11 +70,12 @@
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
-                    <Button size="sm" variant="outline"
-                      :className="'text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30'"
-                      @click="onDelete(acc)">
+                    <button
+                      class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
+                      @click="onDelete(acc, $event)"
+                    >
                       删除
-                    </Button>
+                    </button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -82,7 +83,7 @@
 
             <template v-else>
               <TableRow>
-                <TableCell :colspan="6" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+                <TableCell :colspan="7" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
               </TableRow>
             </template>
           </TableBody>
@@ -91,14 +92,14 @@
           <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
             <PaginationContent v-slot="{ items }">
               <!-- <PaginationFirst>首页</PaginationFirst> -->
-              <PaginationPrevious/>
+              <PaginationPrevious />
               <template v-for="(item, index) in items" :key="index">
                 <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
                   {{ item.value }}
                 </PaginationItem>
                 <PaginationEllipsis v-else :index="index" />
               </template>
-              <PaginationNext/>
+              <PaginationNext />
               <!-- <PaginationLast>末页</PaginationLast> -->
             </PaginationContent>
           </Pagination>
@@ -155,6 +156,18 @@
           </div>
         </template>
       </Modal>
+
+      <!-- 删除确认气泡弹窗 -->
+      <DeleteConfirmDialog
+        :isOpen="showDeleteDialog"
+        :title="'删除'"
+        :description="'确定要删除吗？此操作不可撤销。'"
+        :isLoading="deleteLoading"
+        :triggerRect="triggerRect"
+        @close="closeDeleteDialog"
+        @confirm="confirmDelete"
+      />
+
     </div>
   </AdminLayout>
 </template>
@@ -166,6 +179,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
+import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { getlist, addlist, details, updatelist, deletelist } from '@/api/aiCofig.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -236,31 +250,60 @@ async function onEdit(account) {
   }
 }
 
-async function onDelete(account) {
+function onDelete(account, event) {
+  itemToDelete.value = account
 
+  // 获取触发按钮的位置信息
+  const buttonRect = event.target.getBoundingClientRect()
+  triggerRect.value = {
+    top: buttonRect.top,
+    left: buttonRect.left,
+    width: buttonRect.width,
+    height: buttonRect.height,
+    bottom: buttonRect.bottom
+  }
 
+  showDeleteDialog.value = true
+}
 
-  // 确认删除
-  // if (!confirm(`确定要删除配置 "${account.name}" 吗？此操作不可撤销。`)) {
-  //   return
-  // }
+// 确认删除
+async function confirmDelete() {
+  if (!itemToDelete.value) return
+
+  deleteLoading.value = true
 
   try {
-    await deletelist(account.id)
+    await deletelist(itemToDelete.value.id)
     toast.success('删除成功')
     await fetchlist()
+    closeDeleteDialog()
   } catch (error) {
     console.error('删除失败:', error)
     toast.error('删除失败', {
       description: error.response?.data?.message || error.message || '删除配置时发生错误'
     })
+  } finally {
+    deleteLoading.value = false
   }
+}
+
+// 关闭删除确认弹窗
+function closeDeleteDialog() {
+  showDeleteDialog.value = false
+  itemToDelete.value = null
+  deleteLoading.value = false
 }
 
 const showAdd = ref(false)
 const isEditMode = ref(false)
 const editingId = ref(null)
 const isLoading = ref(false)
+
+// 删除确认弹窗相关状态
+const showDeleteDialog = ref(false)
+const deleteLoading = ref(false)
+const itemToDelete = ref(null)
+const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
 const form = ref({
   name: '',
   provider: '',
@@ -417,6 +460,4 @@ onMounted(() => {
 })
 </script>
 
-<style>
-
-</style>
+<style></style>
