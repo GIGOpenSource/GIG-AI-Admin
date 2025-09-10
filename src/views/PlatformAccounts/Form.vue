@@ -24,7 +24,7 @@
                   required
                 >
                   <option value="">请选择平台</option>
-                  <option value="x">X</option>
+                  <option value="twitter">X</option>
                   <option value="facebook">Facebook</option>
                   <option value="instagram">Instagram</option>
                 </select>
@@ -70,7 +70,7 @@
                 <input
                   v-model="form.api_version"
                   type="text"
-                  placeholder="如：v1、v2.1"
+                  placeholder="如：1.0、2.1"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                 />
               </div>
@@ -248,6 +248,8 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
+import { createPlatform, createAccount } from '@/api/platform.ts'
+import { toast } from 'vue-sonner'
 
 const route = useRoute()
 const router = useRouter()
@@ -290,25 +292,82 @@ const form = ref({
 
 // 提交表单
 const handleSubmit = async () => {
+  // 表单验证
+  if (!form.value.provider) {
+    toast.error('请选择平台')
+    return
+  }
+  if (!form.value.name) {
+    toast.error('请填写项目名称')
+    return
+  }
+  if (!form.value.is_default) {
+    toast.error('请选择是否默认')
+    return
+  }
+  if (!form.value.account_external_username) {
+    toast.error('请填写用户名')
+    return
+  }
+  if (isAdminRole.value && !form.value.owner) {
+    toast.error('请选择所属用户')
+    return
+  }
+
   loading.value = true
   try {
     console.log('提交表单数据:', form.value)
 
-    // TODO: 调用API保存数据
-    // if (isEditMode.value) {
-    //   await updatePlatformAccount(route.params.id, form.value)
-    // } else {
-    //   await createPlatformAccount(form.value)
-    // }
+    // 准备平台配置数据
+    const platformData = {
+      provider: form.value.provider,
+      name: form.value.name,
+      is_default: form.value.is_default === 'true',
+      api_version: form.value.api_version,
+      redirect_uris: form.value.redirect_uris,
+      bearer_token: form.value.bearer_token
+    }
 
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 根据平台类型设置不同的ID和Secret字段
+    if (form.value.provider === 'twitter') {
+      platformData.client_id = form.value.app_id
+      platformData.client_secret = form.value.app_secret
+    } else {
+      platformData.app_id = form.value.app_id
+      platformData.app_secret = form.value.app_secret
+    }
+
+    // 准备账户数据
+    const accountData = {
+      account_external_username: form.value.account_external_username,
+      account_external_user_id: form.value.account_external_user_id,
+      account_access_token: form.value.account_access_token,
+      account_refresh_token: form.value.account_refresh_token,
+      owner: form.value.owner
+    }
+
+    // 调用API创建平台配置
+    const platformResponse = await createPlatform(platformData)
+
+    // 使用平台配置的返回值更新账户数据
+    const updatedAccountData = {
+      ...accountData,
+      config: platformResponse.id,
+      provider: form.value.provider
+    }
+
+    // 调用API创建账户
+    await createAccount(updatedAccountData)
+
+    toast.success('配置创建成功')
 
     // 保存成功后返回列表页
-    router.push('/platform-accounts')
+    // router.push('/platform-accounts')
   } catch (error) {
     console.error('保存失败:', error)
-    // TODO: 显示错误提示
+    toast.error('保存失败', {
+      description: error.response?.data?.message || error.message || '创建配置时发生错误'
+    })
   } finally {
     loading.value = false
   }

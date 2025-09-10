@@ -177,6 +177,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
@@ -189,6 +190,8 @@ import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
+
+const router = useRouter()
 const currentPageTitle = ref('平台账号配置')
 const accounts = ref([])
 const page = ref(1)
@@ -318,17 +321,8 @@ const form = ref({
 })
 
 function openAdd() {
-  // 重置为新增模式
-  isEditMode.value = false
-  editingId.value = null
-  form.value = {
-    name: '',
-    provider: '',
-    priority: '',
-    api_key: '',
-    model: ''
-  }
-  showAdd.value = true
+  // 跳转到新增页面
+  router.push('/platform-accounts/new')
 }
 
 function closeAdd() {
