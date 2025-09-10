@@ -46,5 +46,10 @@ server: {
     //   secure: false,
     // },
   },
-}
+},
+  preview: {
+    host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: ['gigaisystem.com', 'www.gigaisystem.com'],
+  }
 })
