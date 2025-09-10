@@ -5,12 +5,12 @@
       <ComponentCard>
         <div class="mb-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="relative">
+            <!-- <div class="relative">
               <select v-model="platformFilter"
                 class="w-48 h-10 pl-3 pr-8 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
                 @change="handleSearchClick">
                 <option value="">请选择平台</option>
-                <option :value="item.name" v-for="(item, index) in accounts" :key="index">{{ item.name }}</option>
+                <option :value="item.name" v-for="(item, index) in platf" :key="index">{{ item.name }}</option>
               </select>
             </div>
             <div class="relative">
@@ -35,7 +35,7 @@
             </Button>
             <Button size="sm" variant="outline" @click="clearSearch" class="text-gray-500 hover:text-gray-700">
               重置
-            </Button>
+            </Button> -->
           </div>
           <div class="flex gap-2">
             <Button size="sm" @click="openAdd">新增</Button>
@@ -188,7 +188,6 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
@@ -196,19 +195,18 @@ import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 // import { getlist, addlist, details, updatelist, deletelist } from '@/api/aiCofig.ts'
-import { getAccount, getConfigs } from '@/api/platform.ts'
+import { getAccount, getConfigs,deletePlatform,deleteAccount} from '@/api/platform.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
-
-const router = useRouter()
 const currentPageTitle = ref('平台账号配置')
 const accounts = ref([])
 const page = ref(1)
 const pageSize = ref(20) // 默认一页20条
 const total = ref(0)
 const searchQuery = ref('')
+const platf = ref([])
 const platformFilter = ref('')
 const searchTimeout = ref(null)
 const isSearching = ref(false)
@@ -243,7 +241,6 @@ async function onEdit(account) {
 
 function onDelete(account, event) {
   itemToDelete.value = account
-
   // 获取触发按钮的位置信息
   const buttonRect = event.target.getBoundingClientRect()
   triggerRect.value = {
@@ -264,7 +261,8 @@ async function confirmDelete() {
   deleteLoading.value = true
 
   try {
-    await deletelist(itemToDelete.value.id)
+    await deletePlatform(itemToDelete.value.id)
+    await deleteAccount(itemToDelete.value.account_id)
     toast.success('删除成功')
     await fetchlist()
     closeDeleteDialog()
@@ -304,8 +302,17 @@ const form = ref({
 })
 
 function openAdd() {
-  // 跳转到新增页面
-  router.push('/platform-accounts/new')
+  // 重置为新增模式
+  isEditMode.value = false
+  editingId.value = null
+  form.value = {
+    name: '',
+    provider: '',
+    priority: '',
+    api_key: '',
+    model: ''
+  }
+  showAdd.value = true
 }
 
 function closeAdd() {
@@ -412,8 +419,6 @@ const clearSearch = () => {
   page.value = 1 // 重置到第一页
   fetchlist()
 }
-
-
 const fetchlist = async () => {
   try {
     const accountResponse = await getAccount({page: page.value})
@@ -457,6 +462,9 @@ const fetchlist = async () => {
     let filteredAccounts = mergedAccounts
     accounts.value = filteredAccounts
     total.value = accountResponse.count
+    if(configsData.length == 0 || accountData.length == 0){
+           accounts.value = []
+    }
   } catch (error) {
     console.error('获取列表失败:', error)
     toast.error('获取列表失败', {
@@ -475,6 +483,7 @@ watch(page, (newPage) => {
 
 onMounted(() => {
   fetchlist()
+
 })
 </script>
 
