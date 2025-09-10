@@ -30,7 +30,8 @@ WORKDIR /app
 # Only copy built assets and necessary files
 COPY --from=builder /app/dist /app/dist
 COPY package*.json ./
-RUN npm ci --omit=dev
+COPY vite.config.ts ./
+RUN npm ci
 
 ENV HOST=0.0.0.0
 EXPOSE 5173

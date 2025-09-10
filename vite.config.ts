@@ -33,18 +33,10 @@ server: {
 
   proxy: {
     '/api': {
-      // 方案 A：保持指向你的域名（简单，不改网络）
-      target: 'https://gigaisystem.com',
+      target: 'http://web:8000',
       changeOrigin: true,
-      secure: true,
+      secure: false,
     },
-
-    // 方案 B（可选）：如果前后端容器在同一网络，直接指向后端
-    // '/api': {
-    //   target: 'http://web:8000',
-    //   changeOrigin: true,
-    //   secure: false,
-    // },
   },
 },
   preview: {
