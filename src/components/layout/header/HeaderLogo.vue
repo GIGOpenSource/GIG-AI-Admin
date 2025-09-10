@@ -1,6 +1,6 @@
 <template>
   <router-link to="/" class="lg:hidden">
-    <div class="text-2xl font-bold">AiDS</div>
+    <div class="text-2xl font-bold dark:text-white" >AiDS</div>
   </router-link>
 </template>
 
