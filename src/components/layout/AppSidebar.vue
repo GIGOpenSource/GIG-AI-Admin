@@ -20,7 +20,7 @@
       ]"
     >
       <router-link to="/">
-        <h1 style="font-size: 18px; font-weight: bold;" class="dark:text-white">AiDS</h1>
+        <h1 style="font-size: 18px; font-weight: bold;" class="dark:text-white">Pulse AI</h1>
         <!-- <img
           v-if="isExpanded || isHovered || isMobileOpen"
           class="dark:hidden"

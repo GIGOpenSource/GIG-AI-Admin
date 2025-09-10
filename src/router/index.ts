@@ -128,7 +128,7 @@ const router = createRouter({
 export default router
 
 router.beforeEach((to, from, next) => {
-  document.title = `${to.meta.title} | AiDS`
+  document.title = `${to.meta.title} | Pulse AI`
   const token = localStorage.getItem('token')
   const profile = JSON.parse(localStorage.getItem('profile') || '{}')
   if (!token && to.path !== '/signin') {

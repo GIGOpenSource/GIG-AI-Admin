@@ -196,7 +196,7 @@
                 <img width="{231}" height="{48}" src="/images/logo/auth-logo.svg" alt="Logo" />
               </router-link> -->
               <p class="text-center text-white dark:text-white/60 text-4xl font-bold">
-                AiDS
+                Pulse AI
               </p>
             </div>
           </div>
@@ -280,7 +280,7 @@ const handleSubmit = async () => {
 
 <style scoped>
 .bg-img {
-  background-image: url('../..//assets/signin.webp');
+  background-image: url('@/assets/signin.webp');
   background-size: cover;
   background-position: center;
 }

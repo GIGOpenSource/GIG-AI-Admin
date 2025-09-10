@@ -256,7 +256,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
-import { createPlatform, createAccount, getAccountById, getConfigById } from '@/api/platform.ts'
+import { createPlatform, createAccount, getAccountById, getConfigById, updateConfig, updateAccount } from '@/api/platform.ts'
 import { toast } from 'vue-sonner'
 import { getUser } from '@/api/index.ts'
 
@@ -385,27 +385,46 @@ const handleSubmit = async () => {
       owner: isAdminRole.value ? form.value.owner : currentUserId
     }
 
-    // 调用API创建平台配置
-    const platformResponse = await createPlatform(platformData)
+    if (isEditMode.value) {
+      // 编辑模式：更新现有配置
+      const id = String(route.query.id || '')
+      const configId = String(route.query.config || '')
 
-    // 使用平台配置的返回值更新账户数据
-    const updatedAccountData = {
-      ...accountData,
-      config: platformResponse.id,
-      provider: form.value.provider
+      // 更新平台配置
+      await updateConfig(configId, platformData)
+
+      // 更新账户信息，确保provider使用平台配置的provider
+      const updatedAccountData = {
+        ...accountData,
+        provider: form.value.provider
+      }
+      await updateAccount(id, updatedAccountData)
+
+      toast.success('配置更新成功')
+    } else {
+      // 新增模式：创建新配置
+      // 调用API创建平台配置
+      const platformResponse = await createPlatform(platformData)
+
+      // 使用平台配置的返回值更新账户数据
+      const updatedAccountData = {
+        ...accountData,
+        config: platformResponse.id,
+        provider: form.value.provider
+      }
+
+      // 调用API创建账户
+      await createAccount(updatedAccountData)
+
+      toast.success('配置创建成功')
     }
-
-    // 调用API创建账户
-    await createAccount(updatedAccountData)
-
-    toast.success('配置创建成功')
 
     // 保存成功后返回列表页
     router.push('/platform-accounts')
   } catch (error) {
     console.error('保存失败:', error)
     toast.error('保存失败', {
-      description: error.response?.data?.message || error.message || '创建配置时发生错误'
+      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新配置时发生错误' : '创建配置时发生错误')
     })
   } finally {
     loading.value = false
@@ -425,7 +444,6 @@ const getUserList = async () => {
     userList.value = results
   } catch (error) {
     console.error('获取用户列表失败:', error)
-    // TODO: 显示错误提示
   }
 }
 

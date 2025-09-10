@@ -1,6 +1,6 @@
 <template>
   <router-link to="/" class="lg:hidden">
-    <div class="text-2xl font-bold dark:text-white" >AiDS</div>
+    <div class="text-2xl font-bold dark:text-white" >Pulse AI</div>
   </router-link>
 </template>
 
