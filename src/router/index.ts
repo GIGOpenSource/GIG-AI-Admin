@@ -55,6 +55,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/platform-accounts',
+      name: 'Platform Accounts',
+      component: () => import('../views/PlatformAccounts/index.vue'),
+      meta: {
+        title: 'Platform Accounts',
+      },
+    },
+    {
       path: '/blank',
       name: 'Blank',
       component: () => import('../views/Pages/BlankPage.vue'),

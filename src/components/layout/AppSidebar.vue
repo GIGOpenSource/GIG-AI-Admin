@@ -231,6 +231,7 @@ import {
   TableIcon,
   ListIcon,
   PlugInIcon,
+  SettingsIcon,
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
@@ -249,6 +250,7 @@ const menuGroups = ref(
       { icon: TaskIcon, name: "任务列表", path: "/auto-reply" },
       { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
       { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
+      { icon: SettingsIcon, name: "平台账户配置", path: "/platform-accounts" },
     ],
   },
 ]
