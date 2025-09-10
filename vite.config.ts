@@ -26,10 +26,10 @@ server: {
   // 关键：告知客户端用 https 域名访问（影响 HMR 客户端）
   origin: 'https://gigaisystem.com',
   // 关键：HMR 走 wss 且 host 为你的域名（Nginx 终止 TLS）
-  hmr: {
-    host: 'gigaisystem.com',
-    protocol: 'wss'
-  },
+  // hmr: {
+  //   host: 'gigaisystem.com',
+  //   protocol: 'wss'
+  // },
 
   proxy: {
     '/api': {
