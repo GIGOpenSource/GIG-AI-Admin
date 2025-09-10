@@ -22,3 +22,7 @@ export const getConfigById = (id:string) => get(`/social/configs/${id}/`)
 export const updateConfig = (id:string, data:any) => put(`/social/configs/${id}/`, data)
 
 export const deleteConfig = (id:string) => del(`/social/configs/${id}/`)
+
+export const deletePlatform = (id: string) => del(`/social/configs/${id}/`)
+
+
