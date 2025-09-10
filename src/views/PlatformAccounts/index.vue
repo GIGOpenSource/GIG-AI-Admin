@@ -232,17 +232,6 @@ const type = ref([
   },
 
 ])
-const formdata = {
-  openai: 'OpenAI',
-  azure: 'Azure OpenAI',
-  gemini: 'Google Gemini',
-  anthropic: 'Anthropic Claude',
-  together: 'Together Al',
-  deepseek: 'Deepseek',
-  moonshot: 'Moonshot',
-  zhipuai: '智谱AI',
-  custom: '自定义OpenAl兼容接口'
-}
 async function onEdit(account) {
 
   // 跳转到编辑页面并携带查询参数
