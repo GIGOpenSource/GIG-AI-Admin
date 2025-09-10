@@ -10,7 +10,7 @@
                 class="w-48 h-10 pl-3 pr-8 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
                 @change="handleSearchClick">
                 <option value="">请选择平台</option>
-                <option :value="item.value" v-for="(item, index) in type" :key="index">{{ item.title }}</option>
+                <option :value="item.name" v-for="(item, index) in accounts" :key="index">{{ item.name }}</option>
               </select>
             </div>
             <div class="relative">
@@ -65,19 +65,30 @@
             <template v-if="accounts.length">
               <TableRow v-for="(acc, index) in accounts" :key="acc.id">
                 <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
-                <TableCell class="whitespace-nowrap">平台</TableCell>
-                <TableCell class="whitespace-nowrap">项目名称</TableCell>
-                <TableCell class="whitespace-nowrap">是否默认</TableCell>
-                <TableCell class="whitespace-nowrap">API版本</TableCell>
-                <TableCell class="whitespace-nowrap">回调地址</TableCell>
-                <TableCell class="whitespace-nowrap">appid</TableCell>
-                <TableCell class="whitespace-nowrap">app密钥</TableCell>
-                <TableCell class="whitespace-nowrap">读取使用token</TableCell>
-                <TableCell class="whitespace-nowrap">账号uid</TableCell>
-                <TableCell class="whitespace-nowrap">用户名</TableCell>
-                <TableCell class="whitespace-nowrap">输入token</TableCell>
-                <TableCell class="whitespace-nowrap">2025-09-10</TableCell>
-                <TableCell class="whitespace-nowrap">状态</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.provider || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.name || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.is_default ? '是' : '否' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.api_version || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.redirect_uris || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.app_id || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.refresh_token || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.bearer_token_masked || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.external_user_id || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.external_username || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.access_token || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.updated_at || '--' }}</TableCell>
+                <!-- <TableCell class="whitespace-nowrap">{{ acc.status }}</TableCell> -->
+                <TableCell class="whitespace-nowrap">
+
+                  <span :class="[
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                    acc.enabled
+                      ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
+                      : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
+                  ]">
+                    {{ acc.status == 'active' ? '正常' : '禁用' }}
+                  </span>
+                </TableCell>
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
@@ -411,9 +422,6 @@ async function submitAdd() {
 
 // 手动搜索按钮点击
 const handleSearchClick = async () => {
-
-
-  return
   if (isSearching.value) return
 
   isSearching.value = true
@@ -435,30 +443,56 @@ const clearSearch = () => {
 
 
 const fetchlist = async () => {
-  let res = await getAccount({})
+  try {
+    const accountResponse = await getAccount({page: page.value})
+    const accountData = accountResponse.results || accountResponse || []
+    const configsResponse = await getConfigs({
+      search: searchQuery.value,
+      provider: platformFilter.value,
+      page: page.value
+    })
+    const configsData = configsResponse.results || configsResponse || []
+    console.log(configsData, '配置数据');
+    const mergedAccounts = accountData.map(account => {
+      // 查找匹配的配置
+      const matchingConfig = configsData.find(config =>
+        config.id === account.config ||
+        config.id === account.config_id ||
+        config.id === account.configId
+      )
 
-  console.log(res.results, '账号');
+      if (matchingConfig) {
+        return {
+          ...account,
+          ...matchingConfig,
+          account_id: account.id,
+          account_owner: account.owner,
+          account_created_at: account.created_at,
+          account_updated_at: account.updated_at,
+        }
+      }
 
-  let res1 = await getConfigs({})
-  console.log(res1.results, '平台');
+      return {
+        ...account,
+        account_id: account.id,
+        account_owner: account.owner,
+        account_created_at: account.created_at,
+        account_updated_at: account.updated_at,
+      }
+    })
 
 
-  // try {
-  //   let res = await getlist({
-  //     search: searchQuery.value,
-  //     platform: platformFilter.value,
-  //     page: page.value
-  //   })
-
-  //   accounts.value = res.results
-  //   total.value = res.count
-
-  // } catch (error) {
-  //   console.error('获取列表失败:', error)
-  //   toast.error('获取列表失败', {
-  //     description: error.response?.data?.message || error.message || '获取配置列表时发生错误'
-  //   })
-  // }
+    let filteredAccounts = mergedAccounts
+    accounts.value = filteredAccounts
+    total.value = accountResponse.count
+  } catch (error) {
+    console.error('获取列表失败:', error)
+    toast.error('获取列表失败', {
+      description: error.response?.data?.message || error.message || '获取配置列表时发生错误'
+    })
+    accounts.value = []
+    total.value = 0
+  }
 }
 
 // 监听分页变化
