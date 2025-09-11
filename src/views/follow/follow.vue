@@ -36,12 +36,9 @@
           <TableHeader>
             <TableRow>
               <TableHead class="whitespace-nowrap">序号</TableHead>
-              <TableHead class="whitespace-nowrap">配置名称</TableHead>
-              <TableHead class="whitespace-nowrap">平台名称</TableHead>
-              <TableHead class="whitespace-nowrap">key</TableHead>
-              <TableHead class="whitespace-nowrap">状态</TableHead>
-              <TableHead class="whitespace-nowrap">优先级</TableHead>
-              <TableHead class="whitespace-nowrap">创建时间</TableHead>
+              <TableHead class="whitespace-nowrap">对方账号</TableHead>
+              <TableHead class="whitespace-nowrap">AI账号选择</TableHead>
+              <TableHead class="whitespace-nowrap">关注执行结果</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -49,24 +46,28 @@
             <template v-if="accounts.length">
               <TableRow v-for="(acc, index) in accounts" :key="acc.id">
                 <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
-                <!--  -->
-                <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.api_key_masked }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.external_user_id || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">
-
+                  <div v-if="acc.runner_accounts && acc.runner_accounts.length > 0" class="flex flex-wrap gap-1">
+                    <span v-for="accountId in acc.runner_accounts" :key="accountId"
+                      class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 whitespace-nowrap">
+                      {{ getAiAccountName(accountId) }}
+                    </span>
+                  </div>
+                  <span v-else class="text-gray-400">--</span>
+                </TableCell>
+                <TableCell class="whitespace-nowrap">
                   <span :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    acc.enabled
+                    acc.completed == true
                       ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
-                      : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
+                      : acc.completed == false
+                        ? 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30'
+                        : 'bg-gray-50 text-gray-600 ring-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:ring-gray-500/30'
                   ]">
-                    {{ acc.enabled ? '正常' : '禁用' }}
+                    {{ acc.completed ? '已完成':'未完成' }}
                   </span>
                 </TableCell>
-                <!--{{ item.priority }}  -->
-                <TableCell class="whitespace-nowrap">{{ acc.priority }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ formatTime(acc.created_at) }}</TableCell>
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
@@ -83,7 +84,7 @@
 
             <template v-else>
               <TableRow>
-                <TableCell :colspan="7" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+                <TableCell :colspan="5" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
               </TableRow>
             </template>
           </TableBody>
@@ -136,7 +137,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import { getFollow, getDetailsFollow,createFollow,updateFollow,deleteFollow} from '@/api/follow.ts'
+import { getFollow, getDetailsFollow,deleteFollow, getBoot } from '@/api/follow.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
@@ -150,47 +151,33 @@ const total = ref(0)
 const searchQuery = ref('')
 const searchTimeout = ref(null)
 const isSearching = ref(false)
-const type = ref([
-  {
-    title: 'OpenAI',
-    value: 'openai'
-  },
-  {
-    title: 'Azure OpenAI',
-    value: 'azure'
-  }, {
-    title: 'Google Gemini',
-    value: 'gemini'
-  }, {
-    title: 'Anthropic',
-    value: 'anthropic'
-  }, {
-    title: 'Custom',
-    value: 'custom'
-  },{
-    title: 'Grok',
-    value: 'grok'
-  },{
-    title: 'Deepseek',
-    value: 'deepseek'
-  },
 
-])
-const formdata = {
-  openai: 'OpenAI',
-  azure: 'Azure OpenAI',
-  gemini: 'Google Gemini',
-  anthropic: 'Anthropic Claude',
-  together: 'Together Al',
-  deepseek: 'Deepseek',
-  moonshot: 'Moonshot',
-  zhipuai: '智谱AI',
-  custom: '自定义OpenAl兼容接口'
+// AI账号选项
+const aiAccountOptions = ref([])
+
+// 获取AI账号名称
+function getAiAccountName(accountId) {
+  const account = aiAccountOptions.value.find(option => option.id === accountId)
+  return account ? account.bot : `账号${accountId}`
 }
+
+// 获取关注执行结果文本
+function getFollowResultText(result) {
+  switch (result) {
+    case 'success':
+      return '执行成功'
+    case 'failed':
+      return '执行失败'
+    case 'pending':
+    default:
+      return '未执行'
+  }
+}
+
 async function onEdit(account) {
   try {
     // 获取详细信息
-    const detailData = await details(account.id)
+    const detailData = await getDetailsFollow(account.id)
 
     isEditMode.value = true
     editingId.value = account.id
@@ -198,11 +185,8 @@ async function onEdit(account) {
     // 设置编辑数据
     editData.value = {
       id: account.id,
-      name: detailData.name || '',
-      platform: detailData.provider || '',
-      apiKey: detailData.api_key_masked || '',
-      status: detailData.status || 'active',
-      priority: detailData.priority || 1
+      external_user_id: detailData.external_user_id || '',
+      runner_accounts: detailData.runner_accounts || []
     }
 
     // 打开弹窗
@@ -236,14 +220,14 @@ async function confirmDelete() {
   deleteLoading.value = true
 
   try {
-    await deletelist(itemToDelete.value.id)
+    await deleteFollow(itemToDelete.value.id)
     toast.success('删除成功')
-    await fetchlist()
+    await fetchAccounts()
     closeDeleteDialog()
   } catch (error) {
     console.error('删除失败:', error)
     toast.error('删除失败', {
-      description: error.response?.data?.message || error.message || '删除配置时发生错误'
+      description: error.response?.data?.message || error.message || '删除关注列表时发生错误'
     })
   } finally {
     deleteLoading.value = false
@@ -268,25 +252,11 @@ const showDeleteDialog = ref(false)
 const deleteLoading = ref(false)
 const itemToDelete = ref(null)
 const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
-const form = ref({
-  name: '',
-  provider: '',
-  priority: '',
-  api_key: '',
-  model: ''
-})
-
 function openAdd() {
   // 重置为新增模式
   isEditMode.value = false
   editingId.value = null
-  form.value = {
-    name: '',
-    provider: '',
-    priority: '',
-    api_key: '',
-    model: ''
-  }
+  editData.value = {}
   showAdd.value = true
 }
 
@@ -303,76 +273,6 @@ function handleFormSuccess() {
   closeAdd()
 }
 
-async function submitAdd() {
-  // 防止重复提交
-  if (isLoading.value) return
-
-  // 表单验证 - 逐个检查并提示具体字段
-  if (!form.value.name || form.value.name.trim() === '') {
-    toast.error('请填写配置名称', {
-      description: '配置名称不能为空'
-    })
-    return
-  }
-
-  if (!form.value.provider || form.value.provider === '') {
-    toast.error('请选择平台名称', {
-      description: '平台名称不能为空'
-    })
-    return
-  }
-
-  if (!form.value.api_key || form.value.api_key.trim() === '') {
-    toast.error('请填写API Key', {
-      description: 'API Key不能为空'
-    })
-    return
-  }
-
-  if (!form.value.model || form.value.model.trim() === '') {
-    toast.error('请填写模型名称', {
-      description: '模型名称不能为空'
-    })
-    return
-  }
-
-  isLoading.value = true
-
-  try {
-    // 准备提交数据
-    const submitData = {
-      name: form.value.name.trim(),
-      provider: form.value.provider,
-      priority: form.value.priority,
-      api_key: form.value.api_key.trim(),
-      model: form.value.model.trim()
-    }
-
-    // 根据模式调用不同的接口
-    if (isEditMode.value) {
-      // 编辑模式：调用更新接口
-      await updatelist(editingId.value, submitData)
-      toast.success('配置更新成功')
-    } else {
-      // 新增模式：调用新增接口
-      await addlist(submitData)
-      toast.success('配置新增成功')
-    }
-
-    // 成功后关闭弹窗并刷新列表
-    closeAdd()
-    await fetchlist()
-
-  } catch (error) {
-    console.error(isEditMode.value ? '更新失败:' : '新增失败:', error)
-    toast.error(isEditMode.value ? '更新失败' : '新增失败', {
-      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新配置时发生错误' : '新增配置时发生错误')
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
 
 // 手动搜索按钮点击
 const handleSearchClick = async () => {
@@ -381,7 +281,7 @@ const handleSearchClick = async () => {
   isSearching.value = true
   page.value = 1 // 搜索时重置到第一页
   try {
-    await fetchlist()
+    await fetchAccounts()
   } finally {
     isSearching.value = false
   }
@@ -391,11 +291,11 @@ const handleSearchClick = async () => {
 const clearSearch = () => {
   searchQuery.value = ''
   page.value = 1 // 重置到第一页
-  fetchlist()
+  fetchAccounts()
 }
 
 
-const fetchlist = async () => {
+const fetchAccounts = async () => {
   try {
     let res = await getFollow({
       // search: searchQuery.value,
@@ -408,19 +308,31 @@ const fetchlist = async () => {
   } catch (error) {
     console.error('获取列表失败:', error)
     toast.error('获取列表失败', {
-      description: error.response?.data?.message || error.message || '获取配置列表时发生错误'
+      description: error.response?.data?.message || error.message || '获取关注列表时发生错误'
     })
+  }
+}
+
+// 获取AI账号列表
+const fetchAiAccounts = async () => {
+  try {
+    const res = await getBoot({})
+    aiAccountOptions.value = res
+  } catch (error) {
+    console.error('获取AI账号失败:', error)
+    aiAccountOptions.value = []
   }
 }
 
 // 监听分页变化
 watch(page, (newPage) => {
   console.log('Page changed to:', newPage)
-  fetchlist()
+  fetchAccounts()
 })
 
 onMounted(() => {
-  fetchlist()
+  fetchAccounts()
+  fetchAiAccounts()
 })
 </script>
 
