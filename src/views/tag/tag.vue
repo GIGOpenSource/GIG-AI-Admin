@@ -104,9 +104,12 @@
             <form @submit.prevent="submitForm" class="space-y-4">
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">话题名称<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.name" type="text" placeholder="请输入话题名称"
+                    class="text-error-500">*</span><span class="text-gray-500 text-xs ml-1">(最多10个字符)</span></label>
+                <input v-model="form.name" type="text" placeholder="请输入话题名称" maxlength="10"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                <div class="mt-1 text-xs text-gray-500">
+                  已输入: {{ form.name.length }}/10
+                </div>
               </div>
               <div class="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" @click="closeModal">取消</Button>
@@ -260,6 +263,14 @@ async function submitForm() {
   if (!form.value.name || form.value.name.trim() === '') {
     toast.error('请填写话题名称', {
       description: '话题名称不能为空'
+    })
+    return
+  }
+
+  // 验证字数限制
+  if (form.value.name.length > 10) {
+    toast.error('话题名称字数超限', {
+      description: '话题名称最多只能输入10个字符'
     })
     return
   }
