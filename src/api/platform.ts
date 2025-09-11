@@ -26,3 +26,11 @@ export const deleteConfig = (id:string) => del(`/social/configs/${id}/`)
 export const deletePlatform = (id: string) => del(`/social/configs/${id}/`)
 
 
+
+export const getFacebookStart = () => get(`/social/oauth/facebook/start/`)
+
+export const getInstagramStart = () => get(`/social/oauth/instagram/start/`)
+
+export const getThreadsStart = () => get(`/social/oauth/threads/start/`)
+
+export const getTwitterStart = () => get(`/social/oauth/twitter/start/`)

@@ -83,13 +83,26 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   回调地址 <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.redirect_uris"
-                  type="url"
-                  placeholder="Callback URI / OAuth Redirect URI"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                <div class="flex gap-2">
+                  <input
+                    v-model="form.redirect_uris"
+                    type="url"
+                    placeholder="Callback URI / OAuth Redirect URI"
+                    class="dark:bg-dark-900 h-11 flex-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    required
+                    readonly
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    @click="getCallbackUrl"
+                    :disabled="!form.provider"
+                    class="h-11 px-4"
+                  >
+                    获取地址
+                  </Button>
+                </div>
               </div>
 
               <!-- App ID -->
@@ -250,13 +263,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
-import { createPlatform, createAccount, getAccountById, getConfigById, updateConfig, updateAccount } from '@/api/platform.ts'
+import { createPlatform, createAccount, getAccountById, getConfigById, updateConfig, updateAccount, getTwitterStart, getFacebookStart, getInstagramStart, getThreadsStart } from '@/api/platform.ts'
 import { toast } from 'vue-sonner'
 import { getUser } from '@/api/index.ts'
 import { PLATFORM_OPTIONS } from '@/config/platforms'
@@ -437,6 +450,30 @@ const handleCancel = () => {
   router.push('/platform-accounts')
 }
 
+// 获取回调地址
+const getCallbackUrl = async () => {
+  if (!form.value.provider) {
+    toast.error('请先选择平台')
+    return
+  }
+
+  // 根据不同平台设置不同的回调地址
+  const callbackUrls = {
+    twitter: getTwitterStart,
+    facebook: getFacebookStart,
+    instagram: getInstagramStart,
+    threads: getThreadsStart
+  }
+
+  const cb = callbackUrls[form.value.provider]
+  if (cb) {
+    const res = await cb()
+    form.value.redirect_uris = res.auth_url
+  } else {
+    toast.error('暂不支持该平台的回调地址')
+  }
+}
+
 // 获取用户列表
 const getUserList = async () => {
   try {
@@ -492,6 +529,13 @@ const loadEditData = async () => {
     loading.value = false
   }
 }
+
+// 监听provider变化，清空回调地址
+watch(() => form.value.provider, (newProvider, oldProvider) => {
+  if (newProvider !== oldProvider) {
+    form.value.redirect_uris = ''
+  }
+})
 
 onMounted(() => {
   // 如果是admin角色，获取用户列表
