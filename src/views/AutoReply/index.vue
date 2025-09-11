@@ -172,9 +172,10 @@
                           {{ getAiAccountName(account.id) }}
                           <button type="button" @click.stop="removeAiAccountById(account.id)"
                             class="ml-1.5 inline-flex items-center justify-center w-3 h-3 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 dark:hover:bg-blue-800 dark:hover:text-blue-300">
-                            <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
+                            <!-- <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
                               <path d="m0 0 2 2m0 0 2 2m-2-2 2-2m-2 2-2 2"/>
-                            </svg>
+                            </svg> -->
+                            X
                           </button>
                         </span>
                       </div>
@@ -272,14 +273,15 @@
                       <div v-if="form.tags.length === 0" class="text-gray-400">请选择话题</div>
                       <div v-else class="flex flex-wrap gap-1">
                         <span v-for="tagId in form.tags" :key="tagId"
-                          class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {{ getTagName(tagId) }}
-                          <button type="button" @click.stop="removeTag(tagId)"
-                            class="ml-1.5 inline-flex items-center justify-center w-3 h-3 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 dark:hover:bg-blue-800 dark:hover:text-blue-300">
-                            <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
-                              <path d="m0 0 2 2m0 0 2 2m-2-2 2-2m-2 2-2 2"/>
-                            </svg>
-                          </button>
+                          class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 whitespace-nowrap">
+                          <span class="px-1">{{ getTagName(tagId) }}</span>
+                           <button type="button" @click.stop="removeTag(tagId)"
+                             class="inline-flex items-center justify-center w-3 h-3 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 dark:hover:bg-blue-800 dark:hover:text-blue-300">
+                             <!-- <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
+                               <path d="m0 0 2 2m0 0 2 2m-2-2 2-2m-2 2-2 2"/>
+                             </svg> -->
+                             X
+                           </button>
                         </span>
                       </div>
                       <!-- 下拉箭头 -->
@@ -302,9 +304,10 @@
                           class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
                           <span>{{ tag.name }}</span>
                           <div v-if="form.tags.includes(tag.id)" class="text-blue-500">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            X
+                            <!-- <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                            </svg>
+                            </svg> -->
                           </div>
                         </div>
                       </div>
