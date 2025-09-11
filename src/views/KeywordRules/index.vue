@@ -100,9 +100,10 @@
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span class="text-error-500">*</span></label>
                 <select v-model="form.provider"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="twitter">Twitter</option>
-                  <option value="facebook">Facebook</option>
-                  <option value="ins">Ins</option>
+                  <option value="">请选择平台</option>
+                  <option v-for="option in PLATFORM_OPTIONS" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </option>
                 </select>
               </div>
               <div>
@@ -158,9 +159,10 @@
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span class="text-error-500">*</span></label>
                 <select v-model="editForm.provider"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="twitter">Twitter</option>
-                  <option value="facebook">Facebook</option>
-                  <option value="ins">Ins</option>
+                  <option value="">请选择平台</option>
+                  <option v-for="option in PLATFORM_OPTIONS" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </option>
                 </select>
               </div>
               <div>
@@ -222,6 +224,7 @@ import { getKeywordsConfigs, getKeywordsConfigsDetail, createKeywordsConfigs, cr
 import { getUser } from '@/api/index'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
+import { PLATFORM_OPTIONS } from '@/config/platforms'
 
 const currentPageTitle = ref('关键词规则')
 
@@ -338,7 +341,7 @@ onMounted(async () => {
 const showAdd = ref(false)
 const form = ref({
   name: '',
-  provider: 'twitter',
+  provider: '',
   owner_id: '',
   include_keywords: '',
   match_mode: 'any',
@@ -349,7 +352,7 @@ const editLoading = ref(false)
 const editForm = ref({
   id: 0,
   name: '',
-  provider: 'twitter',
+  provider: '',
   owner_id: '',
   include_keywords: '',
   match_mode: 'any',

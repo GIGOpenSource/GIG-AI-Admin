@@ -139,9 +139,9 @@
                 <select v-model="form.scene"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                   <option value="" disabled>请选择模板类型</option>
-                  <option value="reply_comment">回复评论</option>
-                  <option value="reply_message">回复消息</option>
-                  <option value="post">发帖</option>
+                  <option v-for="option in TASK_TYPE_OPTIONS" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </option>
                 </select>
               </div>
               <div>
@@ -202,6 +202,7 @@ import { getUser } from '@/api/index'
 import { getPromptsConfigs, createPromptsConfig, createUserPromptsConfig, updatePromptsConfig, deletePromptsConfig, getPromptsConfig } from '@/api/prompts'
 import { toast } from 'vue-sonner'
 import { formatTime } from '@/lib/utils'
+import { TASK_TYPE_OPTIONS } from '@/config/platforms'
 const currentPageTitle = ref('提示词模板')
 const isLoading = ref(false)
 const isEditMode = ref(false)
@@ -493,12 +494,8 @@ function closeDeleteDialog() {
 
 
 function getTemplateTypeText(type) {
-  const typeMap = {
-    'reply_comment': '回复评论',
-    'reply_message': '回复消息',
-    'post': '发帖'
-  }
-  return typeMap[type] || type
+  const taskType = TASK_TYPE_OPTIONS.find(option => option.value === type)
+  return taskType ? taskType.label : type
 }
 
 // 手动搜索按钮点击

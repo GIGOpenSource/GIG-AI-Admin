@@ -24,9 +24,9 @@
                   required
                 >
                   <option value="">请选择平台</option>
-                  <option value="twitter">X</option>
-                  <option value="facebook">Facebook</option>
-                  <option value="instagram">Instagram</option>
+                  <option v-for="option in PLATFORM_OPTIONS" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </option>
                 </select>
               </div>
 
@@ -259,6 +259,7 @@ import Button from '@/components/ui/Button.vue'
 import { createPlatform, createAccount, getAccountById, getConfigById, updateConfig, updateAccount } from '@/api/platform.ts'
 import { toast } from 'vue-sonner'
 import { getUser } from '@/api/index.ts'
+import { PLATFORM_OPTIONS } from '@/config/platforms'
 
 const route = useRoute()
 const router = useRouter()

@@ -103,18 +103,20 @@
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span class="text-error-500">*</span></label>
                   <select v-model="form.provider"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option value="Twitter">Twitter</option>
-                    <option value="Facebook">Facebook</option>
-                    <option value="Ins">Ins</option>
+                    <option value="">请选择平台</option>
+                    <option v-for="option in PLATFORM_OPTIONS" :key="option.value" :value="option.value">
+                      {{ option.label }}
+                    </option>
                   </select>
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span class="text-error-500">*</span></label>
                   <select v-model="form.type"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option value="reply_comment">回复评论</option>
-                    <option value="post">发帖</option>
-                    <option value="reply_message">回复消息</option>
+                    <option value="">请选择类型</option>
+                    <option v-for="option in TASK_TYPE_OPTIONS" :key="option.value" :value="option.value">
+                      {{ option.label }}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -204,6 +206,7 @@ import { getPromptsConfigs } from '@/api/prompts'
 import { getUser } from '@/api/index'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
+import { PLATFORM_OPTIONS, TASK_TYPE_OPTIONS } from '@/config/platforms'
 const role = localStorage.getItem('role')
 const userinfo = JSON.parse(localStorage.getItem('profile'))
 const currentPageTitle = ref('任务列表')
@@ -222,7 +225,7 @@ const showForm = ref(false)
 const editingId = ref(null)
 const form = ref({
   owner: role == 'user' ?userinfo.id :'',
-  provider: 'Twitter',
+  provider: '',
   type: 'reply_message',
   keyword: '',
   prompt: '',
@@ -283,7 +286,7 @@ async function openEdit(item) {
 function closeForm() {
   showForm.value = false
   editingId.value = null
-  form.value = { owner: '', provider: 'Twitter', type: 'reply_message', keyword: '', prompt: '', recurrence_type: 'daily', day_of_month: 1, time_of_day: '09:00', enabled: true }
+  form.value = { owner: '', provider: '', type: 'reply_message', keyword: '', prompt: '', recurrence_type: 'daily', day_of_month: 1, time_of_day: '09:00', enabled: true }
 }
 
 async function submitForm() {
@@ -405,12 +408,8 @@ function getRecurrenceTypeText(recurrenceType) {
 }
 
 function getTaskTypeText(type) {
-  const typeMap = {
-    'reply_comment': '回复评论',
-    'post': '发帖',
-    'reply_message': '回复消息'
-  }
-  return typeMap[type] || type
+  const taskType = TASK_TYPE_OPTIONS.find(option => option.value === type)
+  return taskType ? taskType.label : type
 }
 
 // keyword/prompt options and linkage
