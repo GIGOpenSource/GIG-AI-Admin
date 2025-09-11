@@ -61,7 +61,7 @@
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
-                    <button
+                    <button v-if="userinfo.is_staff && userinfo.is_superuser"
                       class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
                       @click="onDelete(item, $event)"
                     >
@@ -160,6 +160,7 @@ const isLoading = ref(false)
 const isEditMode = ref(false)
 const tags = ref([])
 const editingId = ref('')
+const userinfo = JSON.parse(localStorage.getItem('profile'))
 // 统一的弹窗显示状态
 const showModal = ref(false)
 
