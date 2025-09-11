@@ -180,12 +180,12 @@ import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import { getlist, addlist, details, updatelist, deletelist } from '@/api/aiCofig.ts'
+import { getTags,getDetailsTags,createTags,updateTags,deleteTags } from '@/api/follow.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
-const currentPageTitle = ref('AI 服务配置')
+const currentPageTitle = ref('关注列表')
 const accounts = ref([])
 const page = ref(1)
 const pageSize = ref(20) // 默认一页20条
@@ -439,8 +439,8 @@ const clearSearch = () => {
 
 const fetchlist = async () => {
   try {
-    let res = await getlist({
-      search: searchQuery.value,
+    let res = await getTags({
+      // search: searchQuery.value,
       page: page.value
     })
 

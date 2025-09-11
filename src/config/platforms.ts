@@ -44,10 +44,10 @@ export const TASK_TYPE_OPTIONS: TaskTypeOption[] = [
     value: 'post',
     label: '发帖'
   },
-  {
-    value: 'follow_task',
-    label: '关注'
-  }
+  // {
+  //   value: 'follow_task',
+  //   label: '关注任务'
+  // }
 ]
 
 // 平台类型枚举
