@@ -105,57 +105,14 @@
           </Pagination>
         </div>
       </ComponentCard>
-      <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
-        <template #body>
-          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑服务配置' : '新增服务配置' }}</h3>
-            <form @submit.prevent="submitAdd" class="space-y-4">
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">配置名称<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.name" type="text" placeholder="如：OpenAI GPT-4配置"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台名称<span
-                    class="text-error-500">*</span></label>
-                <select v-model="form.provider"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="">请选择平台</option>
-                  <option :value="item.value" v-for="(item, index) in type" :key="index">{{ item.title }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">key<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.api_key" type="password" placeholder="请输入key"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模型名称<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.model" type="text" placeholder="如：gpt-4、claude-3-sonnet"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">优先级</label>
-                <input v-model="form.priority" type="number" placeholder="如：8"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <div class="flex justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" @click="closeAdd" :disabled="isLoading">取消</Button>
-                <Button type="submit" :disabled="isLoading">
-                  <span v-if="isLoading" class="mr-2">处理中...</span>
-                  {{ isEditMode ? '更新' : '保存' }}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </template>
-      </Modal>
+      <!-- 表单弹窗组件 -->
+      <FollowForm
+        :showModal="showAdd"
+        :isEditMode="isEditMode"
+        :editData="editData"
+        @close="closeAdd"
+        @success="handleFormSuccess"
+      />
 
       <!-- 删除确认气泡弹窗 -->
       <DeleteConfirmDialog
@@ -178,13 +135,13 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
-import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import { getTags,getDetailsTags,createTags,updateTags,deleteTags } from '@/api/follow.ts'
+import { getFollow, getDetailsFollow,createFollow,updateFollow,deleteFollow} from '@/api/follow.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
+import FollowForm from './form.vue'
 const currentPageTitle = ref('关注列表')
 const accounts = ref([])
 const page = ref(1)
@@ -235,17 +192,17 @@ async function onEdit(account) {
     // 获取详细信息
     const detailData = await details(account.id)
 
-    // pe
     isEditMode.value = true
     editingId.value = account.id
 
-    // 填充表单数据
-    form.value = {
+    // 设置编辑数据
+    editData.value = {
+      id: account.id,
       name: detailData.name || '',
-      provider: detailData.provider || '',
-      priority: detailData.priority || '',
-      api_key: detailData.api_key_masked || '',
-      model: detailData.model || ''
+      platform: detailData.provider || '',
+      apiKey: detailData.api_key_masked || '',
+      status: detailData.status || 'active',
+      priority: detailData.priority || 1
     }
 
     // 打开弹窗
@@ -303,6 +260,7 @@ function closeDeleteDialog() {
 const showAdd = ref(false)
 const isEditMode = ref(false)
 const editingId = ref(null)
+const editData = ref({})
 const isLoading = ref(false)
 
 // 删除确认弹窗相关状态
@@ -336,13 +294,13 @@ function closeAdd() {
   showAdd.value = false
   isEditMode.value = false
   editingId.value = null
-  form.value = {
-    name: '',
-    provider: '',
-    priority: '',
-    api_key: '',
-    model: ''
-  }
+  editData.value = {}
+}
+
+// 表单成功回调
+function handleFormSuccess() {
+  fetchAccounts() // 刷新列表
+  closeAdd()
 }
 
 async function submitAdd() {
@@ -439,7 +397,7 @@ const clearSearch = () => {
 
 const fetchlist = async () => {
   try {
-    let res = await getTags({
+    let res = await getFollow({
       // search: searchQuery.value,
       page: page.value
     })
