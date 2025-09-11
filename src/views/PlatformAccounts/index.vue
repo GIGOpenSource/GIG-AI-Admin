@@ -98,8 +98,12 @@
                     {{ acc.status == 'active' ? '正常' : '禁用' }}
                   </span>
                 </TableCell>
-                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 z-10 w-[200px]">
+                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 z-10 w-[280px]">
                   <div class="flex items-center justify-end gap-2">
+                    <Button size="sm" variant="outline" @click="onViewCallbackUrl(acc)" :disabled="loadingCallbackUrl">
+                      <span v-if="loadingCallbackUrl" class="mr-2">获取中...</span>
+                      查看回调地址
+                    </Button>
                     <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
                     <button
                       class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
@@ -140,6 +144,13 @@
       <DeleteConfirmDialog :isOpen="showDeleteDialog" :title="'删除'" :description="'确定要删除吗？此操作不可撤销。'"
         :isLoading="deleteLoading" :triggerRect="triggerRect" @close="closeDeleteDialog" @confirm="confirmDelete" />
 
+      <!-- 查看回调地址弹窗 -->
+      <CallbackUrlModal
+        :isOpen="showCallbackUrlModal"
+        :url="selectedCallbackUrl"
+        @close="closeCallbackUrlModal"
+      />
+
     </div>
   </AdminLayout>
 </template>
@@ -151,8 +162,9 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
+import CallbackUrlModal from '@/components/common/CallbackUrlModal.vue'
 // import { getlist, addlist, details, updatelist, deletelist } from '@/api/aiCofig.ts'
-import { getAccount, getConfigs, deletePlatform, deleteAccount } from '@/api/platform.ts'
+import { getAccount, getConfigs, deletePlatform, deleteAccount, getFacebookStart, getInstagramStart, getThreadsStart, getTwitterStart } from '@/api/platform.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
@@ -163,6 +175,9 @@ const itemToDelete = ref({})
 const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
 const showDeleteDialog = ref(false)
 const deleteLoading = ref(false)
+const showCallbackUrlModal = ref(false)
+const selectedCallbackUrl = ref('')
+const loadingCallbackUrl = ref(false)
 const currentPageTitle = ref('平台账号配置')
 const accounts = ref([])
 const page = ref(1)
@@ -204,6 +219,54 @@ function onEdit(account) {
     path: '/platform-accounts/edit',
     query: { id: account.account_id, config: account.config }
   })
+}
+
+// 查看回调地址
+async function onViewCallbackUrl(account) {
+  if (!account.provider) {
+    toast.error('平台信息不完整')
+    return
+  }
+
+  loadingCallbackUrl.value = true
+  selectedCallbackUrl.value = ''
+
+  try {
+    // 根据不同平台调用不同的接口
+    const apiMap = {
+      twitter: getTwitterStart,
+      facebook: getFacebookStart,
+      instagram: getInstagramStart,
+      threads: getThreadsStart
+    }
+
+    const apiFunction = apiMap[account.provider]
+    if (!apiFunction) {
+      toast.error('暂不支持该平台的回调地址获取')
+      return
+    }
+
+    const response = await apiFunction()
+    if (response && response.auth_url) {
+      selectedCallbackUrl.value = response.auth_url
+      showCallbackUrlModal.value = true
+    } else {
+      toast.error('获取回调地址失败')
+    }
+  } catch (error) {
+    console.error('获取回调地址失败:', error)
+    toast.error('获取回调地址失败', {
+      description: error.response?.data?.message || error.message || '请稍后重试'
+    })
+  } finally {
+    loadingCallbackUrl.value = false
+  }
+}
+
+// 关闭回调地址弹窗
+function closeCallbackUrlModal() {
+  showCallbackUrlModal.value = false
+  selectedCallbackUrl.value = ''
 }
 
 function onDelete(account, event) {

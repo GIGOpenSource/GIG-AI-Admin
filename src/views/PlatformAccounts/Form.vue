@@ -79,7 +79,7 @@
 
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- 回调地址 -->
-              <div>
+              <!-- <div>
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   回调地址 <span class="text-error-500">*</span>
                 </label>
@@ -103,7 +103,7 @@
                     获取地址
                   </Button>
                 </div>
-              </div>
+              </div> -->
 
               <!-- App ID -->
               <div>
@@ -118,9 +118,7 @@
                   required
                 />
               </div>
-            </div>
 
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- App 密钥 -->
               <div>
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
@@ -134,6 +132,9 @@
                   required
                 />
               </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
               <!-- 读取使用Token -->
               <div v-if="form.provider !== 'twitter'">
@@ -333,10 +334,10 @@ const handleSubmit = async () => {
     toast.error('请填写API版本')
     return
   }
-  if (!form.value.redirect_uris) {
-    toast.error('请填写回调地址')
-    return
-  }
+  // if (!form.value.redirect_uris) {
+  //   toast.error('请填写回调地址')
+  //   return
+  // }
   if (!form.value.app_id) {
     toast.error('请填写App ID或Client ID')
     return
@@ -376,7 +377,7 @@ const handleSubmit = async () => {
       name: form.value.name,
       is_default: form.value.is_default === 'true',
       api_version: form.value.api_version,
-      redirect_uris: form.value.redirect_uris,
+      // redirect_uris: form.value.redirect_uris,
       bearer_token: form.value.bearer_token
     }
 
@@ -450,29 +451,6 @@ const handleCancel = () => {
   router.push('/platform-accounts')
 }
 
-// 获取回调地址
-const getCallbackUrl = async () => {
-  if (!form.value.provider) {
-    toast.error('请先选择平台')
-    return
-  }
-
-  // 根据不同平台设置不同的回调地址
-  const callbackUrls = {
-    twitter: getTwitterStart,
-    facebook: getFacebookStart,
-    instagram: getInstagramStart,
-    threads: getThreadsStart
-  }
-
-  const cb = callbackUrls[form.value.provider]
-  if (cb) {
-    const res = await cb()
-    form.value.redirect_uris = res.auth_url
-  } else {
-    toast.error('暂不支持该平台的回调地址')
-  }
-}
 
 // 获取用户列表
 const getUserList = async () => {
@@ -504,7 +482,7 @@ const loadEditData = async () => {
       form.value.name = configRes.name || ''
       form.value.is_default = String(!!configRes.is_default)
       form.value.api_version = configRes.api_version || ''
-      form.value.redirect_uris = configRes.redirect_uris || ''
+      // form.value.redirect_uris = configRes.redirect_uris || ''
       // 兼容 twitter 与其他平台的ID/secret
       form.value.app_id = configRes.client_id || configRes.app_id || ''
       form.value.app_secret = configRes.client_secret || configRes.app_secret || ''
@@ -531,11 +509,11 @@ const loadEditData = async () => {
 }
 
 // 监听provider变化，清空回调地址
-watch(() => form.value.provider, (newProvider, oldProvider) => {
-  if (newProvider !== oldProvider) {
-    form.value.redirect_uris = ''
-  }
-})
+// watch(() => form.value.provider, (newProvider, oldProvider) => {
+//   if (newProvider !== oldProvider) {
+//     form.value.redirect_uris = ''
+//   }
+// })
 
 onMounted(() => {
   // 如果是admin角色，获取用户列表
