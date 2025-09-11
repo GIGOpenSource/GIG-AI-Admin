@@ -45,3 +45,5 @@ server: {
     allowedHosts: ['gigaisystem.com', 'www.gigaisystem.com'],
   }
 })
+
+
