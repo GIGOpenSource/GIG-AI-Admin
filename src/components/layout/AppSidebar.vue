@@ -247,6 +247,7 @@ const menuGroups = ref(
     title: "Menu",
     items: [
        { icon: GridIcon, name: "数据统计", path: "/" },
+        { icon: TaskIcon, name: "话题列表", path: "/tag" },
       { icon: TaskIcon, name: "任务列表", path: "/auto-reply" },
       { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
       { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
@@ -261,7 +262,7 @@ onMounted(() => {
 const menu = () =>{
    if(userinfo.is_staff && userinfo.is_superuser){
        menuGroups.value[0].items.push(
-        { icon: TableIcon, name: "AI 用户列表", path: "/ai-accounts" },
+        { icon: TableIcon, name: "用户列表", path: "/ai-accounts" },
         { icon: ListIcon, name: "AI 服务配置", path: "/ai-config" }
       )
    }else{

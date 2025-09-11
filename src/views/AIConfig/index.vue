@@ -65,7 +65,7 @@
                   </span>
                 </TableCell>
                 <!--{{ item.priority }}  -->
-                <TableCell class="whitespace-nowrap">222</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.priority }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ formatTime(acc.created_at) }}</TableCell>
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
@@ -210,6 +210,9 @@ const type = ref([
   }, {
     title: 'Custom',
     value: 'custom'
+  },{
+    title: 'Grok',
+    value: 'grok'
   },
 
 ])
