@@ -15,7 +15,7 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- 平台 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   平台 <span class="text-error-500">*</span>
                 </label>
                 <select
@@ -32,13 +32,13 @@
 
               <!-- 项目名称 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   项目名称 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.name"
                   type="text"
-                  placeholder="请输入项目名称"
+                  placeholder="Project Name / App Name"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
@@ -48,7 +48,7 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- 是否默认 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   是否默认 <span class="text-error-500">*</span>
                 </label>
                 <select
@@ -64,13 +64,13 @@
 
               <!-- API版本 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   API版本 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.api_version"
                   type="text"
-                  placeholder="如：1.0、2.1"
+                  placeholder="x: Default 1.1, other:Graph API Version"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
@@ -80,13 +80,13 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- 回调地址 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   回调地址 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.redirect_uris"
                   type="url"
-                  placeholder="https://example.com/callback"
+                  placeholder="Callback URI / OAuth Redirect URI"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
@@ -94,13 +94,13 @@
 
               <!-- App ID -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  App ID / Client ID <span class="text-error-500">*</span>
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
+                  App ID <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.app_id"
                   type="text"
-                  placeholder="请输入App ID或Client ID"
+                  placeholder="x: Client ID, other: App ID"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
@@ -110,27 +110,27 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- App 密钥 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  App 密钥 / Client Secret <span class="text-error-500">*</span>
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
+                  App 密钥 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.app_secret"
                   type="password"
-                  placeholder="请输入App密钥或Client Secret"
+                  placeholder="x: API Secret Key, other: App Secret"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
               </div>
 
               <!-- 读取使用Token -->
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              <div v-if="form.provider !== 'twitter'">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   读取使用Token <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.bearer_token"
                   type="password"
-                  placeholder="根据平台要求输入"
+                  placeholder="App Token"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
@@ -148,13 +148,13 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- 用户名 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   用户名 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.external_username"
                   type="text"
-                  placeholder="请输入用户名"
+                  placeholder="x: Screen Name, other: Username"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
@@ -162,13 +162,13 @@
 
               <!-- 账户UID -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   账户UID
                 </label>
                 <input
                   v-model="form.external_user_id"
                   type="text"
-                  placeholder="根据平台要求输入"
+                  placeholder="x: User ID, fb: ID, ins: Instagram Business Account ID"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   :readonly="form.provider === 'twitter'"
                 />
@@ -178,13 +178,13 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- 输入Token -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   输入Token <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.access_token"
                   type="password"
-                  placeholder="根据平台要求输入"
+                  placeholder="x: Access Token, fb: User Access Token, ins: Page Access Token (Graph API)"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
@@ -192,13 +192,13 @@
 
               <!-- 输入密钥 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   输入密钥 <span class="text-error-500">*</span>
                 </label>
                 <input
                   v-model="form.refresh_token"
                   type="password"
-                  placeholder="根据平台要求输入"
+                  placeholder="x: Access Token Secret, other: Refresh Token"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   required
                 />
@@ -208,7 +208,7 @@
             <!-- 所属用户 - 仅当用户角色为admin时显示 -->
             <div v-if="isAdminRole" class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   所属用户 <span class="text-error-500">*</span>
                 </label>
                 <select
