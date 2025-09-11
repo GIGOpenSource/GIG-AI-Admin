@@ -43,6 +43,10 @@ export const TASK_TYPE_OPTIONS: TaskTypeOption[] = [
   {
     value: 'post',
     label: '发帖'
+  },
+  {
+    value: 'follow_task',
+    label: '关注'
   }
 ]
 
@@ -58,7 +62,8 @@ export enum PlatformType {
 export enum TaskType {
   REPLY_COMMENT = 'reply_comment',
   REPLY_MESSAGE = 'reply_message',
-  POST = 'post'
+  POST = 'post',
+  FOLLOW_TASK = 'follow_task'
 }
 
 

@@ -50,13 +50,17 @@
               <TableHead class="whitespace-nowrap">是否默认</TableHead>
               <TableHead class="whitespace-nowrap">API版本</TableHead>
               <TableHead class="whitespace-nowrap">回调地址</TableHead>
+               <TableHead class="whitespace-nowrap">权限类型</TableHead>
               <TableHead class="whitespace-nowrap">appid</TableHead>
+               <TableHead class="whitespace-nowrap">app-key</TableHead>
               <TableHead class="whitespace-nowrap">app密钥</TableHead>
               <TableHead class="whitespace-nowrap">读取使用token</TableHead>
+              <TableHead class="whitespace-nowrap">订阅使用token</TableHead>
               <TableHead class="whitespace-nowrap">账号uid</TableHead>
               <TableHead class="whitespace-nowrap">用户名</TableHead>
               <TableHead class="whitespace-nowrap">输入token</TableHead>
               <TableHead class="whitespace-nowrap">最近调用时间</TableHead>
+              <TableHead class="whitespace-nowrap">权限类型</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
               <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white dark:bg-gray-900 z-10 w-[100px]">操作</TableHead>
             </TableRow>
@@ -70,13 +74,18 @@
                 <TableCell class="whitespace-nowrap">{{ acc.is_default ? '是' : '否' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.api_version || '--' }}</TableCell>
                  <TableCell class="max-w-[200px] truncate" :title="acc.redirect_uris || '--'">{{ acc.redirect_uris || '--' }}</TableCell>
+                <TableCell>权限类型</TableCell>
                  <TableCell class="max-w-[200px] truncate" :title="acc.app_id || acc.client_id || '--'">{{ acc.app_id|| acc.client_id || '--' }}</TableCell>
+
+                  <TableCell>app-key</TableCell>
                  <TableCell class="max-w-[200px] truncate" :title="acc.refresh_token || '--'">{{ acc.refresh_token || '--' }}</TableCell>
                  <TableCell class="max-w-[200px] truncate" :title="acc.bearer_token_masked || '--'">{{ acc.bearer_token_masked || '--' }}</TableCell>
+                   <TableCell>订阅使用token</TableCell>
                  <TableCell class="max-w-[200px] truncate" :title="acc.external_user_id || '--'">{{ acc.external_user_id || '--' }}</TableCell>
                  <TableCell class="max-w-[200px] truncate" :title="acc.external_username || '--'">{{ acc.external_username || '--' }}</TableCell>
                  <TableCell class="max-w-[200px] truncate" :title="acc.access_token || '--'">{{ acc.access_token || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ formatTime(acc.updated_at) || '--' }}</TableCell>
+                   <TableCell>权限类型</TableCell>
                 <!-- <TableCell class="whitespace-nowrap">{{ acc.status }}</TableCell> -->
                 <TableCell class="whitespace-nowrap">
 

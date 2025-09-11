@@ -15,6 +15,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/tag',
+      name: 'tag',
+      component: () => import('../views/tag/tag.vue'),
+      meta: {
+        title: 'Tag',
+      },
+    },
+    {
       path: '/ai-accounts',
       name: 'AI Accounts',
       component: () => import('../views/AIAccounts/index.vue'),
@@ -87,9 +95,7 @@ const router = createRouter({
       meta: {
         title: '空白页',
       },
-    },
-
-    {
+    },{
       path: '/error-404',
       name: '404 Error',
       component: () => import('../views/Errors/FourZeroFour.vue'),
