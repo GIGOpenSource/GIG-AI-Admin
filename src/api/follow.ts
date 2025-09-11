@@ -1,11 +1,14 @@
 import { get, post, put, patch, del } from '@/lib/http'
 
-export const getTags = (params:any) => get('/tasks/follow-targets/',{params})
+export const getFollow = (params:any) => get('/tasks/follow-targets/',{params})
 
-export const getDetailsTags = (id: string) => get(`/tasks/follow-targets/${id}/`)
+//获取账号下拉选择
+export const getBoot = (params:any) => get('/ai/configs/picker/',{params})
 
-export const createTags = (data: any) => post('/tasks/follow-targets/', data)
+export const getDetailsFollow = (id: string) => get(`/tasks/follow-targets/${id}/`)
 
-export const updateTags = (id: string, data: any) => put(`/tasks/follow-targets/${id}/`, data)
+export const createFollow = (data: any) => post('/tasks/follow-targets/', data)
 
-export const deleteTags = (id: string) => del(`/tasks/follow-targets/${id}/`)
+export const updateFollow = (id: string, data: any) => put(`/tasks/follow-targets/${id}/`, data)
+
+export const deleteFollow = (id: string) => del(`/tasks/follow-targets/${id}/`)

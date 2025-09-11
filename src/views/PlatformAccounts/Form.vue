@@ -329,7 +329,7 @@ const handleSubmit = async () => {
     toast.error('请填写App密钥或Client Secret')
     return
   }
-  if (!form.value.bearer_token) {
+  if (!form.value.bearer_token && form.value.provider !== 'twitter') {
     toast.error('请填写读取使用Token')
     return
   }

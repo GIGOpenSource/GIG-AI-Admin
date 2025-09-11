@@ -36,9 +36,9 @@
           <TableHeader>
             <TableRow>
               <TableHead class="whitespace-nowrap">序号</TableHead>
-              <TableHead class="whitespace-nowrap">关注账号</TableHead>
-              <TableHead class="whitespace-nowrap">AI账号</TableHead>
-              <TableHead class="whitespace-nowrap">关注结果</TableHead>
+              <TableHead class="whitespace-nowrap">对方账号</TableHead>
+              <TableHead class="whitespace-nowrap">AI账号选择</TableHead>
+              <TableHead class="whitespace-nowrap">关注执行结果</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -46,18 +46,26 @@
             <template v-if="accounts.length">
               <TableRow v-for="(acc, index) in accounts" :key="acc.id">
                 <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.target_account || '--' }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.ai_accounts || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.external_user_id || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">
+                  <div v-if="acc.runner_accounts && acc.runner_accounts.length > 0" class="flex flex-wrap gap-1">
+                    <span v-for="accountId in acc.runner_accounts" :key="accountId"
+                      class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 whitespace-nowrap">
+                      {{ getAiAccountName(accountId) }}
+                    </span>
+                  </div>
+                  <span v-else class="text-gray-400">--</span>
+                </TableCell>
                 <TableCell class="whitespace-nowrap">
                   <span :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    acc.follow_result === 'success'
+                    acc.completed == true
                       ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
-                      : acc.follow_result === 'failed'
-                      ? 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30'
-                      : 'bg-gray-50 text-gray-600 ring-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:ring-gray-500/30',
+                      : acc.completed == false
+                        ? 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30'
+                        : 'bg-gray-50 text-gray-600 ring-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:ring-gray-500/30'
                   ]">
-                    {{ acc.follow_result === 'success' ? '成功' : acc.follow_result === 'failed' ? '失败' : '待执行' }}
+                    {{ acc.completed ? '已完成':'未完成' }}
                   </span>
                 </TableCell>
                 <TableCell class="text-right whitespace-nowrap">
@@ -98,6 +106,14 @@
           </Pagination>
         </div>
       </ComponentCard>
+      <!-- 表单弹窗组件 -->
+      <FollowForm
+        :showModal="showAdd"
+        :isEditMode="isEditMode"
+        :editData="editData"
+        @close="closeAdd"
+        @success="handleFormSuccess"
+      />
 
       <!-- 删除确认气泡弹窗 -->
       <DeleteConfirmDialog
@@ -121,52 +137,64 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import { getTags, deleteTags } from '@/api/follow.ts'
+import { getFollow, getDetailsFollow,deleteFollow, getBoot } from '@/api/follow.ts'
 import { toast } from 'vue-sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { formatTime } from '@/lib/utils'
+import FollowForm from './form.vue'
 const currentPageTitle = ref('关注列表')
 const accounts = ref([])
 const page = ref(1)
 const pageSize = ref(20) // 默认一页20条
 const total = ref(0)
+const searchQuery = ref('')
+const searchTimeout = ref(null)
+const isSearching = ref(false)
 
-// 模拟数据
-const mockData = [
-  {
-    id: 1,
-    target_account: '@elonmusk',
-    ai_accounts: 'AI助手001',
-    follow_result: 'success'
-  },
-  {
-    id: 2,
-    target_account: '@openai',
-    ai_accounts: 'AI助手002',
-    follow_result: 'failed'
-  },
-  {
-    id: 3,
-    target_account: '@sundarpichai',
-    ai_accounts: 'AI助手003',
-    follow_result: 'pending'
-  },
-  {
-    id: 4,
-    target_account: '@tim_cook',
-    ai_accounts: 'AI助手001',
-    follow_result: 'success'
-  },
-  {
-    id: 5,
-    target_account: '@satyanadella',
-    ai_accounts: 'AI助手004',
-    follow_result: 'pending'
+// AI账号选项
+const aiAccountOptions = ref([])
+
+// 获取AI账号名称
+function getAiAccountName(accountId) {
+  const account = aiAccountOptions.value.find(option => option.id === accountId)
+  return account ? account.bot : `账号${accountId}`
+}
+
+// 获取关注执行结果文本
+function getFollowResultText(result) {
+  switch (result) {
+    case 'success':
+      return '执行成功'
+    case 'failed':
+      return '执行失败'
+    case 'pending':
+    default:
+      return '未执行'
   }
-]
-function onEdit(account) {
-  // TODO: 实现编辑功能
-  console.log('编辑账号:', account)
+}
+
+async function onEdit(account) {
+  try {
+    // 获取详细信息
+    const detailData = await getDetailsFollow(account.id)
+
+    isEditMode.value = true
+    editingId.value = account.id
+
+    // 设置编辑数据
+    editData.value = {
+      id: account.id,
+      external_user_id: detailData.external_user_id || '',
+      runner_accounts: detailData.runner_accounts || []
+    }
+
+    // 打开弹窗
+    showAdd.value = true
+  } catch (error) {
+    console.error('获取详情失败:', error)
+    toast.error('获取详情失败')
+  }
 }
 
 function onDelete(account, event) {
@@ -192,14 +220,14 @@ async function confirmDelete() {
   deleteLoading.value = true
 
   try {
-    await deleteTags(itemToDelete.value.id)
+    await deleteFollow(itemToDelete.value.id)
     toast.success('删除成功')
-    await fetchlist()
+    await fetchAccounts()
     closeDeleteDialog()
   } catch (error) {
     console.error('删除失败:', error)
     toast.error('删除失败', {
-      description: error.response?.data?.message || error.message || '删除配置时发生错误'
+      description: error.response?.data?.message || error.message || '删除关注列表时发生错误'
     })
   } finally {
     deleteLoading.value = false
@@ -213,30 +241,69 @@ function closeDeleteDialog() {
   deleteLoading.value = false
 }
 
+const showAdd = ref(false)
+const isEditMode = ref(false)
+const editingId = ref(null)
+const editData = ref({})
+const isLoading = ref(false)
+
 // 删除确认弹窗相关状态
 const showDeleteDialog = ref(false)
 const deleteLoading = ref(false)
 const itemToDelete = ref(null)
 const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
-
 function openAdd() {
-  // TODO: 实现新增功能
-  console.log('新增关注账号')
+  // 重置为新增模式
+  isEditMode.value = false
+  editingId.value = null
+  editData.value = {}
+  showAdd.value = true
+}
+
+function closeAdd() {
+  showAdd.value = false
+  isEditMode.value = false
+  editingId.value = null
+  editData.value = {}
+}
+
+// 表单成功回调
+function handleFormSuccess() {
+  fetchAccounts() // 刷新列表
+  closeAdd()
 }
 
 
-const fetchlist = async () => {
-  try {
-    // 使用模拟数据
-    accounts.value = mockData
-    total.value = mockData.length
+// 手动搜索按钮点击
+const handleSearchClick = async () => {
+  if (isSearching.value) return
 
-    // 如果需要真实API调用，可以取消注释以下代码
-    // let res = await getTags({
-    //   page: page.value
-    // })
-    // accounts.value = res.results
-    // total.value = res.count
+  isSearching.value = true
+  page.value = 1 // 搜索时重置到第一页
+  try {
+    await fetchAccounts()
+  } finally {
+    isSearching.value = false
+  }
+}
+
+// 清除搜索
+const clearSearch = () => {
+  searchQuery.value = ''
+  page.value = 1 // 重置到第一页
+  fetchAccounts()
+}
+
+
+const fetchAccounts = async () => {
+  try {
+    let res = await getFollow({
+      // search: searchQuery.value,
+      page: page.value
+    })
+
+    accounts.value = res.results
+    total.value = res.count
 
   } catch (error) {
     console.error('获取列表失败:', error)
@@ -246,14 +313,26 @@ const fetchlist = async () => {
   }
 }
 
+// 获取AI账号列表
+const fetchAiAccounts = async () => {
+  try {
+    const res = await getBoot({})
+    aiAccountOptions.value = res
+  } catch (error) {
+    console.error('获取AI账号失败:', error)
+    aiAccountOptions.value = []
+  }
+}
+
 // 监听分页变化
 watch(page, (newPage) => {
   console.log('Page changed to:', newPage)
-  fetchlist()
+  fetchAccounts()
 })
 
 onMounted(() => {
-  fetchlist()
+  fetchAccounts()
+  fetchAiAccounts()
 })
 </script>
 
