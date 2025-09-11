@@ -18,11 +18,9 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   平台 <span class="text-error-500">*</span>
                 </label>
-                <select
-                  v-model="form.provider"
+                <select v-model="form.provider"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                >
+                  required>
                   <option value="">请选择平台</option>
                   <option v-for="option in PLATFORM_OPTIONS" :key="option.value" :value="option.value">
                     {{ option.label }}
@@ -35,13 +33,9 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   项目名称 <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.name"
-                  type="text"
-                  placeholder="Project Name / App Name"
+                <input v-model="form.name" type="text" placeholder="Project Name / App Name"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                  required />
               </div>
             </div>
 
@@ -51,11 +45,9 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   是否默认 <span class="text-error-500">*</span>
                 </label>
-                <select
-                  v-model="form.is_default"
+                <select v-model="form.is_default"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                >
+                  required>
                   <option value="">请选择</option>
                   <option value="true">是</option>
                   <option value="false">否</option>
@@ -67,13 +59,9 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   API版本 <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.api_version"
-                  type="text"
-                  placeholder="x: Default 1.1, other:Graph API Version"
+                <input v-model="form.api_version" type="text" placeholder="x: Default 1.1, other:Graph API Version"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                  required />
               </div>
             </div>
 
@@ -110,13 +98,9 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   App ID <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.app_id"
-                  type="text"
-                  placeholder="x: Client ID, other: App ID"
+                <input v-model="form.app_id" type="text" placeholder="x: Client ID, other: App ID"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                  required />
               </div>
 
               <!-- App 密钥 -->
@@ -124,13 +108,32 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   App 密钥 <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.app_secret"
-                  type="password"
-                  placeholder="x: API Secret Key, other: App Secret"
+                <input v-model="form.app_secret" type="password" placeholder="x: API Secret Key, other: App Secret"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                  required />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <!-- 权限类型：scopes -->
+              <div class="sm:col-span-2">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <label class="text-sm font-bold text-black dark:text-white">
+                    权限类型
+                  </label>
+                  <button
+                    type="button"
+                    @click="showScopesHelp = true"
+                    class="flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+                    title="查看权限类型说明"
+                  >
+                    <svg class="w-3 h-3 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                    </svg>
+                  </button>
+                </div>
+                <input v-model="form.scopes" type="text" placeholder="多个权限以逗号分隔，如：read,write,admin"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
             </div>
 
@@ -141,13 +144,9 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   读取使用Token <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.bearer_token"
-                  type="password"
-                  placeholder="App Token"
+                <input v-model="form.bearer_token" type="password" placeholder="App Token"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                  required />
               </div>
             </div>
           </div>
@@ -165,13 +164,9 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   用户名 <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.external_username"
-                  type="text"
-                  placeholder="x: Screen Name, other: Username"
+                <input v-model="form.external_username" type="text" placeholder="x: Screen Name, other: Username"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                  required />
               </div>
 
               <!-- 账户UID -->
@@ -179,13 +174,10 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   账户UID
                 </label>
-                <input
-                  v-model="form.external_user_id"
-                  type="text"
+                <input v-model="form.external_user_id" type="text"
                   placeholder="x: User ID, fb: ID, ins: Instagram Business Account ID"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  :readonly="form.provider === 'twitter'"
-                />
+                  :readonly="form.provider === 'twitter'" />
               </div>
             </div>
 
@@ -195,13 +187,10 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   输入Token <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.access_token"
-                  type="password"
+                <input v-model="form.access_token" type="password"
                   placeholder="x: Access Token, fb: User Access Token, ins: Page Access Token (Graph API)"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                  required />
               </div>
 
               <!-- 输入密钥 -->
@@ -209,13 +198,10 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   输入密钥 <span class="text-error-500">*</span>
                 </label>
-                <input
-                  v-model="form.refresh_token"
-                  type="password"
+                <input v-model="form.refresh_token" type="password"
                   placeholder="x: Access Token Secret, other: Refresh Token"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  required
-                />
+                  required />
               </div>
             </div>
 
@@ -225,11 +211,9 @@
                 <label class="mb-1.5 block text-sm font-bold text-black dark:text-white">
                   所属用户 <span class="text-error-500">*</span>
                 </label>
-                <select
-                  v-model="form.owner"
+                <select v-model="form.owner"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  :required="isAdminRole"
-                >
+                  :required="isAdminRole">
                   <option value="">请选择所属用户</option>
                   <option v-for="user in userList" :key="user.id" :value="user.id">
                     {{ user.username }} ({{ user.email }})
@@ -241,18 +225,10 @@
 
           <!-- 按钮组 -->
           <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <Button
-              type="button"
-              variant="outline"
-              @click="handleCancel"
-              :disabled="loading"
-            >
+            <Button type="button" variant="outline" @click="handleCancel" :disabled="loading">
               取消
             </Button>
-            <Button
-              type="submit"
-              :disabled="loading"
-            >
+            <Button type="submit" :disabled="loading">
               <span v-if="loading" class="mr-2">保存中...</span>
               {{ isEditMode ? '更新配置' : '创建配置' }}
             </Button>
@@ -260,6 +236,9 @@
         </form>
       </ComponentCard>
     </div>
+
+    <!-- Scopes Help Drawer -->
+    <scopeHelper v-model:isOpen="showScopesHelp" />
   </AdminLayout>
 </template>
 
@@ -274,6 +253,7 @@ import { createPlatform, createAccount, getAccountById, getConfigById, updateCon
 import { toast } from 'vue-sonner'
 import { getUser } from '@/api/index.ts'
 import { PLATFORM_OPTIONS } from '@/config/platforms'
+import scopeHelper from './scopeHelper.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -282,6 +262,7 @@ const router = useRouter()
 const loading = ref(false)
 const userList = ref([])
 const isEditMode = computed(() => !!route.query.id)
+const showScopesHelp = ref(false)
 
 const currentPageTitle = computed(() =>
   isEditMode.value ? '编辑平台账户配置' : '新增平台账户配置'
@@ -307,6 +288,7 @@ const form = ref({
   app_id: '',
   app_secret: '',
   bearer_token: '',
+  scopes: '',
   // 用户信息
   external_username: '',
   external_user_id: '',
@@ -317,6 +299,7 @@ const form = ref({
 
 // 提交表单
 const handleSubmit = async () => {
+
   // 表单验证
   if (!form.value.provider) {
     toast.error('请选择平台')
@@ -378,7 +361,8 @@ const handleSubmit = async () => {
       is_default: form.value.is_default === 'true',
       api_version: form.value.api_version,
       // redirect_uris: form.value.redirect_uris,
-      bearer_token: form.value.bearer_token
+      bearer_token: form.value.bearer_token,
+      scopes: form.value.scopes ? form.value.scopes.split(',').map(scope => scope.trim()).filter(scope => scope) : []
     }
 
     // 根据平台类型设置不同的ID和Secret字段
@@ -487,6 +471,8 @@ const loadEditData = async () => {
       form.value.app_id = configRes.client_id || configRes.app_id || ''
       form.value.app_secret = configRes.client_secret || configRes.app_secret || ''
       form.value.bearer_token = configRes.bearer_token || ''
+      // 处理scopes数据：将数组转换为逗号分隔的字符串
+      form.value.scopes = Array.isArray(configRes.scopes) ? configRes.scopes.join(', ') : (configRes.scopes || '')
     }
 
     // 渲染账户信息
