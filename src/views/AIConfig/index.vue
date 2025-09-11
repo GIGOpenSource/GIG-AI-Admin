@@ -213,6 +213,9 @@ const type = ref([
   },{
     title: 'Grok',
     value: 'grok'
+  },{
+    title: 'Deepseek',
+    value: 'deepseek'
   },
 
 ])

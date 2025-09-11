@@ -33,8 +33,8 @@
               <TableRow v-for="(item, idx) in tasks" :key="item.id">
                 <TableCell class="whitespace-nowrap">{{ idx + 1 }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getPlatformText(item.provider) }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ item.keyword_config_id }}</TableCell>
-                <TableCell class="max-w-[380px] truncate" :title="item.prompt_config_id">{{ item.prompt_config_id }}
+                <TableCell class="whitespace-nowrap">{{ item.keyword_config?.name || '--' }}</TableCell>
+                <TableCell class="max-w-[380px] truncate" :title="item.prompt_config?.name">{{ item.prompt_config?.name || '--'}}
                 </TableCell>
                 <TableCell class="whitespace-nowrap">{{ getTaskTypeText(item.type) }}</TableCell>
                 <TableCell class="whitespace-nowrap">
@@ -109,6 +109,7 @@
                       <option v-for="option in TASK_TYPE_OPTIONS" :key="option.value" :value="option.value">
                         {{ option.label }}
                       </option>
+
                   </select>
                 </div>
               </div>
@@ -145,6 +146,7 @@
                       <option v-for="option in TASK_TYPE_OPTIONS" :key="option.value" :value="option.value">
                         {{ option.label }}
                       </option>
+
                     </select>
                   </div>
                 </div>
@@ -812,7 +814,9 @@ async function fetchTasks() {
       provider: item.provider,
       type: item.type,
       keyword_config_id: item.keyword_config_id,
+      keyword_config: item.keyword_config, // 添加完整的keyword_config对象
       prompt_config_id: item.prompt_config_id,
+      prompt_config: item.prompt_config, // 添加完整的prompt_config对象
       recurrence_type: item.recurrence_type,
       day_of_month: item.day_of_month,
       time_of_day: item.time_of_day,
@@ -824,6 +828,8 @@ async function fetchTasks() {
       ai_accounts: item.ai_accounts,
       follow_result: item.follow_result
     })) : []
+    console.log(tasks.value,'tasks.value');
+
     total.value = res.count || 0
   } catch (error) {
     console.error('Failed to fetch tasks:', error)
