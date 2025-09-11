@@ -19,7 +19,7 @@ const router = createRouter({
       name: 'AI Accounts',
       component: () => import('../views/AIAccounts/index.vue'),
       meta: {
-        title: 'AI Accounts',
+        title: 'AI账户管理',
       },
     },
     {
@@ -27,7 +27,7 @@ const router = createRouter({
       name: 'AI Config',
       component: () => import('../views/AIConfig/index.vue'),
       meta: {
-        title: 'AI Config',
+        title: 'AI配置',
       },
     },
     {
@@ -35,7 +35,7 @@ const router = createRouter({
       name: 'Auto Reply',
       component: () => import('../views/AutoReply/index.vue'),
       meta: {
-        title: 'Auto Reply',
+        title: '自动回复',
       },
     },
     {
@@ -43,7 +43,7 @@ const router = createRouter({
       name: 'Prompt Templates',
       component: () => import('../views/PromptTemplates/index.vue'),
       meta: {
-        title: 'Prompt Templates',
+        title: '提示词模板',
       },
     },
     {
@@ -51,7 +51,7 @@ const router = createRouter({
       name: 'Keyword Rules',
       component: () => import('../views/KeywordRules/index.vue'),
       meta: {
-        title: 'Keyword Rules',
+        title: '关键词规则',
       },
     },
     {
@@ -59,7 +59,7 @@ const router = createRouter({
       name: 'Platform Accounts',
       component: () => import('../views/PlatformAccounts/index.vue'),
       meta: {
-        title: 'Platform Accounts',
+        title: '平台账户配置',
       },
     },
     {
@@ -67,7 +67,7 @@ const router = createRouter({
       name: 'Platform Accounts New',
       component: () => import('../views/PlatformAccounts/Form.vue'),
       meta: {
-        title: 'New Platform Account',
+        title: '新增平台账户',
         parentRoute: '/platform-accounts',
       },
     },
@@ -76,7 +76,7 @@ const router = createRouter({
       name: 'Platform Accounts Edit',
       component: () => import('../views/PlatformAccounts/Form.vue'),
       meta: {
-        title: 'Edit Platform Account',
+        title: '编辑平台账户',
         parentRoute: '/platform-accounts',
       },
     },
@@ -85,7 +85,7 @@ const router = createRouter({
       name: 'Blank',
       component: () => import('../views/Pages/BlankPage.vue'),
       meta: {
-        title: 'Blank',
+        title: '空白页',
       },
     },
 
@@ -94,7 +94,7 @@ const router = createRouter({
       name: '404 Error',
       component: () => import('../views/Errors/FourZeroFour.vue'),
       meta: {
-        title: '404 Error',
+        title: '404错误',
       },
     },
 
@@ -103,7 +103,7 @@ const router = createRouter({
       name: 'Signin',
       component: () => import('../views/Auth/Signin.vue'),
       meta: {
-        title: 'Signin',
+        title: '登录',
       },
     },
     // {
@@ -119,7 +119,7 @@ const router = createRouter({
       name: 'User Profile',
       component: () => import('../views/Others/UserProfile.vue'),
       meta: {
-        title: 'User Profile',
+        title: '个人资料',
       },
     },
   ],
