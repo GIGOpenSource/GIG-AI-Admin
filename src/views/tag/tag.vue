@@ -47,33 +47,16 @@
           <TableHeader>
             <TableRow>
               <TableHead class="whitespace-nowrap">序号</TableHead>
-              <TableHead class="whitespace-nowrap">模板名称</TableHead>
-              <TableHead class="whitespace-nowrap">模板类型</TableHead>
-              <TableHead class="whitespace-nowrap">所属用户</TableHead>
-              <TableHead class="whitespace-nowrap">是否激活</TableHead>
+              <TableHead class="whitespace-nowrap">话题名称</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <template v-if="templates.length">
-              <TableRow v-for="(item,index) in templates" :key="item.id">
+            <template v-if="tags.length">
+              <TableRow v-for="(item,index) in tags" :key="item.id">
                 <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ item.name }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ getTemplateTypeText(item.type) }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ item.user }}</TableCell>
-                <TableCell class="whitespace-nowrap">
-                  <span
-                    :class="[
-                      'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                      item.isActive
-                        ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
-                        : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
-                    ]"
-                  >
-                    {{ item.isActive ? '启用' : '停用' }}
-                  </span>
-                </TableCell>
                 <TableCell class="whitespace-nowrap">{{ formatTime(item.createdAt) }}</TableCell>
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
@@ -90,7 +73,7 @@
             </template>
                <template v-else>
               <TableRow>
-                <TableCell :colspan="6" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+                <TableCell :colspan="4" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
               </TableRow>
             </template>
           </TableBody>
@@ -116,47 +99,14 @@
       <!-- 统一的弹窗组件 -->
       <Modal v-if="showModal" :fullScreenBackdrop="true" @close="closeModal">
         <template #body>
-          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑提示词模板' : '新增提示词模板' }}</h3>
+          <div class="relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+            <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑话题' : '新增话题' }}</h3>
             <form @submit.prevent="submitForm" class="space-y-4">
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模板名称<span
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">话题名称<span
                     class="text-error-500">*</span></label>
-                <input v-model="form.name" type="text" placeholder="如：客服问候模板"
+                <input v-model="form.name" type="text" placeholder="请输入话题名称"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-              <div v-if="userRole === 'admin'">
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">所属用户<span
-                    class="text-error-500">*</span></label>
-                <select v-model="form.owner_id"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-                  <option value="" disabled>请选择用户</option>
-                  <option v-for="u in userOptions" :key="u.id" :value="u.id">{{ u.name }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">模板类型</label>
-                <select v-model="form.scene"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="" disabled>请选择模板类型</option>
-                  <option value="reply_comment">回复评论</option>
-                  <option value="reply_message">回复消息</option>
-                  <option value="post">发帖</option>
-                </select>
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">是否激活</label>
-                <select v-model="form.enabled"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option :value="true">是</option>
-                  <option :value="false">否</option>
-                </select>
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">内容<span
-                    class="text-error-500">*</span></label>
-                <textarea v-model="form.content" rows="3" placeholder="请输入模板内容"
-                  class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
               </div>
               <div class="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" @click="closeModal">取消</Button>
@@ -199,16 +149,14 @@ import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { getUser } from '@/api/index'
-import { getPromptsConfigs, createPromptsConfig, createUserPromptsConfig, updatePromptsConfig, deletePromptsConfig, getPromptsConfig } from '@/api/prompts'
+import { getTags, createTags, updateTags, deleteTags } from '@/api/tag'
 import { toast } from 'vue-sonner'
 import { formatTime } from '@/lib/utils'
 const currentPageTitle = ref('话题列表')
 const isLoading = ref(false)
 const isEditMode = ref(false)
-const templates = ref([])
+const tags = ref([])
 const editingId = ref('')
-// 用户下拉选项
-const userOptions = ref([])
 // 统一的弹窗显示状态
 const showModal = ref(false)
 
@@ -217,9 +165,6 @@ const showDeleteDialog = ref(false)
 const deleteLoading = ref(false)
 const itemToDelete = ref(null)
 const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
-// 当前用户信息
-const currentUser = ref(null)
-const userRole = ref('')
 // 分页相关
 const page = ref(1)
 const pageSize = ref(20) // 默认一页20条
@@ -227,57 +172,28 @@ const total = ref(0)
 const searchQuery = ref('')
 const isSearching = ref(false)
 
-// 获取当前用户信息
-function getCurrentUserInfo() {
+async function fetchTags() {
   try {
-    const profileStr = localStorage.getItem('profile')
-    const role = localStorage.getItem('role')
-
-    if (profileStr) {
-      currentUser.value = JSON.parse(profileStr)
-    }
-    if (role) {
-      userRole.value = role
-    }
-  } catch (error) {
-    console.error('获取用户信息失败:', error)
-  }
-}
-
-async function fetchUsers() {
-  const res = await getUser({})
-  const list = (res && res.results) ? res.results : res
-  userOptions.value = Array.isArray(list) ? list.map((u) => ({
-    id: u.id ?? u.pk ?? u.uuid,
-    name: u.username || u.name || u.email || `用户${u.id}`,
-  })) : []
-}
-
-async function fetchTemplates() {
-  try {
-    const res = await getPromptsConfigs({
+    const res = await getTags({
       page: page.value,
+      page_size: pageSize.value,
     })
 
     // 处理分页数据
     if (res && res.results) {
-      templates.value = Array.isArray(res.results) ? res.results.map((item) => ({
+      tags.value = Array.isArray(res.results) ? res.results.map((item) => ({
         id: item.id,
         name: item.name,
-        type: item.scene || item.type,
-        user: item.owner_detail?.username || item.user,
-        isActive: item.enabled !== undefined ? item.enabled : item.isActive,
-        content: item.content,
-        createdAt: item.createdAt || item.created_at,
+        createdAt: item.created_at || item.createdAt,
       })) : []
       total.value = res.count || 0
     }
   } catch (error) {
-    console.error('Failed to fetch templates:', error)
-    templates.value = []
+    console.error('Failed to fetch tags:', error)
+    tags.value = []
     total.value = 0
-    toast.error('获取模板列表失败', {
-      description: error.response?.data?.message || error.message || '获取模板列表时发生错误'
+    toast.error('获取话题列表失败', {
+      description: error.response?.data?.message || error.message || '获取话题列表时发生错误'
     })
   }
 }
@@ -286,11 +202,6 @@ async function fetchTemplates() {
 const form = ref({
   id: '',
   name: '',
-  scene: '',
-  owner_id: '',
-  enabled: true,
-  content: '',
-  createdAt: '',
 })
 
 // 打开新增弹窗
@@ -298,17 +209,6 @@ async function openAdd() {
   isEditMode.value = false
   editingId.value = ''
   resetForm()
-
-  // 如果用户角色为 user，自动设置 owner_id 为当前用户 ID
-  if (userRole.value === 'user' && currentUser.value?.id) {
-    form.value.owner_id = currentUser.value.id
-  }
-
-  // 如果是管理员且用户列表为空，则获取用户列表
-  if (userRole.value === 'admin' && userOptions.value.length === 0) {
-    await fetchUsers()
-  }
-
   showModal.value = true
 }
 
@@ -318,35 +218,19 @@ async function openEdit(item) {
   editingId.value = item.id
   showModal.value = true
 
-  // 如果是管理员且用户列表为空，则获取用户列表
-  if (userRole.value === 'admin' && userOptions.value.length === 0) {
-    await fetchUsers()
-  }
-
   try {
-    const detail = await getPromptsConfig(String(item.id))
     form.value = {
-      id: detail.id ?? item.id,
-      name: detail.name ?? item.name,
-      scene: detail.scene ?? item.type,
-      owner_id: detail.owner_id ?? detail.owner ?? item.user,
-      enabled: typeof detail.enabled === 'boolean' ? detail.enabled : (typeof detail.isActive === 'boolean' ? detail.isActive : item.isActive),
-      content: detail.content ?? item.content,
-      createdAt: detail.createdAt ?? detail.created_at ?? item.createdAt,
+      id: item.id,
+      name: item.name,
     }
   } catch (error) {
-    console.error('Failed to fetch template detail:', error)
-    toast.error('获取模板详情失败', {
-      description: error.response?.data?.message || error.message || '获取模板详情时发生错误'
+    console.error('Failed to fetch tag detail:', error)
+    toast.error('获取话题详情失败', {
+      description: error.response?.data?.message || error.message || '获取话题详情时发生错误'
     })
     form.value = {
       id: item.id,
       name: item.name,
-      scene: item.type,
-      owner_id: item.user,
-      enabled: item.isActive,
-      content: item.content,
-      createdAt: item.createdAt,
     }
   }
 }
@@ -364,11 +248,6 @@ function resetForm() {
   form.value = {
     id: '',
     name: '',
-    scene: '',
-    owner_id: '',
-    enabled: true,
-    content: '',
-    createdAt: '',
   }
 }
 
@@ -379,23 +258,8 @@ async function submitForm() {
 
   // 表单验证 - 逐个检查并提示具体字段
   if (!form.value.name || form.value.name.trim() === '') {
-    toast.error('请填写模板名称', {
-      description: '模板名称不能为空'
-    })
-    return
-  }
-
-  // 只有管理员需要验证所属用户字段
-  if (userRole.value === 'admin' && (!form.value.owner_id || form.value.owner_id === '')) {
-    toast.error('请选择所属用户', {
-      description: '所属用户不能为空'
-    })
-    return
-  }
-
-  if (!form.value.content || form.value.content.trim() === '') {
-    toast.error('请填写模板内容', {
-      description: '模板内容不能为空'
+    toast.error('请填写话题名称', {
+      description: '话题名称不能为空'
     })
     return
   }
@@ -405,38 +269,27 @@ async function submitForm() {
   try {
     // 准备提交数据
     const submitData = {
-      owner_id: form.value.owner_id,
-      owner: form.value.owner_id,
-      scene: form.value.scene,
       name: form.value.name.trim(),
-      content: form.value.content.trim(),
-      enabled: form.value.enabled
     }
 
     // 根据模式调用不同的接口
     if (isEditMode.value) {
       // 编辑模式：调用更新接口
-      await updatePromptsConfig(editingId.value, submitData)
-      // toast.success('模板更新成功')
+      await updateTags(editingId.value, submitData)
     } else {
-      // 新增模式：根据用户角色使用不同的创建方法
-      if (userRole.value === 'user') {
-        await createUserPromptsConfig(submitData)
-      } else {
-        await createPromptsConfig(submitData)
-      }
-      // toast.success('模板新增成功')
+      // 新增模式：调用创建接口
+      await createTags(submitData)
     }
 
     // 成功后关闭弹窗并刷新列表
-    toast.success(isEditMode.value ? '模板更新成功' : '模板新增成功')
+    toast.success(isEditMode.value ? '话题更新成功' : '话题新增成功')
     closeModal()
-    await fetchTemplates()
+    await fetchTags()
 
   } catch (error) {
     console.error(isEditMode.value ? '更新失败:' : '新增失败:', error)
     toast.error(isEditMode.value ? '更新失败' : '新增失败', {
-      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新模板时发生错误' : '新增模板时发生错误')
+      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新话题时发生错误' : '新增话题时发生错误')
     })
   } finally {
     isLoading.value = false
@@ -470,14 +323,14 @@ async function confirmDelete() {
   deleteLoading.value = true
 
   try {
-    await deletePromptsConfig(itemToDelete.value.id)
+    await deleteTags(itemToDelete.value.id)
     toast.success('删除成功')
-    await fetchTemplates()
+    await fetchTags()
     closeDeleteDialog()
   } catch (error) {
     console.error('删除失败:', error)
     toast.error('删除失败', {
-      description: error.response?.data?.message || error.message || '删除模板时发生错误'
+      description: error.response?.data?.message || error.message || '删除话题时发生错误'
     })
   } finally {
     deleteLoading.value = false
@@ -492,14 +345,6 @@ function closeDeleteDialog() {
 }
 
 
-function getTemplateTypeText(type) {
-  const typeMap = {
-    'reply_comment': '回复评论',
-    'reply_message': '回复消息',
-    'post': '发帖'
-  }
-  return typeMap[type] || type
-}
 
 // 手动搜索按钮点击
 const handleSearchClick = async () => {
@@ -508,11 +353,11 @@ const handleSearchClick = async () => {
   isSearching.value = true
   page.value = 1 // 搜索时重置到第一页
   try {
-    await fetchTemplates()
+    await fetchTags()
   } catch (error) {
     console.error('搜索失败:', error)
     toast.error('搜索失败', {
-      description: error.response?.data?.message || error.message || '搜索模板时发生错误'
+      description: error.response?.data?.message || error.message || '搜索话题时发生错误'
     })
   } finally {
     isSearching.value = false
@@ -524,7 +369,7 @@ const clearSearch = () => {
   searchQuery.value = ''
   page.value = 1 // 重置到第一页
   try {
-    fetchTemplates()
+    fetchTags()
   } catch (error) {
     console.error('清除搜索失败:', error)
     toast.error('清除搜索失败', {
@@ -537,7 +382,7 @@ const clearSearch = () => {
 watch(page, async (newPage) => {
   console.log('Page changed to:', newPage)
   try {
-    await fetchTemplates()
+    await fetchTags()
   } catch (error) {
     console.error('分页加载失败:', error)
     toast.error('分页加载失败', {
@@ -547,13 +392,6 @@ watch(page, async (newPage) => {
 })
 
 onMounted(async () => {
-  getCurrentUserInfo()
-
-  // 只有管理员才需要获取用户列表
-  if (userRole.value === 'admin') {
-    await Promise.all([fetchUsers(), fetchTemplates()])
-  } else {
-    await fetchTemplates()
-  }
+  await fetchTags()
 })
 </script>
