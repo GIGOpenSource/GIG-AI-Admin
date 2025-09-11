@@ -23,6 +23,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/follow',
+      name: 'Follow',
+      component: () => import('../views/follow/follow.vue'),
+      meta: {
+        title: '关注列表',
+      },
+    },
+    {
       path: '/ai-accounts',
       name: 'AI Accounts',
       component: () => import('../views/AIAccounts/index.vue'),
