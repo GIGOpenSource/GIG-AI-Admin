@@ -193,15 +193,19 @@ const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 const menuGroups = ref(
   [
     {
-      title: "Menu",
+      title: "首页",
       items: [
         { icon: GridIcon, name: "数据统计", path: "/" },
-        { icon: ChatIcon, name: "话题列表", path: "/tag" },
-        { icon: TaskIcon, name: "任务列表", path: "/auto-reply" },
+        { icon: TaskIcon, name: "任务列表", path: "/task" },
+      ],
+    },
+    {
+      title: "配置管理",
+      items: [
+        { icon: SettingsIcon, name: "平台账户配置", path: "/platform-accounts" },
         { icon: UserCircleIcon, name: "关注列表", path: "/follow" },
         { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
         { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
-        { icon: SettingsIcon, name: "平台账户配置", path: "/platform-accounts" },
       ],
     },
   ]
@@ -211,8 +215,12 @@ onMounted(() => {
 })
 const menu = () => {
   if (userinfo.is_staff && userinfo.is_superuser) {
+    // Add admin items to the first group (首页)
     menuGroups.value[0].items.push(
-      { icon: TableIcon, name: "用户列表", path: "/ai-accounts" },
+      { icon: TableIcon, name: "用户列表", path: "/ai-accounts" }
+    )
+    // Add AI service config to the second group (配置管理)
+    menuGroups.value[1].items.push(
       { icon: ListIcon, name: "AI 服务配置", path: "/ai-config" }
     )
   } else {

@@ -47,11 +47,11 @@ const router = createRouter({
       },
     },
     {
-      path: '/auto-reply',
+      path: '/task',
       name: 'Auto Reply',
       component: () => import('../views/AutoReply/index.vue'),
       meta: {
-        title: '自动回复',
+        title: '任务列表',
       },
     },
     {
