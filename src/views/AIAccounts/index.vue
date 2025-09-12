@@ -394,6 +394,7 @@ async function submitForm() {
           ...accounts.value[idx],
           is_active: updatedIsActive,
         }
+          await getList()
         toast.success('用户更新成功')
       } catch (e) {
         console.error('update failed', e)
