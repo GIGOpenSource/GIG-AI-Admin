@@ -225,22 +225,36 @@
 
               <!-- 其他任务类型的字段 -->
               <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div class="sm:col-span-2">
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">关键词<span
-                      class="text-error-500">*</span></label>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">关键词</label>
                   <select v-model="form.keyword"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option disabled value="">请选择关键词</option>
                     <option v-for="opt in keywordOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
                 </div>
-                <div class="sm:col-span-2">
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提示词<span
-                      class="text-error-500">*</span></label>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提示词</label>
                   <select v-model="form.prompt"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option disabled value="">请选择提示词</option>
                     <option v-for="opt in availablePrompts" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">大模型</label>
+                  <select v-model="form.ai_config_id"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                    <option disabled value="">请选择大模型</option>
+                    <option v-for="opt in modelOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台账号</label>
+                  <select v-model="form.social_config_id"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                    <option disabled value="">请选择平台账号</option>
+                    <option v-for="opt in platformAccountOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
                 </div>
 
@@ -362,6 +376,8 @@ import { getKeywordsConfigs } from '@/api/keywrods'
 import { getPromptsConfigs } from '@/api/prompts'
 import { getUser } from '@/api/index'
 import { getTags } from '@/api/tag'
+import { getlist as getAiConfigs } from '@/api/aiCofig'
+import { getAccount } from '@/api/platform'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
 import { PLATFORM_OPTIONS, TASK_TYPE_OPTIONS } from '@/config/platforms'
@@ -376,6 +392,12 @@ const userOptions = ref([])
 
 // AI账号选项
 const aiAccountOptions = ref([])
+
+// 大模型选项
+const modelOptions = ref([])
+
+// 平台账号选项
+const platformAccountOptions = ref([])
 
 // Tag选项
 const tagOptions = ref([])
@@ -397,6 +419,8 @@ const form = ref({
   type: '',
   keyword: '',
   prompt: '',
+  ai_config_id: '',
+  social_config_id: '',
   recurrence_type: 'daily',
   day_of_month: 1,
   time_of_day: '09:00',
@@ -436,6 +460,8 @@ async function openEdit(item) {
       type: detail.type ?? item.type,
       keyword: detail.keyword_config_id ?? item.keyword_config_id,
       prompt: detail.prompt_config_id ?? item.prompt_config_id,
+      ai_config_id: detail.ai_config_id ?? item.ai_config_id ?? '',
+      social_config_id: detail.social_config_id ?? item.social_config_id ?? '',
       recurrence_type: detail.recurrence_type ?? item.recurrence_type,
       day_of_month: detail.day_of_month ?? item.day_of_month,
       time_of_day: detail.time_of_day ?? item.time_of_day,
@@ -457,6 +483,8 @@ async function openEdit(item) {
       type: item.type,
       keyword: item.keyword_config_id,
       prompt: item.prompt_config_id,
+      ai_config_id: item.ai_config_id ?? '',
+      social_config_id: item.social_config_id ?? '',
       recurrence_type: item.recurrence_type,
       day_of_month: item.day_of_month,
       time_of_day: item.time_of_day,
@@ -480,6 +508,8 @@ function closeForm() {
     type: '',
     keyword: '',
     prompt: '',
+    ai_config_id: '',
+    social_config_id: '',
     recurrence_type: 'daily',
     day_of_month: 1,
     time_of_day: '09:00',
@@ -522,18 +552,6 @@ async function submitForm() {
       })
       return
     }
-    if (!form.value.keyword) {
-      toast.error('关键词不能为空', {
-        description: '请选择关键词'
-      })
-      return
-    }
-    if (!form.value.prompt) {
-      toast.error('提示词不能为空', {
-        description: '请选择提示词'
-      })
-      return
-    }
 
     // 其他任务类型需要验证的字段
     if (!form.value.day_of_month) {
@@ -566,6 +584,8 @@ async function submitForm() {
       payload.provider = form.value.provider
       payload.keyword_config_id = form.value.keyword
       payload.prompt_config_id = form.value.prompt
+      payload.ai_config_id = form.value.ai_config_id
+      payload.social_config_id = form.value.social_config_id
       payload.recurrence_type = form.value.recurrence_type
       payload.day_of_month = form.value.day_of_month
       payload.time_of_day = form.value.time_of_day
@@ -933,6 +953,43 @@ async function fetchTags() {
   }
 }
 
+async function fetchModels() {
+  try {
+    const res = await getAiConfigs({
+      search: '',
+      page: 1
+    })
+    const list = (res && res.results) ? res.results : res
+    modelOptions.value = Array.isArray(list) ? list.map((item) => ({
+      id: item.id,
+      name: item.name
+    })) : []
+  } catch (error) {
+    console.error('Failed to fetch models:', error)
+    toast.error('获取大模型列表失败', {
+      description: error.response?.data?.message || error.message || '获取大模型列表时发生错误'
+    })
+    modelOptions.value = []
+  }
+}
+
+async function fetchPlatformAccounts() {
+  try {
+    const res = await getAccount({})
+    const list = (res && res.results) ? res.results : res
+    platformAccountOptions.value = Array.isArray(list) ? list.map((item) => ({
+      id: item.id,
+      name: item.external_username || item.username || `账号${item.id}`
+    })) : []
+  } catch (error) {
+    console.error('Failed to fetch platform accounts:', error)
+    toast.error('获取平台账号列表失败', {
+      description: error.response?.data?.message || error.message || '获取平台账号列表时发生错误'
+    })
+    platformAccountOptions.value = []
+  }
+}
+
 // 监听页码变化，自动刷新列表
 watch(page, () => {
   fetchTasks()
@@ -964,7 +1021,9 @@ onMounted(async () => {
     fetchKeywords(),
     fetchPrompts(),
     fetchAiAccounts(),
-    fetchTags()
+    fetchTags(),
+    fetchModels(),
+    fetchPlatformAccounts()
   ])
 })
 
