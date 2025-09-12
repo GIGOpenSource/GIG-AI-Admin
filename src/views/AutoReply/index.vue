@@ -379,7 +379,7 @@ import { getPromptsConfigs } from '@/api/prompts'
 import { getUser } from '@/api/index'
 import { getTags } from '@/api/tag'
 import { getlist as getAiConfigs } from '@/api/aiCofig'
-import { getAccount, runNow, lookResult } from '@/api/platform'
+import { getConfigs, runNow, lookResult } from '@/api/platform'
 import { getFollow } from '@/api/follow'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
@@ -1161,11 +1161,11 @@ async function fetchModels() {
 
 async function fetchPlatformAccounts() {
   try {
-    const res = await getAccount({})
+    const res = await getConfigs({})
     const list = (res && res.results) ? res.results : res
     platformAccountOptions.value = Array.isArray(list) ? list.map((item) => ({
       id: item.id,
-      name: item.external_username || item.username || `账号${item.id}`
+      name: item.external_username || item.name || item.username || `账号${item.id}`
     })) : []
   } catch (error) {
     console.error('Failed to fetch platform accounts:', error)

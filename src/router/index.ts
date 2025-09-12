@@ -75,7 +75,7 @@ const router = createRouter({
       name: 'Platform Accounts',
       component: () => import('../views/PlatformAccounts/index.vue'),
       meta: {
-        title: '平台账户配置',
+        title: '平台账户',
       },
     },
     {

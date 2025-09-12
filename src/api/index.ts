@@ -22,3 +22,6 @@ export const getdate = (data:{page:number}) => get('/stats/overview/', {params:d
 
 // 修改密码
 export const changePassword = (data: { old_password: string, new_password: string }) => post('/accounts/auth/change-password/', data)
+
+// 设置密码
+export const resetPassword = ( data: any) => post(`/accounts/auth/admin/change-password/`, data)

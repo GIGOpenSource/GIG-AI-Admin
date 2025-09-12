@@ -202,7 +202,7 @@ const menuGroups = ref(
     {
       title: "配置管理",
       items: [
-        { icon: SettingsIcon, name: "平台账户配置", path: "/platform-accounts" },
+        { icon: SettingsIcon, name: "平台账户", path: "/platform-accounts" },
         { icon: UserCircleIcon, name: "关注列表", path: "/follow" },
         { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
         { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
