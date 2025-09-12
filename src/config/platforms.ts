@@ -44,10 +44,10 @@ export const TASK_TYPE_OPTIONS: TaskTypeOption[] = [
     value: 'post',
     label: '发帖'
   },
-  // {
-  //   value: 'follow_task',
-  //   label: '关注任务'
-  // }
+  {
+    value: 'follow',
+    label: '关注'
+  }
 ]
 
 // 平台类型枚举
@@ -63,7 +63,7 @@ export enum TaskType {
   REPLY_COMMENT = 'reply_comment',
   REPLY_MESSAGE = 'reply_message',
   POST = 'post',
-  FOLLOW_TASK = 'follow_task'
+  follow = 'follow'
 }
 
 

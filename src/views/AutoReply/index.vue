@@ -31,48 +31,55 @@
             </TableRow>
           </TableHeader>
           <TableBody>
-            <template v-if="tasks.length">
-              <TableRow v-for="(item, idx) in tasks" :key="item.id">
-                <TableCell class="whitespace-nowrap">{{ idx + 1 }}</TableCell>
+          <template v-if="tasks.length">
+               <TableRow v-for="(item, idx) in tasks" :key="item.id">
+              <TableCell class="whitespace-nowrap">{{ idx + 1 }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getPlatformText(item.provider) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ item.keyword_config?.name || '--' }}</TableCell>
                 <TableCell class="max-w-[380px] truncate" :title="item.prompt_config?.name">{{ item.prompt_config?.name || '--'}}
                 </TableCell>
+<<<<<<< Updated upstream
                 <TableCell class="whitespace-nowrap">{{ item.ai_config?.name || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getSocialAccountText(item.social_config_id) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getTaskTypeText(item.type) }}</TableCell>
                 <TableCell class="whitespace-nowrap">
+=======
+              <TableCell class="whitespace-nowrap">{{ getTaskTypeText(item.type) }}</TableCell>
+              <TableCell class="whitespace-nowrap">
+>>>>>>> Stashed changes
                   <span :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
                     item.enabled
                       ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
                       : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
                   ]">
-                    {{ item.enabled ? '启用' : '停用' }}
-                  </span>
-                </TableCell>
-                <TableCell class="whitespace-nowrap">{{ item.day_of_month }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ getRecurrenceTypeText(item.recurrence_type) }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ item.time_of_day }}</TableCell>
+                  {{ item.enabled ? '启用' : '停用' }}
+                </span>
+              </TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.day_of_month }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ getRecurrenceTypeText(item.recurrence_type) }}</TableCell>
+              <TableCell class="whitespace-nowrap">{{ item.time_of_day }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getTagsText(item.tags) }}</TableCell>
                 <!-- <TableCell class="whitespace-nowrap">最大限制数</TableCell> -->
                 <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ item.target_account || '--' }}</TableCell>
                 <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ getAiAccountsText(item.ai_accounts) }}</TableCell>
                 <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ getFollowResultText(item.follow_result) }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ formatTime(item.created_at) }}</TableCell>
-                <TableCell class="text-right whitespace-nowrap">
-                  <div class="flex items-center justify-end gap-2">
-                    <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
+              <TableCell class="whitespace-nowrap">{{ formatTime(item.created_at) }}</TableCell>
+              <TableCell class="text-right whitespace-nowrap">
+                <div class="flex items-center justify-end gap-2">
+                  <Button size="sm" variant="outline" @click="btn(item)" :disabled="runNowLoading">立即执行</Button>
+                  <Button size="sm" variant="outline" @click="viewResult(item)" :disabled="resultLoading">查看执行结果</Button>
+                  <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
                     <button
                       class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
                       @click="onDelete(item, $event)">
                       删除
                     </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </template>
-            <template v-else>
+                </div>
+              </TableCell>
+            </TableRow>
+          </template>
+           <template v-else>
               <TableRow>
                 <TableCell :colspan="10" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
               </TableRow>
@@ -103,7 +110,7 @@
             <h3 class="mb-4 text-lg font-semibold">{{ isEditing ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitForm" class="space-y-4">
               <!-- 关注任务时只显示类型选择 -->
-              <div v-if="form.type === 'follow_task'" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div v-if="form.type === 'follow'" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span
                       class="text-error-500">*</span></label>
@@ -120,109 +127,50 @@
 
               <!-- 其他任务类型显示完整字段 -->
               <div v-else>
-                <div v-if="role == 'admin'">
+              <div v-if="role == 'admin'">
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span
                       class="text-error-500">*</span></label>
-                  <select v-model="form.owner"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option value="" disabled>请选择目标用户</option>
-                    <option v-for="user in userOptions" :key="user.id" :value="user.id">{{ user.name }}</option>
-                  </select>
-                </div>
+                <select v-model="form.owner"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <option value="" disabled>请选择目标用户</option>
+                  <option v-for="user in userOptions" :key="user.id" :value="user.id">{{ user.name }}</option>
+                </select>
+              </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
-                  <div>
+                <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span
                         class="text-error-500">*</span></label>
-                    <select v-model="form.provider"
-                      class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <select v-model="form.provider"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                       <option value="">请选择平台</option>
                       <option v-for="option in PLATFORM_OPTIONS" :key="option.value" :value="option.value">
                         {{ option.label }}
                       </option>
-                    </select>
-                  </div>
-                  <div>
+                  </select>
+                </div>
+                <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span
                         class="text-error-500">*</span></label>
-                    <select v-model="form.type"
-                      class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <select v-model="form.type"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                       <option value="">请选择类型</option>
                       <option v-for="option in TASK_TYPE_OPTIONS" :key="option.value" :value="option.value">
                         {{ option.label }}
                       </option>
 
-                    </select>
+                  </select>
                   </div>
                 </div>
               </div>
               <!-- 关注任务专用字段 -->
-              <div v-if="form.type === 'follow_task'" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div v-if="form.type === 'follow'" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">对方账号<span
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">关注列表<span
                       class="text-error-500">*</span></label>
-                  <input v-model="form.target_account" type="text" placeholder="请输入对方账号"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">AI账号选择<span
-                      class="text-error-500">*</span></label>
-
-                  <!-- 自定义多选下拉框 -->
-                  <div class="relative ai-account-dropdown">
-                    <!-- 显示区域 -->
-                    <div @click="toggleAiAccountDropdown"
-                      class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs cursor-pointer focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 min-h-[44px] flex items-center">
-                      <div v-if="form.ai_accounts.length === 0" class="text-gray-400">请选择AI账号</div>
-                      <div v-else class="flex flex-wrap gap-1">
-                        <span v-for="account in form.ai_accounts" :key="account.id"
-                          class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {{ getAiAccountName(account.id) }}
-                          <button type="button" @click.stop="removeAiAccountById(account.id)"
-                            class="ml-1.5 inline-flex items-center justify-center w-3 h-3 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 dark:hover:bg-blue-800 dark:hover:text-blue-300">
-                            <!-- <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
-                              <path d="m0 0 2 2m0 0 2 2m-2-2 2-2m-2 2-2 2"/>
-                            </svg> -->
-                            X
-                          </button>
-                        </span>
-                      </div>
-                      <!-- 下拉箭头 -->
-                      <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': showAiAccountDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                      </div>
-                    </div>
-
-                    <!-- 下拉选项 -->
-                    <div v-if="showAiAccountDropdown"
-                      class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      <div v-if="aiAccountOptions.length === 0" class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
-                        暂无AI账号选项
-                      </div>
-                      <div v-else>
-                        <div v-for="account in aiAccountOptions" :key="account.id"
-                          @click="toggleAiAccount(account.id)"
-                          class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
-                          <span>{{ account.name }}</span>
-                          <div v-if="form.ai_accounts.some(acc => acc.id === account.id)" class="text-blue-500">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">关注执行结果<span
-                      class="text-error-500">*</span></label>
-                  <select v-model="form.follow_result"
+                  <select v-model="selectedFollowId" @change="onFollowChange"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option value="pending">未执行</option>
-                    <option value="failed">执行失败</option>
-                    <option value="success">执行成功</option>
+                    <option value="">请选择关注列表</option>
+                    <option v-for="follow in followOptions" :key="follow.id" :value="follow.id">{{ follow.external_user_id }}</option>
                   </select>
                 </div>
               </div>
@@ -314,8 +262,8 @@
                         <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': showTagDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                      </div>
-                    </div>
+                </div>
+              </div>
 
                     <!-- 下拉选项 -->
                     <div v-if="showTagDropdown"
@@ -342,8 +290,6 @@
                     已选择: {{ form.tags.length }}/5
                   </div>
                 </div>
-              </div>
-
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">状态</label>
                 <select v-model="form.enabled"
@@ -352,6 +298,9 @@
                   <option :value="false">停用</option>
                 </select>
               </div>
+              </div>
+
+
               <div class="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" @click="closeForm">取消</Button>
                 <Button type="submit">保存</Button>
@@ -364,6 +313,43 @@
       <!-- 删除确认气泡弹窗 -->
       <DeleteConfirmDialog :isOpen="showDeleteDialog" :title="'删除'" :description="'确定要删除吗？此操作不可撤销。'"
         :isLoading="deleteLoading" :triggerRect="triggerRect" @close="closeDeleteDialog" @confirm="confirmDelete" />
+
+      <!-- 执行结果弹窗 -->
+      <Modal v-if="showResultModal" :fullScreenBackdrop="true" @close="closeResultModal">
+        <template #body>
+          <div class="relative z-10 w-full max-w-4xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+            <h3 class="mb-4 text-lg font-semibold">执行结果</h3>
+            <div v-if="resultLoading" class="flex items-center justify-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span class="ml-2 text-gray-600">加载中...</span>
+            </div>
+            <div v-else-if="executionResult && executionResult.length > 0" class="space-y-4">
+              <div v-for="(result, index) in executionResult" :key="index"
+                class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">执行记录 {{ index + 1 }}</span>
+                  <span class="text-xs px-2 py-1 rounded-full"
+                    :class="getStatusClass(result.status)">
+                    {{ getStatusText(result.status) }}
+                  </span>
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <div><strong>开始时间:</strong> {{ formatTime(result.started_at) }}</div>
+                  <div v-if="result.finished_at"><strong>结束时间:</strong> {{ formatTime(result.finished_at) }}</div>
+                  <div v-if="result.error_message"><strong>错误信息:</strong> {{ result.error_message }}</div>
+                  <div v-if="result.result"><strong>执行结果:</strong> {{ result.result }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+              暂无执行结果
+            </div>
+            <div class="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" @click="closeResultModal">关闭</Button>
+            </div>
+          </div>
+        </template>
+      </Modal>
     </div>
   </AdminLayout>
 
@@ -385,7 +371,8 @@ import { getPromptsConfigs } from '@/api/prompts'
 import { getUser } from '@/api/index'
 import { getTags } from '@/api/tag'
 import { getlist as getAiConfigs } from '@/api/aiCofig'
-import { getAccount } from '@/api/platform'
+import { getAccount, runNow, lookResult } from '@/api/platform'
+import { getFollow } from '@/api/follow'
 import { toast } from "vue-sonner"
 import { formatTime } from '@/lib/utils'
 import { PLATFORM_OPTIONS, TASK_TYPE_OPTIONS } from '@/config/platforms'
@@ -401,6 +388,9 @@ const userOptions = ref([])
 // AI账号选项
 const aiAccountOptions = ref([])
 
+// 关注列表选项
+const followOptions = ref([])
+
 // 大模型选项
 const modelOptions = ref([])
 
@@ -412,7 +402,16 @@ const tagOptions = ref([])
 
 // 下拉框状态
 const showTagDropdown = ref(false)
+
+// 关注列表单选相关状态
+const selectedFollowId = ref('')
 const showAiAccountDropdown = ref(false)
+
+// 执行结果相关状态
+const showResultModal = ref(false)
+const resultLoading = ref(false)
+const runNowLoading = ref(false)
+const executionResult = ref([])
 
 // 分页参数
 const page = ref(1)
@@ -435,9 +434,7 @@ const form = ref({
   enabled: true,
   tags: [],//tags - 存储话题ID数组
   // 关注任务专用字段
-  target_account: '',
-  ai_accounts: [{ id: '' }],
-  follow_result: 'pending'
+  follow_targets: []
 })
 
 // 删除确认弹窗相关状态
@@ -450,7 +447,7 @@ const isEditing = computed(() => editingId.value !== null)
 
 // 检查是否有关注任务
 const hasFollowTasks = computed(() => {
-  return tasks.value.some(task => task.type === 'follow_task')
+  return tasks.value.some(task => task.type === 'follow')
 })
 
 function openAdd() {
@@ -476,9 +473,14 @@ async function openEdit(item) {
       enabled: typeof detail.enabled === 'boolean' ? detail.enabled : item.enabled,
       tags: Array.isArray(detail.tags) ? detail.tags : (Array.isArray(item.tags) ? item.tags : []),
       // 关注任务字段
-      target_account: detail.target_account ?? item.target_account ?? '',
-      ai_accounts: detail.ai_accounts ?? item.ai_accounts ?? [{ id: '' }],
-      follow_result: detail.follow_result ?? item.follow_result ?? 'pending'
+      follow_targets: Array.isArray(detail.follow_targets) ? detail.follow_targets : (Array.isArray(item.follow_targets) ? item.follow_targets : [])
+    }
+
+    // 设置关注列表单选值
+    if (form.value.follow_targets && form.value.follow_targets.length > 0) {
+      selectedFollowId.value = form.value.follow_targets[0]
+    } else {
+      selectedFollowId.value = ''
     }
   } catch (error) {
     console.error('Failed to fetch task detail:', error)
@@ -499,9 +501,14 @@ async function openEdit(item) {
       enabled: item.enabled,
       tags: Array.isArray(item.tags) ? item.tags : [],
       // 关注任务字段
-      target_account: item.target_account ?? '',
-      ai_accounts: item.ai_accounts ?? [{ id: '' }],
-      follow_result: item.follow_result ?? 'pending'
+      follow_targets: Array.isArray(item.follow_targets) ? item.follow_targets : []
+    }
+
+    // 设置关注列表单选值
+    if (form.value.follow_targets && form.value.follow_targets.length > 0) {
+      selectedFollowId.value = form.value.follow_targets[0]
+    } else {
+      selectedFollowId.value = ''
     }
   }
   showForm.value = true
@@ -523,10 +530,11 @@ function closeForm() {
     time_of_day: '09:00',
     enabled: true,
     tags: [],
-    target_account: '',
-    ai_accounts: [{ id: '' }],
-    follow_result: 'pending'
+    follow_targets: []
   }
+
+  // 重置关注列表单选值
+  selectedFollowId.value = ''
 }
 
 async function submitForm() {
@@ -539,16 +547,10 @@ async function submitForm() {
   }
 
   // 关注任务的特殊验证
-  if (form.value.type === 'follow_task') {
-    if (!form.value.target_account) {
-      toast.error('对方账号不能为空', {
-        description: '请输入对方账号'
-      })
-      return
-    }
-    if (!form.value.ai_accounts.some(account => account.id)) {
-      toast.error('AI账号不能为空', {
-        description: '请至少选择一个AI账号'
+  if (form.value.type === 'follow') {
+    if (!form.value.follow_targets || form.value.follow_targets.length === 0) {
+      toast.error('关注列表不能为空', {
+        description: '请选择关注列表'
       })
       return
     }
@@ -598,17 +600,17 @@ async function submitForm() {
     }
 
     // 其他任务类型需要验证的字段
-    if (!form.value.day_of_month) {
-      toast.error('循环周期不能为空', {
-        description: '请输入循环周期'
-      })
-      return
-    }
-    if (!form.value.time_of_day) {
-      toast.error('执行时间不能为空', {
-        description: '请选择执行时间'
-      })
-      return
+  if (!form.value.day_of_month) {
+    toast.error('循环周期不能为空', {
+      description: '请输入循环周期'
+    })
+    return
+  }
+  if (!form.value.time_of_day) {
+    toast.error('执行时间不能为空', {
+      description: '请选择执行时间'
+    })
+    return
     }
   }
 
@@ -619,10 +621,8 @@ async function submitForm() {
     }
 
     // 根据任务类型添加不同的字段
-    if (form.value.type === 'follow_task') {
-      payload.target_account = form.value.target_account
-      payload.ai_accounts = form.value.ai_accounts.filter(account => account.id)
-      payload.follow_result = form.value.follow_result
+    if (form.value.type === 'follow') {
+      payload.follow_targets = form.value.follow_targets
     } else {
       payload.owner = form.value.owner
       payload.provider = form.value.provider
@@ -652,6 +652,72 @@ async function submitForm() {
       description: error.response?.data?.message || error.message || (isEditing.value ? '更新任务时发生错误' : '创建任务时发生错误')
     })
   }
+}
+
+// 立即执行任务 - 使用btn接口
+async function btn(item) {
+  try {
+    runNowLoading.value = true
+    await runNow(String(item.id), {})
+    toast.success('任务执行成功', {
+      description: '任务已开始执行'
+    })
+  } catch (error) {
+    console.error('Failed to run task:', error)
+    toast.error('执行失败', {
+      description: error.response?.data?.message || error.message || '执行任务时发生错误'
+    })
+  } finally {
+    runNowLoading.value = false
+  }
+}
+
+// 查看执行结果
+async function viewResult(item) {
+  try {
+    resultLoading.value = true
+    showResultModal.value = true
+    const res = await lookResult(String(item.id))
+    executionResult.value = res.results || res || []
+  } catch (error) {
+    console.error('Failed to fetch execution result:', error)
+    toast.error('获取执行结果失败', {
+      description: error.response?.data?.message || error.message || '获取执行结果时发生错误'
+    })
+    executionResult.value = []
+  } finally {
+    resultLoading.value = false
+  }
+}
+
+// 关闭执行结果弹窗
+function closeResultModal() {
+  showResultModal.value = false
+  executionResult.value = []
+}
+
+// 获取状态文本
+function getStatusText(status) {
+  const statusMap = {
+    'pending': '等待中',
+    'running': '执行中',
+    'completed': '已完成',
+    'failed': '执行失败',
+    'cancelled': '已取消'
+  }
+  return statusMap[status] || status || '未知状态'
+}
+
+// 获取状态样式类
+function getStatusClass(status) {
+  const classMap = {
+    'pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    'running': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    'completed': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    'failed': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    'cancelled': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+  }
+  return classMap[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
 }
 
 function onDelete(item, event) {
@@ -822,6 +888,16 @@ function toggleTag(tagId) {
         description: '最多只能选择5个话题'
       })
     }
+  }
+}
+
+// 关注列表选择变化处理
+function onFollowChange() {
+  if (selectedFollowId.value) {
+    // 单选但以数组形式存储
+    form.value.follow_targets = [selectedFollowId.value]
+  } else {
+    form.value.follow_targets = []
   }
 }
 
@@ -1011,6 +1087,17 @@ async function fetchTags() {
   }
 }
 
+// 获取关注列表
+async function fetchFollowList() {
+  try {
+    const res = await getFollow({})
+    followOptions.value = res.results || []
+  } catch (error) {
+    console.error('获取关注列表失败:', error)
+    followOptions.value = []
+  }
+}
+
 async function fetchModels() {
   try {
     const res = await getAiConfigs({
@@ -1079,6 +1166,7 @@ onMounted(async () => {
     fetchKeywords(),
     fetchPrompts(),
     fetchAiAccounts(),
+    fetchFollowList(),
     fetchTags(),
     fetchModels(),
     fetchPlatformAccounts()
