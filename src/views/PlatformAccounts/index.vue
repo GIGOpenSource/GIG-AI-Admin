@@ -99,7 +99,13 @@
                 </TableCell>
                 <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 z-10 w-[280px]">
                   <div class="flex items-center justify-end gap-2">
-                    <Button size="sm" variant="outline" @click="onViewCallbackUrl(acc)" :disabled="loadingCallbackUrl">
+                    <Button
+                      v-if="acc.provider !== 'twitter'"
+                      size="sm"
+                      variant="outline"
+                      @click="onViewCallbackUrl(acc)"
+                      :disabled="loadingCallbackUrl"
+                    >
                       <span v-if="loadingCallbackUrl" class="mr-2">获取中...</span>
                       查看回调地址
                     </Button>
