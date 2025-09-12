@@ -17,23 +17,18 @@ COPY . .
 ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
-# Build for production
+# Build for production (static assets in /app/dist)
 RUN npm run build-only
 
 ####################
-# Runtime: Preview #
+# Runtime: Nginx Static #
 ####################
-FROM node:20-alpine AS runner
+FROM nginx:alpine AS runner
 
-WORKDIR /app
+# Copy Nginx config and built assets
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Only copy built assets and necessary files
-COPY --from=builder /app/dist /app/dist
-COPY package*.json ./
-COPY vite.config.ts ./
-RUN npm ci
+EXPOSE 80
 
-ENV HOST=0.0.0.0
-EXPOSE 5173
-
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173"]
+CMD ["nginx", "-g", "daemon off;"]
