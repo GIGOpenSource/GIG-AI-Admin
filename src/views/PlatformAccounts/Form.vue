@@ -365,12 +365,8 @@ const handleSubmit = async () => {
       scopes: form.value.scopes ? form.value.scopes.split(',').map(scope => scope.trim()).filter(scope => scope) : []
     }
 
-    // 根据平台类型设置不同的ID和Secret字段
-    if (form.value.provider === 'twitter') {
-      platformData.client_id = form.value.app_id
-    } else {
-      platformData.app_id = form.value.app_id
-    }
+    platformData.client_id = form.value.app_id
+    platformData.app_id = form.value.app_id
     // 新增时同时传递 client_secret 与 app_secret，取值均为 form.app_secret
     platformData.client_secret = form.value.app_secret
     platformData.app_secret = form.value.app_secret
