@@ -26,7 +26,7 @@
               <!-- <TableHead class="whitespace-nowrap">回复最大限制数</TableHead> -->
               <TableHead v-if="hasFollowTasks" class="whitespace-nowrap">对方账号</TableHead>
               <TableHead v-if="hasFollowTasks" class="whitespace-nowrap">AI账号</TableHead>
-              <TableHead v-if="hasFollowTasks" class="whitespace-nowrap">关注执行结果</TableHead>
+              <TableHead v-if="hasFollowTasks" class="whitespace-nowrap">执行结果</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
