@@ -197,8 +197,8 @@ const menuGroups = ref(
       items: [
         { icon: GridIcon, name: "数据统计", path: "/" },
         { icon: ChatIcon, name: "话题列表", path: "/tag" },
+         { icon: UserCircleIcon, name: "关注列表", path: "/follow" },
         { icon: TaskIcon, name: "任务列表", path: "/auto-reply" },
-        { icon: UserCircleIcon, name: "关注列表", path: "/follow" },
         { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
         { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
         { icon: SettingsIcon, name: "平台账户配置", path: "/platform-accounts" },
