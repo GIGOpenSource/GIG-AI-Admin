@@ -15,7 +15,7 @@
               <TableHead class="whitespace-nowrap">关注账户</TableHead>
               <TableHead class="whitespace-nowrap">触发关键词</TableHead>
               <TableHead class="whitespace-nowrap">提示词</TableHead>
-              <TableHead class="whitespace-nowrap">大模型</TableHead>
+              <!-- <TableHead class="whitespace-nowrap">大模型</TableHead> -->
               <TableHead class="whitespace-nowrap">平台账户</TableHead>
               <TableHead class="whitespace-nowrap">任务类型</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
@@ -40,7 +40,7 @@
                 <TableCell class="whitespace-nowrap">{{ item.keyword_config?.name || '--' }}</TableCell>
                 <TableCell class="max-w-[380px] truncate" :title="item.prompt_config?.name">{{ item.prompt_config?.name || '--'}}
                 </TableCell>
-                <TableCell class="whitespace-nowrap">{{ item.ai_config?.name || '--' }}</TableCell>
+                <!-- <TableCell class="whitespace-nowrap">{{ item.ai_config?.name || '--' }}</TableCell> -->
                 <TableCell class="whitespace-nowrap">{{ getSocialAccountText(item.social_config_id) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getTaskTypeText(item.type) }}</TableCell>
                 <TableCell class="whitespace-nowrap">
@@ -78,7 +78,7 @@
           </template>
            <template v-else>
               <TableRow>
-                <TableCell :colspan="10" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+                <TableCell :colspan="15" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
               </TableRow>
             </template>
 
@@ -203,7 +203,7 @@
                     <option v-for="opt in availablePrompts" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
                 </div>
-                <div>
+                <!-- <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">大模型<span
                       class="text-error-500">*</span></label>
                   <select v-model="form.ai_config_id"
@@ -211,7 +211,7 @@
                     <option value="">请选择大模型</option>
                     <option v-for="opt in modelOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
-                </div>
+                </div> -->
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台账号<span
                       class="text-error-500">*</span></label>
@@ -620,12 +620,12 @@ async function submitForm() {
       })
       return
     }
-    if (!form.value.ai_config_id) {
-      toast.error('大模型不能为空', {
-        description: '请选择大模型'
-      })
-      return
-    }
+    // if (!form.value.ai_config_id) {
+    //   toast.error('大模型不能为空', {
+    //     description: '请选择大模型'
+    //   })
+    //   return
+    // }
     if (!form.value.social_config_id) {
       toast.error('平台账号不能为空', {
         description: '请选择平台账号'

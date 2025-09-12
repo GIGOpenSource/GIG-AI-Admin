@@ -49,6 +49,22 @@ export const TASK_TYPE_OPTIONS: TaskTypeOption[] = [
     label: '关注'
   }
 ]
+//关键词
+export const OPTIONS_TYPE_OPTIONS: TaskTypeOption[] = [
+  {
+    value: 'reply_comment',
+    label: '回复评论'
+  },
+  {
+    value: 'reply_message',
+    label: '回复消息'
+  },
+  {
+    value: 'post',
+    label: '发帖'
+  },
+]
+
 
 // 平台类型枚举
 export enum PlatformType {
