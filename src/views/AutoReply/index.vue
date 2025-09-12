@@ -14,6 +14,8 @@
               <TableHead class="whitespace-nowrap">平台名称</TableHead>
               <TableHead class="whitespace-nowrap">触发关键词</TableHead>
               <TableHead class="whitespace-nowrap">提示词</TableHead>
+              <TableHead class="whitespace-nowrap">大模型</TableHead>
+              <TableHead class="whitespace-nowrap">平台账户</TableHead>
               <TableHead class="whitespace-nowrap">任务类型</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
               <TableHead class="whitespace-nowrap">循环周期</TableHead>
@@ -36,6 +38,8 @@
                 <TableCell class="whitespace-nowrap">{{ item.keyword_config?.name || '--' }}</TableCell>
                 <TableCell class="max-w-[380px] truncate" :title="item.prompt_config?.name">{{ item.prompt_config?.name || '--'}}
                 </TableCell>
+                <TableCell class="whitespace-nowrap">{{ item.ai_config?.name || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ getSocialAccountText(item.social_config_id) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getTaskTypeText(item.type) }}</TableCell>
                 <TableCell class="whitespace-nowrap">
                   <span :class="[
@@ -226,34 +230,38 @@
               <!-- 其他任务类型的字段 -->
               <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">关键词</label>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">关键词<span
+                      class="text-error-500">*</span></label>
                   <select v-model="form.keyword"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option disabled value="">请选择关键词</option>
+                    <option value="">请选择关键词</option>
                     <option v-for="opt in keywordOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提示词</label>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提示词<span
+                      class="text-error-500">*</span></label>
                   <select v-model="form.prompt"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option disabled value="">请选择提示词</option>
+                    <option value="">请选择提示词</option>
                     <option v-for="opt in availablePrompts" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">大模型</label>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">大模型<span
+                      class="text-error-500">*</span></label>
                   <select v-model="form.ai_config_id"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option disabled value="">请选择大模型</option>
+                    <option value="">请选择大模型</option>
                     <option v-for="opt in modelOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台账号</label>
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台账号<span
+                      class="text-error-500">*</span></label>
                   <select v-model="form.social_config_id"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option disabled value="">请选择平台账号</option>
+                    <option value="">请选择平台账号</option>
                     <option v-for="opt in platformAccountOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                   </select>
                 </div>
@@ -552,6 +560,42 @@ async function submitForm() {
       })
       return
     }
+    if (!form.value.provider) {
+      toast.error('平台不能为空', {
+        description: '请选择平台'
+      })
+      return
+    }
+    if (!form.value.type) {
+      toast.error('类型不能为空', {
+        description: '请选择类型'
+      })
+      return
+    }
+    if (!form.value.keyword) {
+      toast.error('关键词不能为空', {
+        description: '请选择关键词'
+      })
+      return
+    }
+    if (!form.value.prompt) {
+      toast.error('提示词不能为空', {
+        description: '请选择提示词'
+      })
+      return
+    }
+    if (!form.value.ai_config_id) {
+      toast.error('大模型不能为空', {
+        description: '请选择大模型'
+      })
+      return
+    }
+    if (!form.value.social_config_id) {
+      toast.error('平台账号不能为空', {
+        description: '请选择平台账号'
+      })
+      return
+    }
 
     // 其他任务类型需要验证的字段
     if (!form.value.day_of_month) {
@@ -683,6 +727,17 @@ function getFollowResultText(result) {
     'success': '执行成功'
   }
   return resultMap[result] || result || '--'
+}
+
+// 平台账户文本格式化
+function getSocialAccountText(socialConfigId) {
+  if (!socialConfigId) {
+    return '--'
+  }
+
+  // 根据social_config_id获取对应的名称
+  const socialAccount = platformAccountOptions.value.find(option => option.id === socialConfigId)
+  return socialAccount ? socialAccount.name : `账号${socialConfigId}`
 }
 
 // AI账号文本格式化
@@ -837,6 +892,9 @@ async function fetchTasks() {
       keyword_config: item.keyword_config, // 添加完整的keyword_config对象
       prompt_config_id: item.prompt_config_id,
       prompt_config: item.prompt_config, // 添加完整的prompt_config对象
+      ai_config_id: item.ai_config_id,
+      ai_config: item.ai_config, // 添加完整的ai_config对象
+      social_config_id: item.social_config_id,
       recurrence_type: item.recurrence_type,
       day_of_month: item.day_of_month,
       time_of_day: item.time_of_day,
