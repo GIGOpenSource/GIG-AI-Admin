@@ -39,6 +39,7 @@
               <TableHead class="whitespace-nowrap">配置名称</TableHead>
               <TableHead class="whitespace-nowrap">平台名称</TableHead>
               <TableHead class="whitespace-nowrap">key</TableHead>
+              <TableHead class="whitespace-nowrap">基础地址</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
               <TableHead class="whitespace-nowrap">优先级</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
@@ -52,7 +53,8 @@
                 <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
                 <!--  -->
                 <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.api_key_masked }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ acc.api_key }}</TableCell>
+                 <TableCell class="whitespace-nowrap">{{ acc.base_url }}</TableCell>
                 <TableCell class="whitespace-nowrap">
 
                   <span :class="[
@@ -129,6 +131,12 @@
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">key<span
                     class="text-error-500">*</span></label>
                 <input v-model="form.api_key" type="password" placeholder="请输入key"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">基础地址</label>
+                <input v-model="form.base_url" type="text" placeholder="如：https://api.openai.com/v1"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
 
@@ -244,7 +252,8 @@ async function onEdit(account) {
       name: detailData.name || '',
       provider: detailData.provider || '',
       priority: detailData.priority || '',
-      api_key: detailData.api_key_masked || '',
+      api_key: detailData.api_key || '',
+      base_url: detailData.base_url || '',
       model: detailData.model || ''
     }
 
@@ -315,6 +324,7 @@ const form = ref({
   provider: '',
   priority: '',
   api_key: '',
+  base_url: '',
   model: ''
 })
 
@@ -327,6 +337,7 @@ function openAdd() {
     provider: '',
     priority: '',
     api_key: '',
+    base_url: '',
     model: ''
   }
   showAdd.value = true
@@ -341,6 +352,7 @@ function closeAdd() {
     provider: '',
     priority: '',
     api_key: '',
+    base_url: '',
     model: ''
   }
 }
@@ -387,6 +399,7 @@ async function submitAdd() {
       provider: form.value.provider,
       priority: form.value.priority,
       api_key: form.value.api_key.trim(),
+      base_url: form.value.base_url.trim(),
       model: form.value.model.trim()
     }
 
