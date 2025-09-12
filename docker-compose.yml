@@ -7,6 +7,7 @@ networks:
 
 services:
   app:
+    container_name: app
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,4 +18,6 @@ services:
       - "5173:5173"
     restart: unless-stopped
     networks:
-      - clipai_net
+      clipai_net:
+        aliases:
+          - app
