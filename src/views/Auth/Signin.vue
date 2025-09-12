@@ -217,8 +217,8 @@ import { toast } from "vue-sonner"
 
 const router = useRouter()
 
-const username = ref('admin')
-const password = ref('woshishei')
+const username = ref('')
+const password = ref('')
 const showPassword = ref(false)
 const remember_me = ref(false)
 
