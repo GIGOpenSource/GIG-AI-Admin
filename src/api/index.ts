@@ -21,7 +21,7 @@ export const getUserDetail = (id: string) => get(`/accounts/users/${id}/`)
 export const getdate = (data:{page:number}) => get('/stats/overview/', {params:data})
 
 // 修改密码
-export const changePassword = (data: { old_password: string, new_password: string }) => post('/accounts/auth/change-password/', data)
+export const changePassword = (data: { password: string }) => post('/accounts/auth/change-password/', data)
 
 // 设置密码
 export const resetPassword = ( data: any) => post(`/accounts/auth/admin/change-password/`, data)

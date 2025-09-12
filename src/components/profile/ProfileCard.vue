@@ -23,7 +23,7 @@
             </div>
           </div>
         </div>
-        <button @click="isProfileInfoModal = true" class="edit-button">
+        <button @click="isProfileInfoModal = true" class="edit-button min-w-sm">
           <svg
             class="fill-current"
             width="18"
@@ -74,7 +74,7 @@
               修改密码
             </h4>
             <p class="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              为了账户安全，请输入旧密码和新密码。
+              请输入新的密码。
             </p>
           </div>
           <form @submit.prevent="handleChangePassword" class="flex flex-col">
@@ -84,25 +84,10 @@
                   <label
                     class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                   >
-                    旧密码 <span class="text-error-500">*</span>
-                  </label>
-                  <input
-                    v-model="passwordForm.old_password"
-                    type="password"
-                    placeholder="请输入旧密码"
-                    required
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                  >
                     新密码 <span class="text-error-500">*</span>
                   </label>
                   <input
-                    v-model="passwordForm.new_password"
+                    v-model="passwordForm.password"
                     type="password"
                     placeholder="请输入新密码"
                     required
@@ -167,22 +152,27 @@ const userRole = computed(() => {
 
 // 密码表单
 const passwordForm = ref({
-  old_password: '',
-  new_password: ''
+  password: ''
 })
 
 // 修改密码
 const handleChangePassword = async () => {
-  if (!passwordForm.value.old_password || !passwordForm.value.new_password) {
-    toast.error('请填写完整的密码信息')
+  if (!passwordForm.value.password) {
+    toast.error('请输入新密码')
+    return
+  }
+
+  if (passwordForm.value.password.length < 6) {
+    toast.error('密码长度不足', {
+      description: '密码长度至少需要6位'
+    })
     return
   }
 
   passwordLoading.value = true
   try {
     const response = await changePassword({
-      old_password: passwordForm.value.old_password,
-      new_password: passwordForm.value.new_password
+      password: passwordForm.value.password
     })
 
     // 如果API返回新的token，更新localStorage中的token
@@ -194,8 +184,7 @@ const handleChangePassword = async () => {
     isProfileInfoModal.value = false
     // 重置表单
     passwordForm.value = {
-      old_password: '',
-      new_password: ''
+      password: ''
     }
   } catch (error) {
     console.error('修改密码失败:', error)
