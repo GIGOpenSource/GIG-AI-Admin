@@ -52,7 +52,7 @@
               <TableHead class="whitespace-nowrap">ins</TableHead>
                <TableHead class="whitespace-nowrap">x</TableHead>
               <TableHead class="whitespace-nowrap">FB</TableHead>
-              <TableHead class="whitespace-nowrap">发帖数</TableHead>
+              <!-- <TableHead class="whitespace-nowrap">发帖数</TableHead> -->
               <TableHead class="whitespace-nowrap">回复评论数</TableHead>
               <TableHead class="whitespace-nowrap">回复消息数</TableHead>
               <TableHead class="whitespace-nowrap">总曝光量 </TableHead>
@@ -66,7 +66,7 @@
               <TableCell class="whitespace-nowrap">{{ acc.ins }}</TableCell>
                <TableCell class="whitespace-nowrap">{{ acc.x }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.fb }}</TableCell>
-              <TableCell class="whitespace-nowrap">{{ acc.post_count }}</TableCell>
+              <!-- <TableCell class="whitespace-nowrap">{{ acc.post_count }}</TableCell> -->
                <TableCell class="whitespace-nowrap">{{ acc.reply_comment_count }}</TableCell>
                <TableCell class="whitespace-nowrap">{{ acc.reply_message_count }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ acc.total_impressions }}</TableCell>

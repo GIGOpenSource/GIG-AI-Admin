@@ -53,8 +53,12 @@
                 <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
                 <!--  -->
                 <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.api_key }}</TableCell>
-                 <TableCell class="whitespace-nowrap">{{ acc.base_url }}</TableCell>
+                <TableCell>
+                  <div class="max-w-[200px] truncate" :title="acc.api_key">{{ acc.api_key }}</div>
+                </TableCell>
+                 <TableCell>
+                   <div class="max-w-[200px] truncate" :title="acc.base_url">{{ acc.base_url }}</div>
+                 </TableCell>
                 <TableCell class="whitespace-nowrap">
 
                   <span :class="[
