@@ -24,9 +24,9 @@
               <TableHead class="whitespace-nowrap">执行时间</TableHead>
               <TableHead class="whitespace-nowrap">话题</TableHead>
               <!-- <TableHead class="whitespace-nowrap">回复最大限制数</TableHead> -->
-              <TableHead v-if="hasFollowTasks" class="whitespace-nowrap">对方账号</TableHead>
-              <TableHead v-if="hasFollowTasks" class="whitespace-nowrap">AI账号</TableHead>
-              <TableHead v-if="hasFollowTasks" class="whitespace-nowrap">执行结果</TableHead>
+              <TableHead  class="whitespace-nowrap">对方账号</TableHead>
+              <TableHead class="whitespace-nowrap">AI账号</TableHead>
+              <TableHead  class="whitespace-nowrap">执行结果</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
               <TableHead class="whitespace-nowrap text-right">操作</TableHead>
             </TableRow>
@@ -58,9 +58,9 @@
               <TableCell class="whitespace-nowrap">{{ item.time_of_day }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getTagsText(item.tags) }}</TableCell>
                 <!-- <TableCell class="whitespace-nowrap">最大限制数</TableCell> -->
-                <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ item.target_account || '--' }}</TableCell>
-                <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ getAiAccountsText(item.ai_accounts) }}</TableCell>
-                <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ item.completed ?'已完成':'未完成' }}</TableCell>
+                <TableCell  class="whitespace-nowrap">{{ item.target_account || '--' }}</TableCell>
+                <TableCell  class="whitespace-nowrap">{{ getAiAccountsText(item.ai_accounts) }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ item.completed ?'已完成':'未完成' }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ formatTime(item.created_at) }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
