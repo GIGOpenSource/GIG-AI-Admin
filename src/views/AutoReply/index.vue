@@ -12,6 +12,7 @@
             <TableRow>
               <TableHead class="whitespace-nowrap">序号</TableHead>
               <TableHead class="whitespace-nowrap">平台名称</TableHead>
+              <TableHead class="whitespace-nowrap">关注账户</TableHead>
               <TableHead class="whitespace-nowrap">触发关键词</TableHead>
               <TableHead class="whitespace-nowrap">提示词</TableHead>
               <TableHead class="whitespace-nowrap">大模型</TableHead>
@@ -35,6 +36,7 @@
                <TableRow v-for="(item, idx) in tasks" :key="item.id">
               <TableCell class="whitespace-nowrap">{{ idx + 1 }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getPlatformText(item.provider) }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ item.follow_targets && item.follow_targets.length > 0 ? item.follow_targets[0].external_user_id : '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ item.keyword_config?.name || '--' }}</TableCell>
                 <TableCell class="max-w-[380px] truncate" :title="item.prompt_config?.name">{{ item.prompt_config?.name || '--'}}
                 </TableCell>
@@ -58,12 +60,12 @@
                 <!-- <TableCell class="whitespace-nowrap">最大限制数</TableCell> -->
                 <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ item.target_account || '--' }}</TableCell>
                 <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ getAiAccountsText(item.ai_accounts) }}</TableCell>
-                <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ getFollowResultText(item.follow_result) }}</TableCell>
+                <TableCell v-if="hasFollowTasks" class="whitespace-nowrap">{{ item.completed ?'已完成':'未完成' }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ formatTime(item.created_at) }}</TableCell>
               <TableCell class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
-                  <Button size="sm" variant="outline" @click="btn(item)" :disabled="runNowLoading">立即执行</Button>
-                  <Button size="sm" variant="outline" @click="viewResult(item)" :disabled="resultLoading">查看执行结果</Button>
+                  <Button size="sm" variant="outline" v-if="!item.completed" @click="btn(item)" :disabled="runNowLoading">立即执行</Button>
+                  <!-- <Button size="sm" variant="outline" @click="viewResult(item)" :disabled="resultLoading">查看执行结果</Button> -->
                   <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
                     <button
                       class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
@@ -104,19 +106,30 @@
           <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
             <h3 class="mb-4 text-lg font-semibold">{{ isEditing ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitForm" class="space-y-4">
-              <!-- 关注任务时只显示类型选择 -->
-              <div v-if="form.type === 'follow'" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span
+              <!-- 关注任务时显示类型选择和基础字段 -->
+              <div v-if="form.type === 'follow'">
+                <div v-if="role == 'admin'">
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">目标用户<span
                       class="text-error-500">*</span></label>
-                  <select v-model="form.type"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                <select v-model="form.owner"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <option value="" disabled>请选择目标用户</option>
+                  <option v-for="user in userOptions" :key="user.id" :value="user.id">{{ user.name }}</option>
+                </select>
+              </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span
+                        class="text-error-500">*</span></label>
+                  <select v-model="form.type" :disabled="isEditing"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:opacity-50 disabled:cursor-not-allowed">
                       <option value="">请选择类型</option>
                       <option v-for="option in TASK_TYPE_OPTIONS" :key="option.value" :value="option.value">
                         {{ option.label }}
                       </option>
 
                   </select>
+                  </div>
                 </div>
               </div>
 
@@ -146,8 +159,8 @@
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span
                         class="text-error-500">*</span></label>
-                  <select v-model="form.type"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <select v-model="form.type" :disabled="isEditing"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:opacity-50 disabled:cursor-not-allowed">
                       <option value="">请选择类型</option>
                       <option v-for="option in TASK_TYPE_OPTIONS" :key="option.value" :value="option.value">
                         {{ option.label }}
@@ -429,7 +442,8 @@ const form = ref({
   enabled: true,
   tags: [],//tags - 存储话题ID数组
   // 关注任务专用字段
-  follow_targets: []
+  follow_target_ids: [],
+  interval_value: 1 // 关注任务间隔值，默认1
 })
 
 // 删除确认弹窗相关状态
@@ -468,12 +482,18 @@ async function openEdit(item) {
       enabled: typeof detail.enabled === 'boolean' ? detail.enabled : item.enabled,
       tags: Array.isArray(detail.tags) ? detail.tags : (Array.isArray(item.tags) ? item.tags : []),
       // 关注任务字段
-      follow_targets: Array.isArray(detail.follow_targets) ? detail.follow_targets : (Array.isArray(item.follow_targets) ? item.follow_targets : [])
+      follow_target_ids: Array.isArray(detail.follow_target_ids) ? detail.follow_target_ids : (Array.isArray(item.follow_target_ids) ? item.follow_target_ids : []),
+      interval_value: detail.interval_value ?? item.interval_value ?? 1
     }
 
-    // 设置关注列表单选值
-    if (form.value.follow_targets && form.value.follow_targets.length > 0) {
-      selectedFollowId.value = form.value.follow_targets[0]
+    // 设置关注列表单选值 - 从 follow_targets 对象数组中提取 id
+    if (detail.follow_targets && Array.isArray(detail.follow_targets) && detail.follow_targets.length > 0) {
+      // 从 follow_targets 对象数组中提取 id 字段
+      const extractedIds = detail.follow_targets.map(target => target.id).filter(id => id)
+      form.value.follow_target_ids = extractedIds
+      selectedFollowId.value = extractedIds[0] || ''
+    } else if (form.value.follow_target_ids && form.value.follow_target_ids.length > 0) {
+      selectedFollowId.value = form.value.follow_target_ids[0]
     } else {
       selectedFollowId.value = ''
     }
@@ -496,12 +516,18 @@ async function openEdit(item) {
       enabled: item.enabled,
       tags: Array.isArray(item.tags) ? item.tags : [],
       // 关注任务字段
-      follow_targets: Array.isArray(item.follow_targets) ? item.follow_targets : []
+      follow_target_ids: Array.isArray(item.follow_target_ids) ? item.follow_target_ids : [],
+      interval_value: item.interval_value ?? 1
     }
 
-    // 设置关注列表单选值
-    if (form.value.follow_targets && form.value.follow_targets.length > 0) {
-      selectedFollowId.value = form.value.follow_targets[0]
+    // 设置关注列表单选值 - 从 follow_targets 对象数组中提取 id
+    if (item.follow_targets && Array.isArray(item.follow_targets) && item.follow_targets.length > 0) {
+      // 从 follow_targets 对象数组中提取 id 字段
+      const extractedIds = item.follow_targets.map(target => target.id).filter(id => id)
+      form.value.follow_target_ids = extractedIds
+      selectedFollowId.value = extractedIds[0] || ''
+    } else if (form.value.follow_target_ids && form.value.follow_target_ids.length > 0) {
+      selectedFollowId.value = form.value.follow_target_ids[0]
     } else {
       selectedFollowId.value = ''
     }
@@ -525,7 +551,8 @@ function closeForm() {
     time_of_day: '09:00',
     enabled: true,
     tags: [],
-    follow_targets: []
+    follow_target_ids: [],
+    interval_value: 1
   }
 
   // 重置关注列表单选值
@@ -541,9 +568,21 @@ async function submitForm() {
     return
   }
 
-  // 关注任务的特殊验证
+  // 关注任务的验证
   if (form.value.type === 'follow') {
-    if (!form.value.follow_targets || form.value.follow_targets.length === 0) {
+    if (!form.value.owner) {
+      toast.error('目标用户不能为空', {
+        description: '请选择目标用户'
+      })
+      return
+    }
+    if (!form.value.type) {
+      toast.error('类型不能为空', {
+        description: '请选择类型'
+      })
+      return
+    }
+    if (!form.value.follow_target_ids || form.value.follow_target_ids.length === 0) {
       toast.error('关注列表不能为空', {
         description: '请选择关注列表'
       })
@@ -617,7 +656,10 @@ async function submitForm() {
 
     // 根据任务类型添加不同的字段
     if (form.value.type === 'follow') {
-      payload.follow_targets = form.value.follow_targets
+      payload.owner = form.value.owner
+      payload.provider = form.value.provider
+      payload.follow_target_ids = form.value.follow_target_ids
+      payload.interval_value = form.value.interval_value
     } else {
       payload.owner = form.value.owner
       payload.provider = form.value.provider
@@ -657,6 +699,7 @@ async function btn(item) {
     toast.success('任务执行成功', {
       description: '任务已开始执行'
     })
+    fetchTasks()
   } catch (error) {
     console.error('Failed to run task:', error)
     toast.error('执行失败', {
@@ -890,9 +933,9 @@ function toggleTag(tagId) {
 function onFollowChange() {
   if (selectedFollowId.value) {
     // 单选但以数组形式存储
-    form.value.follow_targets = [selectedFollowId.value]
+    form.value.follow_target_ids = [selectedFollowId.value]
   } else {
-    form.value.follow_targets = []
+    form.value.follow_target_ids = []
   }
 }
 
@@ -975,7 +1018,10 @@ async function fetchTasks() {
       // 关注任务字段
       target_account: item.target_account,
       ai_accounts: item.ai_accounts,
-      follow_result: item.follow_result
+      follow_result: item.follow_result,
+      follow_target_ids: item.follow_target_ids,
+      follow_targets:item.follow_targets
+
     })) : []
     console.log(tasks.value,'tasks.value');
 
@@ -1133,6 +1179,14 @@ async function fetchPlatformAccounts() {
 // 监听页码变化，自动刷新列表
 watch(page, () => {
   fetchTasks()
+})
+
+// 监听任务类型变化，自动设置关注任务的默认值
+watch(() => form.value.type, (newType) => {
+  if (newType === 'follow') {
+    // 关注任务时自动设置平台为 twitter
+    form.value.provider = 'twitter'
+  }
 })
 
 // 点击外部关闭下拉框
