@@ -38,15 +38,10 @@
                 <TableCell class="whitespace-nowrap">{{ item.keyword_config?.name || '--' }}</TableCell>
                 <TableCell class="max-w-[380px] truncate" :title="item.prompt_config?.name">{{ item.prompt_config?.name || '--'}}
                 </TableCell>
-<<<<<<< Updated upstream
                 <TableCell class="whitespace-nowrap">{{ item.ai_config?.name || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getSocialAccountText(item.social_config_id) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ getTaskTypeText(item.type) }}</TableCell>
                 <TableCell class="whitespace-nowrap">
-=======
-              <TableCell class="whitespace-nowrap">{{ getTaskTypeText(item.type) }}</TableCell>
-              <TableCell class="whitespace-nowrap">
->>>>>>> Stashed changes
                   <span :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
                     item.enabled
