@@ -49,7 +49,7 @@
               <TableHead class="whitespace-nowrap">项目名称</TableHead>
               <TableHead class="whitespace-nowrap">是否默认</TableHead>
               <TableHead class="whitespace-nowrap">API版本</TableHead>
-              <TableHead class="whitespace-nowrap">回调地址</TableHead>
+              <!-- <TableHead class="whitespace-nowrap">回调地址</TableHead> -->
                <!-- <TableHead class="whitespace-nowrap">权限类型</TableHead> -->
               <TableHead class="whitespace-nowrap">appid</TableHead>
                <!-- <TableHead class="whitespace-nowrap">app-key</TableHead> -->
@@ -73,7 +73,7 @@
                 <TableCell class="whitespace-nowrap">{{ acc.name || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.is_default ? '是' : '否' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.api_version || '--' }}</TableCell>
-                 <TableCell class="max-w-[200px] truncate" :title="acc.redirect_uris || '--'">{{ acc.redirect_uris || '--' }}</TableCell>
+                 <!-- <TableCell class="max-w-[200px] truncate" :title="acc.redirect_uris || '--'">{{ acc.redirect_uris || '--' }}</TableCell> -->
                 <!-- <TableCell>权限类型</TableCell> -->
                  <TableCell class="max-w-[200px] truncate" :title="acc.app_id || acc.client_id || '--'">{{ acc.app_id|| acc.client_id || '--' }}</TableCell>
 
@@ -88,10 +88,9 @@
                    <!-- <TableCell>权限类型</TableCell> -->
                 <!-- <TableCell class="whitespace-nowrap">{{ acc.status }}</TableCell> -->
                 <TableCell class="whitespace-nowrap">
-
                   <span :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    acc.enabled
+                    acc.status
                       ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
                       : 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30',
                   ]">
