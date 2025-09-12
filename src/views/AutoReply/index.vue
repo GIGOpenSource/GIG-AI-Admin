@@ -25,10 +25,10 @@
               <TableHead class="whitespace-nowrap">话题</TableHead>
               <!-- <TableHead class="whitespace-nowrap">回复最大限制数</TableHead> -->
               <TableHead  class="whitespace-nowrap">对方账号</TableHead>
-              <TableHead class="whitespace-nowrap">AI账号</TableHead>
+              <TableHead class="whitespace-nowrap" style="min-width: 100px;">AI账号</TableHead>
               <TableHead  class="whitespace-nowrap">执行结果</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
-              <TableHead class="whitespace-nowrap text-right">操作</TableHead>
+              <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white dark:bg-gray-900 z-10 w-40">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -59,19 +59,19 @@
                 <TableCell class="whitespace-nowrap">{{ getTagsText(item.tags) }}</TableCell>
                 <!-- <TableCell class="whitespace-nowrap">最大限制数</TableCell> -->
                 <TableCell  class="whitespace-nowrap">{{ item.target_account || '--' }}</TableCell>
-                <TableCell  class="whitespace-nowrap">{{ getAiAccountsText(item.ai_accounts) }}</TableCell>
+                <TableCell class="whitespace-nowrap" style="min-width: 100px;">{{ getAiAccountsText(item.ai_accounts) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ item.completed ?'已完成':'未完成' }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ formatTime(item.created_at) }}</TableCell>
-              <TableCell class="text-right whitespace-nowrap">
+              <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 z-10 w-40">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" v-if="!item.completed" @click="btn(item)" :disabled="runNowLoading">立即执行</Button>
                   <!-- <Button size="sm" variant="outline" @click="viewResult(item)" :disabled="resultLoading">查看执行结果</Button> -->
                   <Button size="sm" variant="outline" @click="openEdit(item)">编辑</Button>
-                    <button
-                      class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
-                      @click="onDelete(item, $event)">
-                      删除
-                    </button>
+                  <button
+                    class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
+                    @click="onDelete(item, $event)">
+                    删除
+                  </button>
                 </div>
               </TableCell>
             </TableRow>
