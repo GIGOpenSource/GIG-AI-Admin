@@ -292,22 +292,25 @@
                 </select>
               </div>
 
-              <div class="grid grid-cols-3 gap-4">
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Twitter回复ID</label>
-                  <input v-model="form.twitter_reply_to_tweet_id" type="text" placeholder="请输入Twitter回复ID"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Facebook页面ID</label>
-                  <input v-model="form.facebook_page_id" type="text" placeholder="请输入Facebook页面ID"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Facebook评论ID</label>
-                  <input v-model="form.facebook_comment_id" type="text" placeholder="请输入Facebook评论ID"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                </div>
+              <!-- Twitter回复ID：仅当 type=reply_comment 且 provider=twitter 时显示 -->
+              <div v-if="form.type === 'reply_comment' && form.provider === 'twitter'">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Twitter回复ID</label>
+                <input v-model="form.twitter_reply_to_tweet_id" type="text" placeholder="请输入Twitter回复ID"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+
+              <!-- Facebook页面ID：仅当 type=post 且 provider=facebook 时显示 -->
+              <div v-if="form.type === 'post' && form.provider === 'facebook'">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Facebook页面ID</label>
+                <input v-model="form.facebook_page_id" type="text" placeholder="请输入Facebook页面ID"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+
+              <!-- Facebook评论ID：仅当 type=reply_comment 且 provider=facebook 时显示 -->
+              <div v-if="form.type === 'reply_comment' && form.provider === 'facebook'">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Facebook评论ID</label>
+                <input v-model="form.facebook_comment_id" type="text" placeholder="请输入Facebook评论ID"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
 
               <div class="flex justify-end gap-3 pt-2">
@@ -600,7 +603,7 @@ async function submitAdd() {
 // 获取用户列表
 const fetchUserList = async () => {
   try {
-    const res = await getUser({ page_size: 1000 })
+    const res = await getUser({ page: 1 })
     userList.value = res.results || res.data || []
   } catch (error) {
     console.error('获取用户列表失败:', error)
@@ -610,7 +613,7 @@ const fetchUserList = async () => {
 // 获取标签列表
 const fetchTagList = async () => {
   try {
-    const res = await getTags({ page_size: 1000 })
+    const res = await getTags({ page: 1 })
     tagList.value = res.results || res.data || []
   } catch (error) {
     console.error('获取标签列表失败:', error)
@@ -620,7 +623,7 @@ const fetchTagList = async () => {
 // 获取提示词列表
 const fetchPromptList = async () => {
   try {
-    const res = await getPromptsConfigs({ page_size: 1000 })
+    const res = await getPromptsConfigs({ page: 1 })
     promptList.value = res.results || res.data || []
   } catch (error) {
     console.error('获取提示词列表失败:', error)
@@ -630,7 +633,7 @@ const fetchPromptList = async () => {
 // 获取账户列表（使用同一个用户接口）
 const fetchAccountList = async () => {
   try {
-    const res = await getUser({ page_size: 1000 })
+    const res = await getUser({ page: 1 })
     accountList.value = res.results || res.data || []
   } catch (error) {
     console.error('获取账户列表失败:', error)
