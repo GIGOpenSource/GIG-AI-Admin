@@ -38,7 +38,7 @@ export const getTwitterStart = () => get(`/social/oauth/twitter/start/`)
 
 
 //立即执行
-export const runNow = (id:string,data: any) => post(`/tasks/scheduled/${id}/run_now/`, data)
+export const runNow = (id:string,data: any) => post(`/tasks/simple/${id}/run/`, data)
 
 //查看执行结果
 export const lookResult = (id:string) => post(`/tasks/runs/?task_id=${id}`)

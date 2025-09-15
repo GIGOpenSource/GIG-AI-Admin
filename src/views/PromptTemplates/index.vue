@@ -330,7 +330,7 @@ async function openEdit(item) {
       id: detail.id ?? item.id,
       name: detail.name ?? item.name,
       scene: detail.scene ?? item.type,
-      owner_id: detail.owner_id ?? detail.owner ?? item.user,
+      owner_id: detail.owner_detail.id,
       enabled: typeof detail.enabled === 'boolean' ? detail.enabled : (typeof detail.isActive === 'boolean' ? detail.isActive : item.isActive),
       content: detail.content ?? item.content,
       createdAt: detail.createdAt ?? detail.created_at ?? item.createdAt,

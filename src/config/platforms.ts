@@ -14,7 +14,7 @@ export interface TaskTypeOption {
 export const PLATFORM_OPTIONS: PlatformOption[] = [
   {
     value: 'twitter',
-    label: 'X',
+    label: 'Twitter',
   },
   {
     value: 'facebook',
@@ -36,18 +36,18 @@ export const TASK_TYPE_OPTIONS: TaskTypeOption[] = [
     value: 'reply_comment',
     label: '回复评论'
   },
-  {
-    value: 'reply_message',
-    label: '回复消息'
-  },
+  // {
+  //   value: 'reply_message',
+  //   label: '回复消息'
+  // },
   {
     value: 'post',
     label: '发帖'
   },
-  {
-    value: 'follow',
-    label: '关注'
-  }
+  // {
+  //   value: 'follow',
+  //   label: '关注'
+  // }
 ]
 //关键词
 export const OPTIONS_TYPE_OPTIONS: TaskTypeOption[] = [

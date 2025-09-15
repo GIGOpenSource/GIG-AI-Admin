@@ -22,14 +22,14 @@ const router = createRouter({
         title: 'Tag',
       },
     },
-    {
-      path: '/follow',
-      name: 'Follow',
-      component: () => import('../views/follow/follow.vue'),
-      meta: {
-        title: '关注列表',
-      },
-    },
+    // {
+    //   path: '/follow',
+    //   name: 'Follow',
+    //   component: () => import('../views/follow/follow.vue'),
+    //   meta: {
+    //     title: '关注列表',
+    //   },
+    // },
     {
       path: '/ai-accounts',
       name: 'AI Accounts',
@@ -49,7 +49,7 @@ const router = createRouter({
     {
       path: '/task',
       name: 'Auto Reply',
-      component: () => import('../views/AutoReply/index.vue'),
+      component: () => import('../views/AutoReply/new.vue'),
       meta: {
         title: '任务列表',
       },
@@ -62,12 +62,20 @@ const router = createRouter({
         title: '提示词模板',
       },
     },
-    {
-      path: '/keyword-rules',
-      name: 'Keyword Rules',
-      component: () => import('../views/KeywordRules/index.vue'),
+    // {
+    //   path: '/keyword-rules',
+    //   name: 'Keyword Rules',
+    //   component: () => import('../views/KeywordRules/index.vue'),
+    //   meta: {
+    //     title: '关键词规则',
+    //   },
+    // },
+     {
+      path: '/prompts',
+      name: 'Prompts',
+      component: () => import('../views/prompts/index.vue'),
       meta: {
-        title: '关键词规则',
+        title: '账号池',
       },
     },
     {
