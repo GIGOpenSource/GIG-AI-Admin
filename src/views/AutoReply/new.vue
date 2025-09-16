@@ -33,15 +33,15 @@
             <template v-if="tasks.length">
               <TableRow v-for="(task, index) in tasks" :key="task.id">
                 <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ task.type || '-' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ task.type == 'post'?'发帖':'回复评论' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.provider || '-' }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ task.language || '-' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ langer[task.language] || '-' }}</TableCell>
                 <TableCell class="max-w-[200px] truncate" :title="task.text">{{ task.text || '-' }}</TableCell>
                   <TableCell class="max-w-[200px] truncate" :title="task.mentions">{{ task.mentions || '-' }}</TableCell>
-                  <TableCell class="max-w-[200px] truncate" :title="task.tags">{{ task.tags || '-' }}</TableCell>
+                  <TableCell class="max-w-[200px] truncate" :title="task.tags">{{ task.tags.map(item => item).join(',') || '-' }}</TableCell>
                   <!-- <TableCell class="max-w-[200px] truncate" :title="task.payload">{{ task.payload || '-' }}</TableCell> -->
-                  <TableCell class="max-w-[200px] truncate" :title="task.selected_accounts">{{ task.selected_accounts || '-' }}</TableCell>
-                <TableCell class="max-w-[200px] truncate" :title="task.prompt">{{ task.prompt || '-' }}</TableCell>
+                  <TableCell class="max-w-[200px] truncate" :title="task.selected_accounts.map(item => item.name).join(',')">{{ task.selected_accounts.map(item => item.name).join(',') || '-' }}</TableCell>
+                <TableCell class="max-w-[200px] truncate" :title="task.prompt">{{ task.prompt_name || '-' }}</TableCell>
                 <!-- <TableCell class="whitespace-nowrap">{{ task.twitter_reply_to_tweet_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_page_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_comment_id || '-' }}</TableCell> -->
@@ -90,22 +90,22 @@
             <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
-                <div>
+              <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span
-                      class="text-error-500">*</span></label>
+                    class="text-error-500">*</span></label>
                   <select v-model="form.type"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option value="">请选择类型</option>
                     <option value="post">发帖</option>
                     <option value="reply_comment">回复评论</option>
                   </select>
-                </div>
-                <div>
+              </div>
+              <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span
-                      class="text-error-500">*</span></label>
-                  <select v-model="form.provider"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                    <option value="">请选择平台</option>
+                    class="text-error-500">*</span></label>
+                <select v-model="form.provider"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                  <option value="">请选择平台</option>
                     <option value="twitter">Twitter</option>
                     <option value="facebook">Facebook</option>
                   </select>
@@ -126,7 +126,7 @@
                     <option value="es">西班牙文</option>
                     <option value="fr">法文</option>
                     <option value="de">德文</option>
-                  </select>
+                </select>
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">文本内容<span
@@ -146,7 +146,7 @@
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">话题<span
                     class="text-error-500">*</span></label>
-                <input v-model="form.tags" type="text" placeholder="请输入话题"
+                <input v-model="form.tags" type="text" placeholder="多各话题使用逗号隔开 如：品牌牛奶，优质水管"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
 
@@ -165,10 +165,10 @@
                     class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs cursor-pointer focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 min-h-[44px] flex items-center">
                     <div v-if="form.selected_accounts.length === 0" class="text-gray-400">请选择机器人</div>
                     <div v-else class="flex flex-wrap gap-1">
-                      <span v-for="accountId in form.selected_accounts" :key="accountId"
+                      <span v-for="account in form.selected_accounts" :key="account.id"
                         class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 whitespace-nowrap">
-                        <span class="px-1">{{ getAccountName(accountId) }}</span>
-                        <button type="button" @click.stop="toggleAccount(accountId)"
+                        <span class="px-1">{{ getAccountName(account) }}</span>
+                        <button type="button" @click.stop="removeAccount(account.id)"
                           class="inline-flex items-center justify-center w-3 h-3 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 dark:hover:bg-blue-800 dark:hover:text-blue-300">
                           X
                         </button>
@@ -194,7 +194,7 @@
                       <div v-for="bot in botList" :key="bot.id" @click="toggleAccount(bot.id)"
                         class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
                         <span>{{ bot.name || bot.provider }}</span>
-                        <div v-if="form.selected_accounts.some(a => a.id === bot.id)" class="text-blue-500">
+                        <div v-if="form.selected_accounts.some(a => String(a.id) === String(bot.id))" class="text-blue-500">
                           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -279,7 +279,15 @@ const tasks = ref([])
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
-
+const langer = {
+  zh:'中文',
+  en:'英文',
+  ja:'日文',
+  ko:'韩文',
+   es:'西班牙文',
+   fr:'法文',
+   de:'德文'
+}
 // 下拉列表数据
 const promptList = ref([])
 const botList = ref([])
@@ -342,6 +350,37 @@ async function onEdit(task) {
     isEditMode.value = true
     editingId.value = task.id
 
+    // 处理从后端返回的数据格式
+    // 处理 tags：如果是数组，转换为字符串；如果是字符串，直接使用
+    let tagsValue = ''
+    if (Array.isArray(detailData.tags)) {
+      tagsValue = detailData.tags.join(',')
+    } else {
+      tagsValue = detailData.tags || ''
+    }
+
+    // 处理 selected_accounts：确保是数组格式，包含id和name
+    let selectedAccountsValue = []
+    if (Array.isArray(detailData.selected_accounts)) {
+      // 如果是数组格式，确保id是字符串格式
+      selectedAccountsValue = detailData.selected_accounts.map(account => ({
+        id: String(account.id || account),
+        name: account.name || String(account.id || account)
+      }))
+    } else if (typeof detailData.selected_accounts === 'object' && detailData.selected_accounts !== null) {
+      // 如果是对象格式，转换为数组
+      selectedAccountsValue = Object.keys(detailData.selected_accounts).map(key => ({
+        id: String(key),
+        name: detailData.selected_accounts[key] || String(key)
+      }))
+    } else if (typeof detailData.selected_accounts === 'string') {
+      // 如果是字符串格式，分割后转换
+      selectedAccountsValue = detailData.selected_accounts.split(',').map(id => ({
+        id: String(id.trim()),
+        name: String(id.trim())
+      }))
+    }
+
     // 填充表单数据
     form.value = {
       type: detailData.type || '',
@@ -349,9 +388,9 @@ async function onEdit(task) {
       language: detailData.language || '',
       text: detailData.text || '',
       mentions: detailData.mentions || '',
-      tags: detailData.tags || '',
+      tags: tagsValue,
       payload: detailData.payload || '',
-      selected_accounts: Array.isArray(detailData.selected_accounts) ? detailData.selected_accounts : (detailData.selected_accounts ? detailData.selected_accounts.split(',').map(id => ({ id, username: '' })) : []),
+      selected_accounts: selectedAccountsValue,
       prompt: detailData.prompt || '',
       twitter_reply_to_tweet_id: detailData.twitter_reply_to_tweet_id || '',
       facebook_page_id: detailData.facebook_page_id || '',
@@ -491,19 +530,35 @@ async function submitAdd() {
 
   try {
     // 准备提交数据
+    // 处理 tags 格式：将字符串转换为数组
+    let tagsArray = []
+    if (form.value.tags && form.value.tags.trim() !== '') {
+      // 如果 tags 是字符串，按逗号分割转换为数组
+      tagsArray = form.value.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
+    }
+
+    // 处理 selected_accounts 格式：保持数组格式，确保id是字符串
+    let selectedAccountsArray = []
+    if (Array.isArray(form.value.selected_accounts)) {
+      selectedAccountsArray = form.value.selected_accounts.map(account => ({
+        id: String(account.id),
+        name: account.name || String(account.id)
+      }))
+    }
+
     const submitData = {
       type: form.value.type,
       provider: form.value.provider,
       language: form.value.language,
       text: form.value.text.trim(),
       mentions: form.value.mentions || '',
-      tags: form.value.tags || '',
-      payload: form.value.payload?.trim() || '',
-      selected_accounts: Array.isArray(form.value.selected_accounts) ? form.value.selected_accounts : [],
+      tags: tagsArray,
+      payload: '',
+      selected_accounts: selectedAccountsArray,
       prompt: form.value.prompt || '',
-      twitter_reply_to_tweet_id: form.value.twitter_reply_to_tweet_id?.trim() || '',
-      facebook_page_id: form.value.facebook_page_id?.trim() || '',
-      facebook_comment_id: form.value.facebook_comment_id?.trim() || ''
+      twitter_reply_to_tweet_id:  '',
+      facebook_page_id:  '',
+      facebook_comment_id:  ''
     }
 
     // 根据模式调用不同的接口
@@ -578,25 +633,39 @@ function toggleAccountDropdown() {
 // 切换选择状态
 
 function toggleAccount(botId) {
-  const bot = botList.value.find(b => b.id === botId)
-  const existingIndex = form.value.selected_accounts.findIndex(a => a.id === botId)
+  const botIdStr = String(botId) // 确保botId是字符串格式
+  const bot = botList.value.find(b => String(b.id) === botIdStr)
+  const existingIndex = form.value.selected_accounts.findIndex(a => String(a.id) === botIdStr)
+
+  // 如果已存在，则删除；如果不存在，则添加
   if (existingIndex > -1) {
     form.value.selected_accounts.splice(existingIndex, 1)
   } else {
-    form.value.selected_accounts.push({ id: botId, username: bot?.name || bot?.provider })
+    form.value.selected_accounts.push({ id: botIdStr, name: bot?.name || bot?.provider })
+  }
+}
+
+// 专门用于删除已选中的账户
+function removeAccount(accountId) {
+  const accountIdStr = String(accountId)
+  const existingIndex = form.value.selected_accounts.findIndex(a => String(a.id) === accountIdStr)
+
+  if (existingIndex > -1) {
+    form.value.selected_accounts.splice(existingIndex, 1)
   }
 }
 
 // 获取名称的辅助函数
 
 function getAccountName(accountId) {
-  // 如果 accountId 是对象（包含 id 和 username）
+  // 如果 accountId 是对象（包含 id 和 name）
   if (typeof accountId === 'object' && accountId.id) {
-    return accountId.username || `机器人${accountId.id}`
+    return accountId.name || `机器人${accountId.id}`
   }
   // 如果 accountId 是字符串或数字，从 botList 中查找
-  const bot = botList.value.find(b => b.id === accountId)
-  return bot ? (bot.name || bot.provider) : `机器人${accountId}`
+  const accountIdStr = String(accountId)
+  const bot = botList.value.find(b => String(b.id) === accountIdStr)
+  return bot ? (bot.name || bot.provider) : `机器人${accountIdStr}`
 }
 
 // 监听分页变化

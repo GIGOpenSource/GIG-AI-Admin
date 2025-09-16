@@ -29,7 +29,7 @@
             </Button> -->
           </div>
           <div class="flex gap-2">
-            <Button size="sm">导入</Button>
+            <Button size="sm" @click="openImport">导入</Button>
             <Button size="sm" @click="openAdd">新增</Button>
           </div>
         </div>
@@ -209,6 +209,108 @@
         </template>
       </Modal>
 
+      <!-- 导入Excel弹窗 -->
+      <Modal v-if="showImport" :fullScreenBackdrop="true" @close="closeImport">
+        <template #body>
+          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+            <h3 class="mb-4 text-lg font-semibold">导入账号池</h3>
+            <div class="space-y-4">
+              <!-- 文件上传区域 -->
+              <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  @change="handleFileSelect"
+                  class="hidden"
+                />
+                <div v-if="!selectedFile" @click="$refs.fileInput.click()" class="cursor-pointer">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span class="font-medium text-blue-600 hover:text-blue-500">点击选择文件</span>
+                    或拖拽文件到此区域
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">支持 .xlsx, .xls 格式</p>
+                </div>
+                <div v-else class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div class="flex items-center">
+                    <svg class="h-8 w-8 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm3 6a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm1 3a1 1 0 100 2h4a1 1 0 100-2H8z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedFile.name }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatFileSize(selectedFile.size) }}</p>
+                    </div>
+                  </div>
+                  <button @click="clearFile" class="text-red-500 hover:text-red-700">
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 导入说明 -->
+              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">导入说明</h4>
+                <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                  <li>• Excel文件必须包含以下列：平台、名称、API Key、是否封禁、状态、限制次数</li>
+                  <li>• 可选列：API Secret、Access Token、Access Token Secret</li>
+                  <li>• 平台：twitter、facebook</li>
+                  <li>• 状态：激活、未激活</li>
+                  <li>• 限制次数：不限次、每天最多两次</li>
+                  <li>• 是否封禁：正常、已封禁</li>
+                </ul>
+              </div>
+
+              <!-- 预览数据 -->
+              <div v-if="previewData.length > 0" class="border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">预览数据 ({{ previewData.length }} 条)</h4>
+                </div>
+                <div class="max-h-48 overflow-y-auto">
+                  <table class="w-full text-xs">
+                    <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                      <tr>
+                        <th class="px-2 py-1 text-left">平台</th>
+                        <th class="px-2 py-1 text-left">名称</th>
+                        <th class="px-2 py-1 text-left">API Key</th>
+                        <th class="px-2 py-1 text-left">状态</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                      <tr v-for="(item, index) in previewData.slice(0, 5)" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td class="px-2 py-1">{{ item.provider }}</td>
+                        <td class="px-2 py-1">{{ item.name }}</td>
+                        <td class="px-2 py-1 truncate max-w-[100px]">{{ item.api_key }}</td>
+                        <td class="px-2 py-1">{{ item.status }}</td>
+                      </tr>
+                      <tr v-if="previewData.length > 5">
+                        <td colspan="4" class="px-2 py-1 text-center text-gray-500">... 还有 {{ previewData.length - 5 }} 条数据</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- 操作按钮 -->
+              <div class="flex justify-end gap-3 pt-4">
+                <Button variant="outline" @click="closeImport" :disabled="isImporting">取消</Button>
+                <Button @click="handleImport" :disabled="!selectedFile || isImporting">
+                  <span v-if="isImporting" class="mr-2">导入中...</span>
+                  <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                  </svg>
+                  确认导入
+                </Button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Modal>
+
       <!-- 删除确认气泡弹窗 -->
       <DeleteConfirmDialog :isOpen="showDeleteDialog" :title="'删除'" :description="'确定要删除吗？此操作不可撤销。'"
         :isLoading="deleteLoading" :triggerRect="triggerRect" @close="closeDeleteDialog" @confirm="confirmDelete" />
@@ -227,6 +329,7 @@ import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { getPool, createPool, getPooldetails, updatePool, deletePool } from '@/api/pool.ts'
 import { toast } from 'vue-sonner'
+import * as XLSX from 'xlsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
@@ -330,6 +433,12 @@ const showAdd = ref(false)
 const isEditMode = ref(false)
 const editingId = ref(null)
 const isLoading = ref(false)
+
+// 导入相关状态
+const showImport = ref(false)
+const selectedFile = ref(null)
+const previewData = ref([])
+const isImporting = ref(false)
 
 // 删除确认弹窗相关状态
 const showDeleteDialog = ref(false)
@@ -537,6 +646,253 @@ watch(page, (newPage) => {
   console.log('Page changed to:', newPage)
   fetchlist()
 })
+
+// 导入相关方法
+function openImport() {
+  showImport.value = true
+  clearFile()
+}
+
+function closeImport() {
+  showImport.value = false
+  clearFile()
+}
+
+function clearFile() {
+  selectedFile.value = null
+  previewData.value = []
+  if (document.querySelector('input[type="file"]')) {
+    document.querySelector('input[type="file"]').value = ''
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // 检查文件类型
+  const allowedTypes = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-excel' // .xls
+  ]
+
+  if (!allowedTypes.includes(file.type)) {
+    toast.error('文件格式不支持', {
+      description: '请选择 .xlsx 或 .xls 格式的Excel文件'
+    })
+    return
+  }
+
+  // 检查文件大小 (10MB限制)
+  const maxSize = 10 * 1024 * 1024
+  if (file.size > maxSize) {
+    toast.error('文件过大', {
+      description: '文件大小不能超过10MB'
+    })
+    return
+  }
+
+  selectedFile.value = file
+  parseExcelFile(file)
+}
+
+function parseExcelFile(file) {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const data = new Uint8Array(e.target.result)
+      const workbook = XLSX.read(data, { type: 'array' })
+
+      // 获取第一个工作表
+      const firstSheetName = workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[firstSheetName]
+
+      // 转换为JSON
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
+
+      if (jsonData.length < 2) {
+        toast.error('Excel文件格式错误', {
+          description: 'Excel文件至少需要包含表头和一行数据'
+        })
+        return
+      }
+
+      // 获取表头
+      const headers = jsonData[0]
+      const requiredHeaders = ['平台', '名称', 'API Key', '是否封禁', '状态', '限制次数']
+
+      // 检查必需的列是否存在
+      const missingHeaders = requiredHeaders.filter(header => !headers.includes(header))
+      if (missingHeaders.length > 0) {
+        toast.error('Excel文件格式错误', {
+          description: `缺少必需的列: ${missingHeaders.join(', ')}`
+        })
+        return
+      }
+
+      // 解析数据行
+      const parsedData = []
+      for (let i = 1; i < jsonData.length; i++) {
+        const row = jsonData[i]
+        if (row.length === 0) continue // 跳过空行
+
+        // 获取原始值
+        const isBanValue = row[headers.indexOf('是否封禁')] || ''
+        const statusValue = row[headers.indexOf('状态')] || ''
+        const usagePolicyValue = row[headers.indexOf('限制次数')] || ''
+
+        // 转换是否封禁
+        let isBan = false
+        if (isBanValue === '已封禁' || isBanValue === 'true' || isBanValue === true) {
+          isBan = true
+        } else if (isBanValue === '正常' || isBanValue === 'false' || isBanValue === false) {
+          isBan = false
+        }
+
+        // 转换状态
+        let status = 'inactive'
+        if (statusValue === '激活' || statusValue === 'active') {
+          status = 'active'
+        } else if (statusValue === '未激活' || statusValue === 'inactive') {
+          status = 'inactive'
+        }
+
+        // 转换使用策略
+        let usagePolicy = 'unlimited'
+        if (usagePolicyValue === '不限次' || usagePolicyValue === 'unlimited') {
+          usagePolicy = 'unlimited'
+        } else if (usagePolicyValue === '每天最多两次' || usagePolicyValue === '每天最多2次' || usagePolicyValue === 'limited') {
+          usagePolicy = 'limited'
+        }
+
+        const item = {
+          provider: row[headers.indexOf('平台')] || '',
+          name: row[headers.indexOf('名称')] || '',
+          api_key: row[headers.indexOf('API Key')] || '',
+          api_secret: row[headers.indexOf('API Secret')] || '',
+          access_token: row[headers.indexOf('Access Token')] || '',
+          access_token_secret: row[headers.indexOf('Access Token Secret')] || '',
+          is_ban: isBan,
+          status: status,
+          usage_policy: usagePolicy
+        }
+
+        // 验证必填字段
+        if (!item.provider || !item.name || !item.api_key) {
+          toast.error(`第${i + 1}行数据不完整`, {
+            description: '平台、名称、API Key为必填字段'
+          })
+          return
+        }
+
+        // 验证平台值
+        if (!['twitter', 'facebook'].includes(item.provider)) {
+          toast.error(`第${i + 1}行平台值错误`, {
+            description: '平台只支持: twitter, facebook'
+          })
+          return
+        }
+
+        // 验证状态值
+        if (!['active', 'inactive'].includes(item.status)) {
+          toast.error(`第${i + 1}行状态值错误`, {
+            description: '状态只支持: 激活、未激活、active、inactive'
+          })
+          return
+        }
+
+        // 验证使用策略值
+        if (!['unlimited', 'limited'].includes(item.usage_policy)) {
+          toast.error(`第${i + 1}行限制次数值错误`, {
+            description: '限制次数只支持: 不限次、每天最多两次、unlimited、limited'
+          })
+          return
+        }
+
+        parsedData.push(item)
+      }
+
+      if (parsedData.length === 0) {
+        toast.error('Excel文件中没有有效数据')
+        return
+      }
+
+      previewData.value = parsedData
+      toast.success(`成功解析${parsedData.length}条数据`, {
+        description: '请检查预览数据后确认导入'
+      })
+
+    } catch (error) {
+      console.error('解析Excel文件失败:', error)
+      toast.error('解析Excel文件失败', {
+        description: error.message || '文件格式可能不正确'
+      })
+    }
+  }
+
+  reader.readAsArrayBuffer(file)
+}
+
+async function handleImport() {
+  if (!selectedFile.value || previewData.value.length === 0) {
+    toast.error('请先选择并解析Excel文件')
+    return
+  }
+
+  isImporting.value = true
+
+  try {
+    let successCount = 0
+    let errorCount = 0
+    const errors = []
+
+    // 批量导入数据
+    for (const item of previewData.value) {
+      try {
+        await createPool(item)
+        successCount++
+      } catch (error) {
+        errorCount++
+        errors.push(`${item.name}: ${error.response?.data?.message || error.message}`)
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`导入成功`, {
+        description: `成功导入${successCount}条数据${errorCount > 0 ? `，失败${errorCount}条` : ''}`
+      })
+
+      // 刷新列表
+      await fetchlist()
+
+      // 关闭弹窗
+      closeImport()
+    }
+
+    if (errorCount > 0 && errors.length > 0) {
+      console.error('导入错误详情:', errors)
+      toast.error(`导入完成，但有${errorCount}条数据导入失败`, {
+        description: errors.slice(0, 3).join('; ') + (errors.length > 3 ? '...' : '')
+      })
+    }
+
+  } catch (error) {
+    console.error('导入失败:', error)
+    toast.error('导入失败', {
+      description: error.response?.data?.message || error.message || '导入时发生未知错误'
+    })
+  } finally {
+    isImporting.value = false
+  }
+}
 
 onMounted(() => {
   fetchlist()
