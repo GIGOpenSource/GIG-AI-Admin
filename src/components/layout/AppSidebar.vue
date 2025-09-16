@@ -204,8 +204,8 @@ const menuGroups = ref(
       items: [
         // { icon: SettingsIcon, name: "平台账户", path: "/platform-accounts" },
         // { icon: UserCircleIcon, name: "关注列表", path: "/follow" },
-         { icon: SettingsIcon, name: "平台账户", path: "/prompts" },
-        { icon: ChatIcon, name: "话题列表", path: "/tag" },
+         { icon: SettingsIcon, name: "账号池", path: "/prompts" },
+        // { icon: ChatIcon, name: "话题列表", path: "/tag" },
         { icon: DocsIcon, name: "提示词模板", path: "/prompt-templates" },
         // { icon: PageIcon, name: "关键词规则", path: "/keyword-rules" },
       ],

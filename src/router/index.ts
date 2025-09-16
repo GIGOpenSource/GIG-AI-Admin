@@ -14,14 +14,14 @@ const router = createRouter({
         title: '数据统计',
       },
     },
-    {
-      path: '/tag',
-      name: 'tag',
-      component: () => import('../views/tag/tag.vue'),
-      meta: {
-        title: 'Tag',
-      },
-    },
+    // {
+    //   path: '/tag',
+    //   name: 'tag',
+    //   component: () => import('../views/tag/tag.vue'),
+    //   meta: {
+    //     title: 'Tag',
+    //   },
+    // },
     // {
     //   path: '/follow',
     //   name: 'Follow',
@@ -75,17 +75,17 @@ const router = createRouter({
       name: 'Prompts',
       component: () => import('../views/prompts/index.vue'),
       meta: {
-        title: '账号池',
+          title: '账号池',
       },
     },
-    {
-      path: '/platform-accounts',
-      name: 'Platform Accounts',
-      component: () => import('../views/PlatformAccounts/index.vue'),
-      meta: {
-        title: '平台账户',
-      },
-    },
+    // {
+    //   path: '/platform-accounts',
+    //   name: 'Platform Accounts',
+    //   component: () => import('../views/PlatformAccounts/index.vue'),
+    //   meta: {
+    //     title: '平台账户',
+    //   },
+    // },
     {
       path: '/platform-accounts/new',
       name: 'Platform Accounts New',
