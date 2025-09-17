@@ -326,9 +326,9 @@ const form = ref({
 async function btn(item) {
   try {
     // runNowLoading.value = true/
-    await runNow(String(item.id), {})
+   const res =  await runNow(String(item.id), {})
     toast.success('任务执行成功', {
-      description: '任务已开始执行'
+      description: `任务已开始执行，成功${res.summary.ok}条，失败${res.summary.error}条`
     })
     fetchlist()
   } catch (error) {
@@ -608,6 +608,8 @@ const fetchPromptList = async () => {
 
 // 获取列表数据
 const fetchlist = async () => {
+  console.log(111);
+
   try {
     let res = await getAutoPlay({
       page: page.value,
