@@ -308,12 +308,12 @@ const handleSubmit = async () => {
     password: password.value,
     password_confirm: passwordConfirm.value,
   })
-  const res = await register({
-    username: username.value,
-    email: email.value,
-    password: password.value,
-    password_confirm: passwordConfirm.value,
-  })
+  // const res = await register({
+  //   username: username.value,
+  //   email: email.value,
+  //   password: password.value,
+  //   password_confirm: passwordConfirm.value,
+  // })
   console.log(res)
   // On success, navigate to sign-in without keeping history
   router.replace({ path: '/signin' })
