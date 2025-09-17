@@ -1,0 +1,1 @@
+import{g as s,p as c,a as t,d as l}from"./http-VbNDWnN5.js";const p=o=>s("/social/pool-accounts/",{params:o}),n=o=>t("/social/pool-accounts/",o),u=(o,a)=>c(`/social/pool-accounts/${o}/`,a),i=o=>l(`/social/pool-accounts/${o}/`),d=o=>s(`/social/pool-accounts/${o}/`);export{d as a,n as c,i as d,p as g,u};
