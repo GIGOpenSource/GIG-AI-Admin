@@ -33,14 +33,17 @@
             <template v-if="tasks.length">
               <TableRow v-for="(task, index) in tasks" :key="task.id">
                 <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ task.type == 'post'?'发帖':'回复评论' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ task.type == 'post' ? '发帖' : '回复评论' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.provider || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ langer[task.language] || '-' }}</TableCell>
                 <TableCell class="max-w-[200px] truncate" :title="task.text">{{ task.text || '-' }}</TableCell>
-                  <TableCell class="max-w-[200px] truncate" :title="task.mentions">{{ task.mentions || '-' }}</TableCell>
-                  <TableCell class="max-w-[200px] truncate" :title="task.tags">{{ task.tags.map(item => item).join(',') || '-' }}</TableCell>
-                  <!-- <TableCell class="max-w-[200px] truncate" :title="task.payload">{{ task.payload || '-' }}</TableCell> -->
-                  <TableCell class="max-w-[200px] truncate" :title="task.selected_accounts.map(item => item.name).join(',')">{{ task.selected_accounts.map(item => item.name).join(',') || '-' }}</TableCell>
+                <TableCell class="max-w-[200px] truncate" :title="task.mentions">{{ task.mentions || '-' }}</TableCell>
+                <TableCell class="max-w-[200px] truncate" :title="task.tags">{{task.tags.map(item => item).join(',') ||
+                  '-' }}</TableCell>
+                <!-- <TableCell class="max-w-[200px] truncate" :title="task.payload">{{ task.payload || '-' }}</TableCell> -->
+                <TableCell class="max-w-[200px] truncate"
+                  :title="task.selected_accounts.map(item => item.name).join(',')">{{task.selected_accounts.map(item =>
+                    item.name).join(',') || '-' }}</TableCell>
                 <TableCell class="max-w-[200px] truncate" :title="task.prompt">{{ task.prompt_name || '-' }}</TableCell>
                 <!-- <TableCell class="whitespace-nowrap">{{ task.twitter_reply_to_tweet_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_page_id || '-' }}</TableCell>
@@ -90,22 +93,22 @@
             <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
-              <div>
+                <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span
-                    class="text-error-500">*</span></label>
+                      class="text-error-500">*</span></label>
                   <select v-model="form.type"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option value="">请选择类型</option>
                     <option value="post">发帖</option>
                     <option value="reply_comment">回复评论</option>
                   </select>
-              </div>
-              <div>
+                </div>
+                <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span
-                    class="text-error-500">*</span></label>
-                <select v-model="form.provider"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="">请选择平台</option>
+                      class="text-error-500">*</span></label>
+                  <select v-model="form.provider"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                    <option value="">请选择平台</option>
                     <option value="twitter">Twitter</option>
                     <option value="facebook">Facebook</option>
                   </select>
@@ -126,7 +129,7 @@
                     <option value="es">西班牙文</option>
                     <option value="fr">法文</option>
                     <option value="de">德文</option>
-                </select>
+                  </select>
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">文本内容<span
@@ -194,7 +197,8 @@
                       <div v-for="bot in botList" :key="bot.id" @click="toggleAccount(bot.id)"
                         class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
                         <span>{{ bot.name || bot.provider }}</span>
-                        <div v-if="form.selected_accounts.some(a => String(a.id) === String(bot.id))" class="text-blue-500">
+                        <div v-if="form.selected_accounts.some(a => String(a.id) === String(bot.id))"
+                          class="text-blue-500">
                           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -280,13 +284,13 @@ const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const langer = {
-  zh:'中文',
-  en:'英文',
-  ja:'日文',
-  ko:'韩文',
-   es:'西班牙文',
-   fr:'法文',
-   de:'德文'
+  zh: '中文',
+  en: '英文',
+  ja: '日文',
+  ko: '韩文',
+  es: '西班牙文',
+  fr: '法文',
+  de: '德文'
 }
 // 下拉列表数据
 const promptList = ref([])
@@ -326,7 +330,7 @@ const form = ref({
 async function btn(item) {
   try {
     // runNowLoading.value = true/
-   const res =  await runNow(String(item.id), {})
+    const res = await runNow(String(item.id), {})
     toast.success('任务执行成功', {
       description: `任务已开始执行，成功${res.summary.ok}条，失败${res.summary.error}条`
     })
@@ -526,6 +530,13 @@ async function submitAdd() {
     return
   }
 
+  if (!form.value.selected_accounts || form.value.selected_accounts.length === 0) {
+    toast.error('请选择机器人', {
+      description: '机器人不能为空'
+    })
+    return
+  }
+
   isLoading.value = true
 
   try {
@@ -556,9 +567,9 @@ async function submitAdd() {
       payload: '',
       selected_accounts: selectedAccountsArray,
       prompt: form.value.prompt || '',
-      twitter_reply_to_tweet_id:  '',
-      facebook_page_id:  '',
-      facebook_comment_id:  ''
+      twitter_reply_to_tweet_id: '',
+      facebook_page_id: '',
+      facebook_comment_id: ''
     }
 
     // 根据模式调用不同的接口

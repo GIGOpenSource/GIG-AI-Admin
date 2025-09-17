@@ -86,24 +86,24 @@ const router = createRouter({
     //     title: '平台账户',
     //   },
     // },
-    {
-      path: '/platform-accounts/new',
-      name: 'Platform Accounts New',
-      component: () => import('../views/PlatformAccounts/Form.vue'),
-      meta: {
-        title: '新增平台账户',
-        parentRoute: '/platform-accounts',
-      },
-    },
-    {
-      path: '/platform-accounts/edit',
-      name: 'Platform Accounts Edit',
-      component: () => import('../views/PlatformAccounts/Form.vue'),
-      meta: {
-        title: '编辑平台账户',
-        parentRoute: '/platform-accounts',
-      },
-    },
+    // {
+    //   path: '/platform-accounts/new',
+    //   name: 'Platform Accounts New',
+    //   component: () => import('../views/PlatformAccounts/Form.vue'),
+    //   meta: {
+    //     title: '新增平台账户',
+    //     parentRoute: '/platform-accounts',
+    //   },
+    // },
+    // {
+    //   path: '/platform-accounts/edit',
+    //   name: 'Platform Accounts Edit',
+    //   component: () => import('../views/PlatformAccounts/Form.vue'),
+    //   meta: {
+    //     title: '编辑平台账户',
+    //     parentRoute: '/platform-accounts',
+    //   },
+    // },
     {
       path: '/blank',
       name: 'Blank',
