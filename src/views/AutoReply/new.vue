@@ -137,16 +137,16 @@
               </div>
 
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提及<span
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提及账号<span
                     class="text-error-500">*</span></label>
-                <input v-model="form.mentions" type="text" placeholder="请输入提及内容"
+                <input v-model="form.mentions" type="text" placeholder="多个提及账号使用逗号隔开 如：user1，user2"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
 
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">话题<span
                     class="text-error-500">*</span></label>
-                <input v-model="form.tags" type="text" placeholder="多各话题使用逗号隔开 如：品牌牛奶，优质水管"
+                <input v-model="form.tags" type="text" placeholder="多个话题使用逗号隔开 如：品牌牛奶，优质水管"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
 
@@ -330,7 +330,7 @@ async function btn(item) {
     toast.success('任务执行成功', {
       description: '任务已开始执行'
     })
-    fetchTasks()
+    fetchlist()
   } catch (error) {
     console.error('Failed to run task:', error)
     toast.error('执行失败', {
@@ -436,7 +436,7 @@ async function confirmDelete() {
   } catch (error) {
     console.error('删除失败:', error)
     toast.error('删除失败', {
-      description: error.response?.data?.message || error.message || '删除自动回复时发生错误'
+      description: error.response?.data?.message || error.message || '删除任务时发生错误'
     })
   } finally {
     deleteLoading.value = false
@@ -565,11 +565,11 @@ async function submitAdd() {
     if (isEditMode.value) {
       // 编辑模式：调用更新接口
       await updateAutoPlay(editingId.value, submitData)
-      toast.success('自动回复更新成功')
+      toast.success('任务更新成功')
     } else {
       // 新增模式：调用新增接口
       await createAutoPlay(submitData)
-      toast.success('自动回复新增成功')
+      toast.success('任务新增成功')
     }
 
     // 成功后关闭弹窗并刷新列表
@@ -579,7 +579,7 @@ async function submitAdd() {
   } catch (error) {
     console.error(isEditMode.value ? '更新失败:' : '新增失败:', error)
     toast.error(isEditMode.value ? '更新失败' : '新增失败', {
-      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新自动回复时发生错误' : '新增自动回复时发生错误')
+      description: error.response?.data?.message || error.message || (isEditMode.value ? '更新任务时发生错误' : '新增任务时发生错误')
     })
   } finally {
     isLoading.value = false
@@ -620,7 +620,7 @@ const fetchlist = async () => {
   } catch (error) {
     console.error('获取列表失败:', error)
     toast.error('获取列表失败', {
-      description: error.response?.data?.message || error.message || '获取自动回复列表时发生错误'
+      description: error.response?.data?.message || error.message || '获取任务列表时发生错误'
     })
   }
 }
