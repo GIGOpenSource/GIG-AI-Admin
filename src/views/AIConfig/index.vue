@@ -139,7 +139,8 @@
               </div>
 
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">基础地址</label>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">基础地址<span
+                    class="text-error-500">*</span></label>
                 <input v-model="form.base_url" type="text" placeholder="如：https://api.openai.com/v1"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
@@ -383,6 +384,13 @@ async function submitAdd() {
   if (!form.value.api_key || form.value.api_key.trim() === '') {
     toast.error('请填写API Key', {
       description: 'API Key不能为空'
+    })
+    return
+  }
+
+  if (!form.value.base_url || form.value.base_url.trim() === '') {
+    toast.error('请填写基础地址', {
+      description: '基础地址不能为空'
     })
     return
   }
