@@ -75,7 +75,7 @@
                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   @change="toggleLeftItem(item,index)"
                 />
-              <span class="text-sm truncate">{{ getItemLabel(item) }}</span>
+              <span class="text-sm truncate max-w-[220px] block" :title="getItemLabel(item)">{{ getItemLabel(item) }}</span>
             </div>
             <div v-if="leftItems.length === 0" class="text-center py-8 text-gray-500 text-sm">
               {{ leftSearchQuery ? '无搜索结果' : '无可选项' }}
@@ -194,7 +194,7 @@
                 class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 @click="toggleRightItem(item,index)"
               />
-              <span class="text-sm truncate">{{ getItemLabel(item) }}</span>
+              <span class="text-sm truncate max-w-[220px] block" :title="getItemLabel(item)">{{ getItemLabel(item) }}</span>
             </div>
             <div v-if="rightItems.length === 0" class="text-center py-8 text-gray-500 text-sm">
               {{ rightSearchQuery ? '无搜索结果' : '无已选项' }}
