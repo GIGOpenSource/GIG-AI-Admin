@@ -184,7 +184,7 @@
           </div>
           <div v-else>
             <div
-              v-for="item in rightItems"
+              v-for="(item,index) in rightItems"
               :key="item.id"
               class="transfer-item"
             >
