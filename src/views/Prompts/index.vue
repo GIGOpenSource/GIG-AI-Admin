@@ -40,9 +40,9 @@
               <TableHead class="whitespace-nowrap">平台</TableHead>
               <TableHead class="whitespace-nowrap">名称</TableHead>
               <TableHead class="whitespace-nowrap">API Key</TableHead>
-              <!-- <TableHead class="whitespace-nowrap">API Secret</TableHead>
+              <TableHead class="whitespace-nowrap">API Secret</TableHead>
               <TableHead class="whitespace-nowrap">Access Token</TableHead>
-              <TableHead class="whitespace-nowrap">Access Token Secret</TableHead> -->
+              <TableHead class="whitespace-nowrap">Access Token Secret</TableHead>
               <TableHead class="whitespace-nowrap">是否封禁</TableHead>
               <TableHead class="whitespace-nowrap">状态</TableHead>
               <TableHead class="whitespace-nowrap">限制次数</TableHead>
@@ -59,7 +59,7 @@
                 <TableCell>
                   <div class="max-w-[200px] truncate" :title="acc.api_key">{{ acc.api_key || '-' }}</div>
                 </TableCell>
-                <!-- <TableCell>
+                <TableCell>
                   <div class="max-w-[200px] truncate" :title="acc.api_secret">{{ acc.api_secret || '-' }}</div>
                 </TableCell>
                 <TableCell>
@@ -67,7 +67,7 @@
                 </TableCell>
                 <TableCell>
                   <div class="max-w-[200px] truncate" :title="acc.access_token_secret">{{ acc.access_token_secret || '-' }}</div>
-                </TableCell> -->
+                </TableCell>
                 <TableCell class="whitespace-nowrap">
                   <span :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
