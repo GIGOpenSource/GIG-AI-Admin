@@ -5,28 +5,15 @@
       <ComponentCard>
         <div class="mb-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <!-- <div class="relative">
-              <input v-model="searchQuery" type="text" placeholder="请搜索配置名称"
-                class="w-80 h-10 pl-10 pr-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                @keyup.enter="handleSearchClick" />
-              <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-              </div>
-            </div>
-            <Button size="sm" @click="handleSearchClick" :disabled="isSearching">
-              <span v-if="isSearching" class="mr-2">搜索中...</span>
-              <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-              搜索
-            </Button>
-            <Button size="sm" variant="outline" @click="clearSearch" class="text-gray-500 hover:text-gray-700">
+            <select v-model="statusFilter" @change="handleFilterChange"
+              class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+              <option value="">请选择是否封禁</option>
+              <option value="normal">激活</option>
+              <option value="banned">未激活</option>
+            </select>
+            <Button size="sm" variant="outline" @click="clearSearch">
               重置
-            </Button> -->
+            </Button>
           </div>
           <div class="flex gap-2">
             <Button size="sm" @click="openImport">导入</Button>
@@ -113,7 +100,7 @@
         </Table>
         </div>
         <div class="mt-4" v-if="total > 0">
-          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
+          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1"  show-edges>
             <PaginationContent v-slot="{ items }">
               <!-- <PaginationFirst>首页</PaginationFirst> -->
               <PaginationPrevious />
@@ -340,9 +327,7 @@ const accounts = ref([])
 const page = ref(1)
 const pageSize = ref(20) // 默认一页20条
 const total = ref(0)
-const searchQuery = ref('')
-const searchTimeout = ref(null)
-const isSearching = ref(false)
+const statusFilter = ref('')
 const type = ref([
   {
     title: 'Twitter',
@@ -604,22 +589,15 @@ async function submitAdd() {
 }
 
 
-// 手动搜索按钮点击
-const handleSearchClick = async () => {
-  if (isSearching.value) return
-
-  isSearching.value = true
-  page.value = 1 // 搜索时重置到第一页
-  try {
-    await fetchlist()
-  } finally {
-    isSearching.value = false
-  }
+// 状态筛选处理
+const handleFilterChange = () => {
+  page.value = 1 // 筛选时重置到第一页
+  fetchlist()
 }
 
-// 清除搜索
+// 清除筛选
 const clearSearch = () => {
-  searchQuery.value = ''
+  statusFilter.value = ''
   page.value = 1 // 重置到第一页
   fetchlist()
 }
@@ -627,10 +605,21 @@ const clearSearch = () => {
 
 const fetchlist = async () => {
   try {
-    let res = await getPool({
-      search: searchQuery.value,
+    // 构建查询参数
+    const params = {
       page: page.value
-    })
+    }
+
+    // 添加状态筛选参数
+    if (statusFilter.value) {
+      if (statusFilter.value === 'normal') {
+        params.status = 'active'
+      } else if (statusFilter.value === 'banned') {
+        params.status = 'banned'
+      }
+    }
+
+    let res = await getPool(params)
 
     accounts.value = res.results || res.data || []
     total.value = res.count || res.total || 0

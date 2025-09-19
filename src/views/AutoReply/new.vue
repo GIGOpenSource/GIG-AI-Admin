@@ -71,7 +71,7 @@
           </TableBody>
         </Table>
         <div class="mt-4" v-if="total > 0">
-          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
+          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1" show-edges>
             <PaginationContent v-slot="{ items }">
               <PaginationPrevious />
               <template v-for="(item, index) in items" :key="index">
