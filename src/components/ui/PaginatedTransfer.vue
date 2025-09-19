@@ -21,7 +21,7 @@
             <input
               v-model="leftSearchQuery"
               type="text"
-              placeholder="请搜索机器人名称"
+                placeholder="请搜索机器人备注"
               class="w-full h-8 pl-8 pr-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
               @keyup.enter="searchLeft"
             />
@@ -311,7 +311,7 @@ const hasRightSelected = computed(() => selectedRightItemsArray.value.length > 0
 
 // 获取项目标签
 function getItemLabel(item) {
-  return item[props.labelKey] || item[props.valueKey] || String(item)
+return  (item.remark ? `(${item.remark})` : '') + (item[props.labelKey] || item[props.valueKey] || String(item))
 }
 
 // 获取左侧数据

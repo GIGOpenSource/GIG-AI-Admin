@@ -102,9 +102,9 @@
                   </TableCell>
                   <TableCell class="whitespace-nowrap">{{ acc.usage_policy == 'unlimited' ? '不限次' : '每天最多 2 次' }}
                   </TableCell>
-                  <TableCell class="whitespace-nowrap max-w-[200px]">
-                    <div class="truncate" :title="acc.remark">{{ acc.remark || '-' }}</div>
-                  </TableCell>
+                <TableCell class="whitespace-nowrap">
+                  <div class="max-w-[200px] truncate" :title="acc.remark">{{ acc.remark || '-' }}</div>
+                </TableCell>
                   <TableCell class="whitespace-nowrap">{{ formatTime(acc.created_at) }}</TableCell>
                   <TableCell
                     class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-2px_rgba(255,255,255,0.1)] z-10">

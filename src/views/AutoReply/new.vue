@@ -22,6 +22,7 @@
               <!-- <TableHead class="whitespace-nowrap">载荷</TableHead> -->
               <TableHead class="whitespace-nowrap">机器人</TableHead>
               <TableHead class="whitespace-nowrap">提示词</TableHead>
+              <TableHead class="whitespace-nowrap">备注</TableHead>
               <!-- <TableHead class="whitespace-nowrap">Twitter回复ID</TableHead>
               <TableHead class="whitespace-nowrap">Facebook页面ID</TableHead>
               <TableHead class="whitespace-nowrap">Facebook评论ID</TableHead> -->
@@ -45,6 +46,9 @@
                   :title="task.selected_accounts.map(item => item.name).join(',')">{{task.selected_accounts.map(item =>
                     item.name).join(',') || '-' }}</TableCell>
                 <TableCell class="max-w-[200px] truncate" :title="task.prompt">{{ task.prompt_name || '-' }}</TableCell>
+                <TableCell class="whitespace-nowrap">
+                  <div class="max-w-[200px] truncate" :title="task.task_remark">{{ task.task_remark || '-' }}</div>
+                </TableCell>
                 <!-- <TableCell class="whitespace-nowrap">{{ task.twitter_reply_to_tweet_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_page_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_comment_id || '-' }}</TableCell> -->
@@ -200,6 +204,12 @@
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
 
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">备注</label>
+                <textarea v-model="form.task_remark" placeholder="请输入备注信息（可选）" rows="3"
+                  class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"></textarea>
+              </div>
+
               <div class="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" @click="closeAdd" :disabled="isLoading">取消</Button>
                 <Button type="submit" :disabled="isLoading">
@@ -283,7 +293,9 @@ const form = ref({
   prompt: '',
   twitter_reply_to_tweet_id: '',
   facebook_page_id: '',
-  facebook_comment_id: ''
+  facebook_comment_id: '',
+  task_orig_id: '',
+  task_remark: ''
 })
 // 立即执行任务 - 使用btn接口
 async function btn(item) {
@@ -357,7 +369,8 @@ async function onEdit(task) {
       prompt: detailData.prompt || '',
       twitter_reply_to_tweet_id: detailData.twitter_reply_to_tweet_id || '',
       facebook_page_id: detailData.facebook_page_id || '',
-      facebook_comment_id: detailData.facebook_comment_id || ''
+      facebook_comment_id: detailData.facebook_comment_id || '',
+      task_remark: detailData.task_remark || ''
     }
 
     // 打开弹窗
@@ -430,7 +443,8 @@ function openAdd() {
     prompt: '',
     twitter_reply_to_tweet_id: '',
     facebook_page_id: '',
-    facebook_comment_id: ''
+    facebook_comment_id: '',
+    task_remark: ''
   }
   showAdd.value = true
 }
@@ -451,7 +465,8 @@ function closeAdd() {
     prompt: '',
     twitter_reply_to_tweet_id: '',
     facebook_page_id: '',
-    facebook_comment_id: ''
+    facebook_comment_id: '',
+    task_remark: ''
   }
 }
 
@@ -528,7 +543,8 @@ async function submitAdd() {
       prompt: form.value.prompt || '',
       twitter_reply_to_tweet_id: '',
       facebook_page_id: '',
-      facebook_comment_id: ''
+      facebook_comment_id: '',
+      task_remark: form.value.task_remark.trim() || ''
     }
 
     // 根据模式调用不同的接口
@@ -567,9 +583,9 @@ const fetchBotListPaginated = async (params) => {
       // page_size 不传递，使用后端默认的20条
     }
 
-    // 添加搜索参数（搜索机器人名称）
+    // 添加搜索参数（搜索机器人备注）
     if (params.search) {
-      apiParams.name = params.search // 使用name字段进行搜索
+      apiParams.remark = params.search // 使用remark字段进行搜索
     }
 
     const res = await getPool(apiParams)
