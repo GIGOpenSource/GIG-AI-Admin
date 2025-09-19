@@ -10,7 +10,7 @@
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
             <TableRow>
-              <TableHead class="whitespace-nowrap">ID</TableHead>
+              <TableHead class="whitespace-nowrap">序号</TableHead>
               <TableHead class="whitespace-nowrap">用户名</TableHead>
               <TableHead class="whitespace-nowrap">电子邮件地址</TableHead>
               <TableHead class="whitespace-nowrap">角色</TableHead>
@@ -20,8 +20,8 @@
           </TableHeader>
           <TableBody>
             <template v-if="accounts.length > 0">
-              <TableRow v-for="acc in accounts" :key="acc.id">
-                <TableCell class="whitespace-nowrap">{{ acc.id }}</TableCell>
+              <TableRow v-for="(acc,index) in accounts" :key="acc.id">
+                <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.username }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.email || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.is_superuser ? '超级管理员' : (acc.is_staff ? '管理员' : '用户') }}</TableCell>
