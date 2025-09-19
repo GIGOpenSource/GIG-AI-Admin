@@ -55,7 +55,9 @@
                 <TableCell class="whitespace-nowrap">{{ formatTime(task.created_at) }}</TableCell>
                 <TableCell class="text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-2">
-                    <Button size="sm" variant="outline" @click="btn(task)">立即执行</Button>
+                    <Button size="sm" variant="outline" @click="btn(task)">
+                      立即执行
+                    </Button>
                     <Button size="sm" variant="outline" @click="onEdit(task)">编辑</Button>
                     <button
                       class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
@@ -226,6 +228,14 @@
       <!-- 删除确认气泡弹窗 -->
       <DeleteConfirmDialog :isOpen="showDeleteDialog" :title="'删除'" :description="'确定要删除吗？此操作不可撤销。'"
         :isLoading="deleteLoading" :triggerRect="triggerRect" @close="closeDeleteDialog" @confirm="confirmDelete" />
+
+      <!-- 执行任务时的透明蒙层 -->
+      <div v-if="executeLoading" class="fixed inset-0 bg-transparent flex items-center justify-center z-50">
+        <div class="flex flex-col items-center gap-3">
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600"></div>
+          <span class="text-blue-600 dark:text-blue-400 font-medium text-sm">任务正在执行，请稍后...</span>
+        </div>
+      </div>
     </div>
   </AdminLayout>
 </template>
@@ -281,6 +291,10 @@ const deleteLoading = ref(false)
 const itemToDelete = ref(null)
 const triggerRect = ref({ top: 0, left: 0, width: 0, height: 0 })
 
+// 立即执行loading状态
+const executeLoading = ref(false)
+const executingTaskId = ref(null)
+
 // 表单数据
 const form = ref({
   type: '',
@@ -300,8 +314,13 @@ const form = ref({
 })
 // 立即执行任务 - 使用btn接口
 async function btn(item) {
+  // 防止重复执行
+  if (executeLoading.value) return
+
+  executeLoading.value = true
+  executingTaskId.value = item.id
+
   try {
-    // runNowLoading.value = true/
     const res = await runNow(String(item.id), {})
     toast.success('任务执行成功', {
       description: `任务已开始执行，成功${res.summary.ok}条，失败${res.summary.error}条`
@@ -313,7 +332,8 @@ async function btn(item) {
       description: error.response?.data?.message || error.message || '执行任务时发生错误'
     })
   } finally {
-    // runNowLoading.value = false
+    executeLoading.value = false
+    executingTaskId.value = null
   }
 }
 // 编辑功能
