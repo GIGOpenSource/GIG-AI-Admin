@@ -22,7 +22,7 @@ function getAuthToken(): string | null {
 
 const http: AxiosInstance = axios.create({
   baseURL: getBaseURL(),
-  timeout: 15000,
+  timeout: 2000000000,
   withCredentials: false,
 })
 
