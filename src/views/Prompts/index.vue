@@ -147,7 +147,7 @@
       </ComponentCard>
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
         <template #body>
-          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900 mt-8">
             <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑账号池' : '新增账号池' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div>
@@ -235,7 +235,7 @@
       <!-- 导入Excel弹窗 -->
       <Modal v-if="showImport" :fullScreenBackdrop="true" @close="closeImport">
         <template #body>
-          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+          <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900 mt-8">
             <h3 class="mb-4 text-lg font-semibold">导入账号池</h3>
             <div class="space-y-4">
               <!-- 文件上传区域 -->

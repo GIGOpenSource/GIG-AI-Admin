@@ -94,6 +94,7 @@
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
         <template #body>
           <div class="relative z-10 w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+          <div style="height:35vh"></div>
             <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
