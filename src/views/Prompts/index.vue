@@ -33,23 +33,24 @@
             <Button size="sm" @click="openAdd">新增</Button>
           </div>
         </div>
-        <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
-          <TableHeader>
-            <TableRow>
-              <TableHead class="whitespace-nowrap">序号</TableHead>
-              <TableHead class="whitespace-nowrap">平台</TableHead>
-              <TableHead class="whitespace-nowrap">名称</TableHead>
-              <TableHead class="whitespace-nowrap">API Key</TableHead>
-              <TableHead class="whitespace-nowrap">API Secret</TableHead>
-              <TableHead class="whitespace-nowrap">Access Token</TableHead>
-              <TableHead class="whitespace-nowrap">Access Token Secret</TableHead>
-              <TableHead class="whitespace-nowrap">是否封禁</TableHead>
-              <TableHead class="whitespace-nowrap">状态</TableHead>
-              <TableHead class="whitespace-nowrap">限制次数</TableHead>
-              <TableHead class="whitespace-nowrap">创建时间</TableHead>
-              <TableHead class="whitespace-nowrap text-right">操作</TableHead>
-            </TableRow>
-          </TableHeader>
+        <div class="overflow-x-auto relative">
+          <Table class="[&_td]:py-3.5 [&_th]:py-3.5 min-w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead class="whitespace-nowrap">序号</TableHead>
+                <TableHead class="whitespace-nowrap">平台</TableHead>
+                <TableHead class="whitespace-nowrap">名称</TableHead>
+                <TableHead class="whitespace-nowrap">API Key</TableHead>
+                <TableHead class="whitespace-nowrap">API Secret</TableHead>
+                <TableHead class="whitespace-nowrap">Access Token</TableHead>
+                <TableHead class="whitespace-nowrap">Access Token Secret</TableHead>
+                <TableHead class="whitespace-nowrap min-w-[100px]">是否封禁</TableHead>
+                <TableHead class="whitespace-nowrap">状态</TableHead>
+                <TableHead class="whitespace-nowrap">限制次数</TableHead>
+                <TableHead class="whitespace-nowrap">创建时间</TableHead>
+                <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white dark:bg-gray-900 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-2px_rgba(255,255,255,0.1)] z-10">操作</TableHead>
+              </TableRow>
+            </TableHeader>
           <TableBody>
             <template v-if="accounts.length">
               <TableRow v-for="(acc, index) in accounts" :key="acc.id">
@@ -68,7 +69,7 @@
                 <TableCell>
                   <div class="max-w-[200px] truncate" :title="acc.access_token_secret">{{ acc.access_token_secret || '-' }}</div>
                 </TableCell>
-                <TableCell class="whitespace-nowrap">
+                <TableCell class="whitespace-nowrap min-w-[100px]">
                   <span :class="[
                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
                     acc.is_ban
@@ -90,7 +91,7 @@
                 </TableCell>
                 <TableCell class="whitespace-nowrap">{{ acc.usage_policy == 'unlimited' ? '不限次' : '每天最多 2 次' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ formatTime(acc.created_at) }}</TableCell>
-                <TableCell class="text-right whitespace-nowrap">
+                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-2px_rgba(255,255,255,0.1)] z-10">
                   <div class="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
                     <button
@@ -110,6 +111,7 @@
             </template>
           </TableBody>
         </Table>
+        </div>
         <div class="mt-4" v-if="total > 0">
           <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1">
             <PaginationContent v-slot="{ items }">
