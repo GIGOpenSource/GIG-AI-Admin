@@ -330,8 +330,17 @@ async function fetchLeftData() {
     const response = await props.fetchApi(params)
     console.log('=== 左侧数据响应 ===', response)
 
-    // 给每个项目添加selected属性，检查是否在选中数组中
-    const itemsWithSelection = (response.results || response.data || []).map(item => {
+    // 过滤掉已经在右侧的数据，并给每个项目添加selected属性
+    const rightSideIds = new Set(props.modelValue.map(item =>
+      String(typeof item === 'object' ? item[props.valueKey] : item)
+    ))
+
+    const filteredItems = (response.results || response.data || []).filter(item => {
+      const itemId = String(item[props.valueKey])
+      return !rightSideIds.has(itemId) // 排除已经在右侧的数据
+    })
+
+    const itemsWithSelection = filteredItems.map(item => {
       const itemId = String(item[props.valueKey])
       const wasSelected = selectedLeftItemsArray.value.some(selectedItem =>
         String(selectedItem[props.valueKey]) === itemId
@@ -344,6 +353,7 @@ async function fetchLeftData() {
     })
 
     leftItems.value = itemsWithSelection
+    console.log('=== 过滤后的左侧数据（排除右侧已有） ===', leftItems.value)
     leftTotal.value = response.count || response.total || 0
     leftTotalPages.value = Math.ceil(leftTotal.value / props.pageSize)
 
