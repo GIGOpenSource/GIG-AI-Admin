@@ -162,53 +162,12 @@
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">机器人<span
                     class="text-error-500">*</span></label>
-                <div class="relative account-dropdown">
-                  <!-- 显示区域 -->
-                  <div @click="toggleAccountDropdown"
-                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs cursor-pointer focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 min-h-[44px] flex items-center">
-                    <div v-if="form.selected_accounts.length === 0" class="text-gray-400">请选择机器人</div>
-                    <div v-else class="flex flex-wrap gap-1">
-                      <span v-for="account in form.selected_accounts" :key="account.id"
-                        class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 whitespace-nowrap">
-                        <span class="px-1">{{ getAccountName(account) }}</span>
-                        <button type="button" @click.stop="removeAccount(account.id)"
-                          class="inline-flex items-center justify-center w-3 h-3 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 dark:hover:bg-blue-800 dark:hover:text-blue-300">
-                          X
-                        </button>
-                      </span>
-                    </div>
-                    <!-- 下拉箭头 -->
-                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <svg class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                        :class="{ 'rotate-180': showAccountDropdown }" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </div>
-                  </div>
-
-                  <!-- 下拉选项 -->
-                  <div v-if="showAccountDropdown"
-                    class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    <div v-if="botList.length === 0" class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
-                      暂无机器人选项
-                    </div>
-                    <div v-else>
-                      <div v-for="bot in botList" :key="bot.id" @click="toggleAccount(bot.id)"
-                        class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
-                        <span>{{ bot.name || bot.provider }}</span>
-                        <div v-if="form.selected_accounts.some(a => String(a.id) === String(bot.id))"
-                          class="text-blue-500">
-                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clip-rule="evenodd"></path>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <PaginatedTransfer
+                  v-model="form.selected_accounts"
+                  :fetchApi="fetchBotListPaginated"
+                  labelKey="name"
+                  valueKey="id"
+                />
               </div>
 
               <div>
@@ -261,13 +220,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
+import PaginatedTransfer from '@/components/ui/PaginatedTransfer.vue'
 import { getAutoPlay, getAutoPlayDetail, createAutoPlay, updateAutoPlay, deleteAutoPlay, runNow } from '@/api/autoPlay.ts'
 import { getUser } from '@/api/index.ts'
 import { getTags } from '@/api/tag.ts'
@@ -296,8 +256,7 @@ const langer = {
 const promptList = ref([])
 const botList = ref([])
 
-// 多选下拉框状态
-const showAccountDropdown = ref(false)
+// 已移除多选下拉框状态，改用分页穿梭框
 
 // 弹窗相关状态
 const showAdd = ref(false)
@@ -598,12 +557,62 @@ async function submitAdd() {
 }
 
 // 获取机器人列表
-const fetchBotList = async () => {
+// 获取机器人列表（分页版本，用于穿梭框，与账号池分页逻辑保持一致）
+const fetchBotListPaginated = async (params) => {
   try {
-    const res = await getPool({ page: 1 })
-    botList.value = res.results || res.data || []
+    console.log('=== API调用参数 ===', params)
+
+    const apiParams = {
+      page: params.page
+      // page_size 不传递，使用后端默认的20条
+    }
+
+    // 添加搜索参数（搜索机器人名称）
+    if (params.search) {
+      apiParams.name = params.search // 使用name字段进行搜索
+    }
+
+    const res = await getPool(apiParams)
+    console.log('=== API返回原始数据 ===', res)
+
+    // 完全在前端进行过滤，不依赖后端API参数
+    let filteredResults = res.results || res.data || []
+    console.log('=== 过滤前的数据 ===', filteredResults)
+
+    // 排除已选中的项目（用于左侧列表）
+    if (params.exclude_ids && params.exclude_ids.length > 0) {
+      console.log('=== 排除ID列表 ===', params.exclude_ids)
+      filteredResults = filteredResults.filter(item => {
+        const shouldExclude = params.exclude_ids.includes(String(item.id))
+        console.log(`项目 ${item.id} (${item.name}) 是否排除: ${shouldExclude}`)
+        return !shouldExclude
+      })
+    }
+
+    // 只包含已选中的项目（用于右侧列表）
+    if (params.include_ids && params.include_ids.length > 0) {
+      console.log('=== 包含ID列表 ===', params.include_ids)
+      filteredResults = filteredResults.filter(item => {
+        const shouldInclude = params.include_ids.includes(String(item.id))
+        console.log(`项目 ${item.id} (${item.name}) 是否包含: ${shouldInclude}`)
+        return shouldInclude
+      })
+    }
+
+    console.log('=== 过滤后的数据 ===', filteredResults)
+
+    return {
+      results: filteredResults,
+      count: res.count || res.total || 0,
+      total: res.count || res.total || 0
+    }
   } catch (error) {
     console.error('获取机器人列表失败:', error)
+    return {
+      results: [],
+      count: 0,
+      total: 0
+    }
   }
 }
 
@@ -638,48 +647,7 @@ const fetchlist = async () => {
   }
 }
 
-// 多选下拉框切换函数
-function toggleAccountDropdown() {
-  showAccountDropdown.value = !showAccountDropdown.value
-}
-
-// 切换选择状态
-
-function toggleAccount(botId) {
-  const botIdStr = String(botId) // 确保botId是字符串格式
-  const bot = botList.value.find(b => String(b.id) === botIdStr)
-  const existingIndex = form.value.selected_accounts.findIndex(a => String(a.id) === botIdStr)
-
-  // 如果已存在，则删除；如果不存在，则添加
-  if (existingIndex > -1) {
-    form.value.selected_accounts.splice(existingIndex, 1)
-  } else {
-    form.value.selected_accounts.push({ id: botIdStr, name: bot?.name || bot?.provider })
-  }
-}
-
-// 专门用于删除已选中的账户
-function removeAccount(accountId) {
-  const accountIdStr = String(accountId)
-  const existingIndex = form.value.selected_accounts.findIndex(a => String(a.id) === accountIdStr)
-
-  if (existingIndex > -1) {
-    form.value.selected_accounts.splice(existingIndex, 1)
-  }
-}
-
-// 获取名称的辅助函数
-
-function getAccountName(accountId) {
-  // 如果 accountId 是对象（包含 id 和 name）
-  if (typeof accountId === 'object' && accountId.id) {
-    return accountId.name || `机器人${accountId.id}`
-  }
-  // 如果 accountId 是字符串或数字，从 botList 中查找
-  const accountIdStr = String(accountId)
-  const bot = botList.value.find(b => String(b.id) === accountIdStr)
-  return bot ? (bot.name || bot.provider) : `机器人${accountIdStr}`
-}
+// 已移除多选下拉框相关函数，改用分页穿梭框组件
 
 // 监听分页变化
 watch(page, (newPage) => {
@@ -687,25 +655,11 @@ watch(page, (newPage) => {
   fetchlist()
 })
 
-// 点击外部关闭下拉框
-function handleClickOutside(event) {
-  if (showAccountDropdown.value && !event.target.closest('.account-dropdown')) {
-    showAccountDropdown.value = false
-  }
-}
+// 已移除点击外部关闭下拉框的逻辑
 
 onMounted(() => {
   fetchlist()
-  fetchBotList()
   fetchPromptList()
-
-  // 监听点击事件
-  document.addEventListener('click', handleClickOutside)
-})
-
-// 组件卸载时移除事件监听
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
