@@ -5,12 +5,32 @@
       <ComponentCard>
         <div class="mb-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
+            <div class="relative">
+              <input v-model="remarkQuery" type="text" placeholder="请输入备注关键字"
+                class="w-60 h-10 pl-10 pr-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                @keyup.enter="handleRemarkSearchClick" />
+              <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+            </div>
+
             <select v-model="statusFilter" @change="handleFilterChange"
               class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-              <option value="">请选择是否封禁</option>
+              <option value="">请选择账号状态</option>
               <option value="normal">激活</option>
               <option value="banned">未激活</option>
             </select>
+            <Button size="sm" @click="handleRemarkSearchClick" :disabled="isRemarkSearching">
+              <span v-if="isRemarkSearching" class="mr-2">搜索中...</span>
+              <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              搜索
+            </Button>
             <Button size="sm" variant="outline" @click="clearSearch">
               重置
             </Button>
@@ -34,73 +54,82 @@
                 <TableHead class="whitespace-nowrap min-w-[100px]">是否封禁</TableHead>
                 <TableHead class="whitespace-nowrap">状态</TableHead>
                 <TableHead class="whitespace-nowrap">限制次数</TableHead>
+                <TableHead class="whitespace-nowrap">备注</TableHead>
                 <TableHead class="whitespace-nowrap">创建时间</TableHead>
-                <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white dark:bg-gray-900 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-2px_rgba(255,255,255,0.1)] z-10">操作</TableHead>
+                <TableHead
+                  class="whitespace-nowrap text-right sticky right-0 bg-white dark:bg-gray-900 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-2px_rgba(255,255,255,0.1)] z-10">
+                  操作</TableHead>
               </TableRow>
             </TableHeader>
-          <TableBody>
-            <template v-if="accounts.length">
-              <TableRow v-for="(acc, index) in accounts" :key="acc.id">
-                <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] || acc.provider }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
-                <TableCell>
-                  <div class="max-w-[200px] truncate" :title="acc.api_key">{{ acc.api_key || '-' }}</div>
-                </TableCell>
-                <TableCell>
-                  <div class="max-w-[200px] truncate" :title="acc.api_secret">{{ acc.api_secret || '-' }}</div>
-                </TableCell>
-                <TableCell>
-                  <div class="max-w-[200px] truncate" :title="acc.access_token">{{ acc.access_token || '-' }}</div>
-                </TableCell>
-                <TableCell>
-                  <div class="max-w-[200px] truncate" :title="acc.access_token_secret">{{ acc.access_token_secret || '-' }}</div>
-                </TableCell>
-                <TableCell class="whitespace-nowrap min-w-[100px]">
-                  <span :class="[
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    acc.is_ban
-                      ? 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30'
-                      : 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30',
-                  ]">
-                    {{ acc.is_ban ? '已封禁' : '正常' }}
-                  </span>
-                </TableCell>
-                <TableCell class="whitespace-nowrap">
-                  <span :class="[
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                    acc.status === 'active'
-                      ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
-                      : 'bg-gray-50 text-gray-600 ring-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:ring-gray-500/30',
-                  ]">
-                    {{ acc.status === 'active' ? '激活' : '未激活' }}
-                  </span>
-                </TableCell>
-                <TableCell class="whitespace-nowrap">{{ acc.usage_policy == 'unlimited' ? '不限次' : '每天最多 2 次' }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ formatTime(acc.created_at) }}</TableCell>
-                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-2px_rgba(255,255,255,0.1)] z-10">
-                  <div class="flex items-center justify-end gap-2">
-                    <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
-                    <button
-                      class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
-                      @click="onDelete(acc, $event)">
-                      删除
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </template>
+            <TableBody>
+              <template v-if="accounts.length">
+                <TableRow v-for="(acc, index) in accounts" :key="acc.id">
+                  <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
+                  <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] || acc.provider }}</TableCell>
+                  <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
+                  <TableCell>
+                    <div class="max-w-[200px] truncate" :title="acc.api_key">{{ acc.api_key || '-' }}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div class="max-w-[200px] truncate" :title="acc.api_secret">{{ acc.api_secret || '-' }}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div class="max-w-[200px] truncate" :title="acc.access_token">{{ acc.access_token || '-' }}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div class="max-w-[200px] truncate" :title="acc.access_token_secret">{{ acc.access_token_secret ||
+                      '-' }}</div>
+                  </TableCell>
+                  <TableCell class="whitespace-nowrap min-w-[100px]">
+                    <span :class="[
+                      'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                      acc.is_ban
+                        ? 'bg-rose-50 text-rose-600 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/30'
+                        : 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30',
+                    ]">
+                      {{ acc.is_ban ? '已封禁' : '正常' }}
+                    </span>
+                  </TableCell>
+                  <TableCell class="whitespace-nowrap">
+                    <span :class="[
+                      'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                      acc.status === 'active'
+                        ? 'bg-emerald-50 text-emerald-600 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/30'
+                        : 'bg-gray-50 text-gray-600 ring-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:ring-gray-500/30',
+                    ]">
+                      {{ acc.status === 'active' ? '激活' : '未激活' }}
+                    </span>
+                  </TableCell>
+                  <TableCell class="whitespace-nowrap">{{ acc.usage_policy == 'unlimited' ? '不限次' : '每天最多 2 次' }}
+                  </TableCell>
+                  <TableCell class="whitespace-nowrap max-w-[200px]">
+                    <div class="truncate" :title="acc.remark">{{ acc.remark || '-' }}</div>
+                  </TableCell>
+                  <TableCell class="whitespace-nowrap">{{ formatTime(acc.created_at) }}</TableCell>
+                  <TableCell
+                    class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-2px_rgba(255,255,255,0.1)] z-10">
+                    <div class="flex items-center justify-end gap-2">
+                      <Button size="sm" variant="outline" @click="onEdit(acc)">编辑</Button>
+                      <button
+                        class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
+                        @click="onDelete(acc, $event)">
+                        删除
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </template>
 
-            <template v-else>
-              <TableRow>
-                <TableCell :colspan="12" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
-              </TableRow>
-            </template>
-          </TableBody>
-        </Table>
+              <template v-else>
+                <TableRow>
+                  <TableCell :colspan="13" class="py-16 text-center text-gray-400 dark:text-white/40">暂无数据</TableCell>
+                </TableRow>
+              </template>
+            </TableBody>
+          </Table>
         </div>
         <div class="mt-4" v-if="total > 0">
-          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1"  show-edges>
+          <Pagination v-model:page="page" :total="total" :items-per-page="pageSize" :sibling-count="1" show-edges>
             <PaginationContent v-slot="{ items }">
               <!-- <PaginationFirst>首页</PaginationFirst> -->
               <PaginationPrevious />
@@ -185,6 +214,11 @@
                   <option value="limited">每天最多2次</option>
                 </select>
               </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">备注</label>
+                <textarea v-model="form.remark" placeholder="请输入备注信息（可选）" rows="3"
+                  class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"></textarea>
+              </div>
 
               <div class="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" @click="closeAdd" :disabled="isLoading">取消</Button>
@@ -205,17 +239,14 @@
             <h3 class="mb-4 text-lg font-semibold">导入账号池</h3>
             <div class="space-y-4">
               <!-- 文件上传区域 -->
-              <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept=".xlsx,.xls"
-                  @change="handleFileSelect"
-                  class="hidden"
-                />
+              <div
+                class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                <input ref="fileInput" type="file" accept=".xlsx,.xls" @change="handleFileSelect" class="hidden" />
                 <div v-if="!selectedFile" @click="$refs.fileInput.click()" class="cursor-pointer">
                   <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path
+                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                   <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                     <span class="font-medium text-blue-600 hover:text-blue-500">点击选择文件</span>
@@ -226,7 +257,9 @@
                 <div v-else class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div class="flex items-center">
                     <svg class="h-8 w-8 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm3 6a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm1 3a1 1 0 100 2h4a1 1 0 100-2H8z" clip-rule="evenodd"></path>
+                      <path fill-rule="evenodd"
+                        d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm3 6a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm1 3a1 1 0 100 2h4a1 1 0 100-2H8z"
+                        clip-rule="evenodd"></path>
                     </svg>
                     <div class="ml-3">
                       <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedFile.name }}</p>
@@ -235,7 +268,9 @@
                   </div>
                   <button @click="clearFile" class="text-red-500 hover:text-red-700">
                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                      <path fill-rule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clip-rule="evenodd"></path>
                     </svg>
                   </button>
                 </div>
@@ -246,18 +281,20 @@
                 <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">导入说明</h4>
                 <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
                   <li>• Excel文件必须包含以下列：平台、名称、API Key、是否封禁、状态、限制次数</li>
-                  <li>• 可选列：API Secret、Access Token、Access Token Secret</li>
+                  <li>• 可选列：API Secret、Access Token、Access Token Secret、备注</li>
                   <li>• 平台：twitter、facebook</li>
                   <li>• 状态：激活、未激活</li>
                   <li>• 限制次数：不限次、每天最多两次</li>
                   <li>• 是否封禁：正常、已封禁</li>
+                  <li>• 备注：可选，用于记录额外信息</li>
                 </ul>
               </div>
 
               <!-- 预览数据 -->
               <div v-if="previewData.length > 0" class="border border-gray-200 dark:border-gray-700 rounded-lg">
                 <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">预览数据 ({{ previewData.length }} 条)</h4>
+                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">预览数据 ({{ previewData.length }} 条)
+                  </h4>
                 </div>
                 <div class="max-h-48 overflow-y-auto">
                   <table class="w-full text-xs">
@@ -267,17 +304,21 @@
                         <th class="px-2 py-1 text-left">名称</th>
                         <th class="px-2 py-1 text-left">API Key</th>
                         <th class="px-2 py-1 text-left">状态</th>
+                        <th class="px-2 py-1 text-left">备注</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                      <tr v-for="(item, index) in previewData.slice(0, 5)" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <tr v-for="(item, index) in previewData.slice(0, 5)" :key="index"
+                        class="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td class="px-2 py-1">{{ item.provider }}</td>
                         <td class="px-2 py-1">{{ item.name }}</td>
                         <td class="px-2 py-1 truncate max-w-[100px]">{{ item.api_key }}</td>
                         <td class="px-2 py-1">{{ item.status }}</td>
+                        <td class="px-2 py-1 truncate max-w-[80px]">{{ item.remark || '-' }}</td>
                       </tr>
                       <tr v-if="previewData.length > 5">
-                        <td colspan="4" class="px-2 py-1 text-center text-gray-500">... 还有 {{ previewData.length - 5 }} 条数据</td>
+                        <td colspan="5" class="px-2 py-1 text-center text-gray-500">... 还有 {{ previewData.length - 5 }}
+                          条数据</td>
                       </tr>
                     </tbody>
                   </table>
@@ -290,7 +331,8 @@
                 <Button @click="handleImport" :disabled="!selectedFile || isImporting">
                   <span v-if="isImporting" class="mr-2">导入中...</span>
                   <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
                   </svg>
                   确认导入
                 </Button>
@@ -307,7 +349,6 @@
     </div>
   </AdminLayout>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
@@ -328,6 +369,8 @@ const page = ref(1)
 const pageSize = ref(20) // 默认一页20条
 const total = ref(0)
 const statusFilter = ref('')
+const remarkQuery = ref('')
+const isRemarkSearching = ref(false)
 const type = ref([
   {
     title: 'Twitter',
@@ -361,7 +404,8 @@ async function onEdit(account) {
       access_token_secret: detailData.access_token_secret || '',
       is_ban: detailData.is_ban || false,
       status: detailData.status || 'inactive',
-      usage_policy: detailData.usage_policy || 'unlimited'
+      usage_policy: detailData.usage_policy || 'unlimited',
+      remark: detailData.remark || ''
     }
 
     // 打开弹窗
@@ -441,7 +485,8 @@ const form = ref({
   access_token_secret: '',
   is_ban: false,
   status: 'inactive',
-  usage_policy: 'unlimited'
+  usage_policy: 'unlimited',
+  remark: ''
 })
 
 function openAdd() {
@@ -457,7 +502,8 @@ function openAdd() {
     access_token_secret: '',
     is_ban: false,
     status: 'inactive',
-    usage_policy: 'unlimited'
+    usage_policy: 'unlimited',
+    remark: ''
   }
   showAdd.value = true
 }
@@ -475,7 +521,8 @@ function closeAdd() {
     access_token_secret: '',
     is_ban: false,
     status: 'inactive',
-    usage_policy: 'unlimited'
+    usage_policy: 'unlimited',
+    remark: ''
   }
 }
 
@@ -560,7 +607,8 @@ async function submitAdd() {
       access_token_secret: form.value.access_token_secret.trim() || '',
       is_ban: form.value.is_ban,
       status: form.value.status,
-      usage_policy: form.value.usage_policy
+      usage_policy: form.value.usage_policy,
+      remark: form.value.remark.trim() || ''
     }
 
     // 根据模式调用不同的接口
@@ -589,15 +637,29 @@ async function submitAdd() {
 }
 
 
-// 状态筛选处理
+// 综合搜索按钮点击处理（备注 + 状态筛选）
+const handleRemarkSearchClick = async () => {
+  if (isRemarkSearching.value) return
+
+  isRemarkSearching.value = true
+  page.value = 1 // 搜索时重置到第一页
+  try {
+    await fetchlist()
+  } finally {
+    isRemarkSearching.value = false
+  }
+}
+
+// 状态筛选处理（仅在下拉框改变时触发）
 const handleFilterChange = () => {
-  page.value = 1 // 筛选时重置到第一页
-  fetchlist()
+  // 状态筛选改变时不自动搜索，等待用户点击搜索按钮
+  // 这样用户可以先选择状态，再输入备注，最后一起搜索
 }
 
 // 清除筛选
 const clearSearch = () => {
   statusFilter.value = ''
+  remarkQuery.value = ''
   page.value = 1 // 重置到第一页
   fetchlist()
 }
@@ -617,6 +679,11 @@ const fetchlist = async () => {
       } else if (statusFilter.value === 'banned') {
         params.status = 'banned'
       }
+    }
+
+    // 添加备注搜索参数
+    if (remarkQuery.value && remarkQuery.value.trim()) {
+      params.remark = remarkQuery.value.trim()
     }
 
     let res = await getPool(params)
@@ -773,7 +840,8 @@ function parseExcelFile(file) {
           access_token_secret: row[headers.indexOf('Access Token Secret')] || '',
           is_ban: isBan,
           status: status,
-          usage_policy: usagePolicy
+          usage_policy: usagePolicy,
+          remark: row[headers.indexOf('备注')] || ''
         }
 
         // 验证必填字段
