@@ -109,7 +109,7 @@
           <button
             type="button"
             @click="moveToRight"
-            :disabled="selectedLeftItems.size === 0"
+            :disabled="selectedLeftItemsArray.length === 0"
             class="transfer-btn"
             title="添加选中项"
           >
@@ -120,7 +120,7 @@
         <button
           type="button"
           @click="moveToLeft"
-          :disabled="!hasRightSelected"
+          :disabled="selectedRightItemsArray.length === 0"
           class="transfer-btn"
           title="移除选中项"
         >
@@ -279,9 +279,9 @@ const rightLoading = ref(false)
 const leftItems = ref([])
 const rightItems = ref([])
 
-// 选中的项目 - 使用Map来保存跨页面的选择状态
-const selectedLeftItems = ref(new Map()) // key: itemId, value: item对象
-const selectedRightItems = ref(new Set())
+// 选中的项目 - 使用数组保存所有选中的数据
+const selectedLeftItemsArray = ref([]) // 保存左侧所有选中的完整项目对象
+const selectedRightItemsArray = ref([]) // 保存右侧所有选中的完整项目对象
 
 // 左侧全选状态
 const isAllLeftSelected = computed(() =>
@@ -303,10 +303,11 @@ const isRightIndeterminate = computed(() =>
   rightItems.value.some(item => item.selected) && !isAllRightSelected.value
 )
 
+// 左侧是否有选中项目
+const hasLeftSelected = computed(() => selectedLeftItemsArray.value.length > 0)
+
 // 右侧是否有选中项目
-const hasRightSelected = computed(() =>
-  rightItems.value.some(item => item.selected)
-)
+const hasRightSelected = computed(() => selectedRightItemsArray.value.length > 0)
 
 // 获取项目标签
 function getItemLabel(item) {
@@ -329,10 +330,12 @@ async function fetchLeftData() {
     const response = await props.fetchApi(params)
     console.log('=== 左侧数据响应 ===', response)
 
-    // 给每个项目添加selected属性，保留之前的选择状态
+    // 给每个项目添加selected属性，检查是否在选中数组中
     const itemsWithSelection = (response.results || response.data || []).map(item => {
       const itemId = String(item[props.valueKey])
-      const wasSelected = selectedLeftItems.value.has(itemId)
+      const wasSelected = selectedLeftItemsArray.value.some(selectedItem =>
+        String(selectedItem[props.valueKey]) === itemId
+      )
 
       return {
         ...item,
@@ -365,10 +368,17 @@ async function fetchRightData() {
     console.log('当前已选项目:', props.modelValue)
 
     // 右侧直接显示props.modelValue中的数据，支持搜索过滤
-    let rightData = [...props.modelValue].map(item => ({
-      ...item,
-      selected: item.selected || false // 确保有selected属性
-    }))
+    let rightData = [...props.modelValue].map(item => {
+      const itemId = String(item[props.valueKey])
+      const wasSelected = selectedRightItemsArray.value.some(selectedItem =>
+        String(selectedItem[props.valueKey]) === itemId
+      )
+
+      return {
+        ...item,
+        selected: wasSelected // 检查是否在右侧选中数组中
+      }
+    })
 
     // 如果有搜索条件，进行过滤
     if (rightSearchQuery.value) {
@@ -408,25 +418,56 @@ function toggleLeftItem(item, index) {
   // 直接修改项目的selected属性
   leftItems.value[index].selected = !leftItems.value[index].selected
 
-  // 同时更新Map中的选择状态，用于跨页面保持选择
+  // 同时更新左侧选中数组，用于跨页面保持选择
   const itemId = String(item[props.valueKey])
   if (leftItems.value[index].selected) {
-    selectedLeftItems.value.set(itemId, item)
+    // 添加到左侧选中数组（如果不存在的话）
+    const alreadyExists = selectedLeftItemsArray.value.some(selectedItem =>
+      String(selectedItem[props.valueKey]) === itemId
+    )
+    if (!alreadyExists) {
+      selectedLeftItemsArray.value.push({ ...item })
+    }
   } else {
-    selectedLeftItems.value.delete(itemId)
+    // 从左侧选中数组中移除
+    selectedLeftItemsArray.value = selectedLeftItemsArray.value.filter(selectedItem =>
+      String(selectedItem[props.valueKey]) !== itemId
+    )
   }
 
   console.log('选择后状态:', leftItems.value[index].selected)
-  console.log('Map中的选择状态:', selectedLeftItems.value)
+  console.log('左侧选中数组:', selectedLeftItemsArray.value)
 }
 
 // 切换右侧项目选择
 function toggleRightItem(item, index) {
-  if (item.selected === undefined) {
-    item.selected = false
-  }
-  item.selected = !item.selected
+  console.log('=== 切换右侧选择 ===')
+  console.log('点击的项目:', item)
+  console.log('索引:', index)
+  console.log('选择前状态:', item.selected)
 
+  // 直接修改项目的selected属性
+  rightItems.value[index].selected = !rightItems.value[index].selected
+
+  // 同时更新右侧选中数组，用于跨页面保持选择
+  const itemId = String(item[props.valueKey])
+  if (rightItems.value[index].selected) {
+    // 添加到右侧选中数组（如果不存在的话）
+    const alreadyExists = selectedRightItemsArray.value.some(selectedItem =>
+      String(selectedItem[props.valueKey]) === itemId
+    )
+    if (!alreadyExists) {
+      selectedRightItemsArray.value.push({ ...item })
+    }
+  } else {
+    // 从右侧选中数组中移除
+    selectedRightItemsArray.value = selectedRightItemsArray.value.filter(selectedItem =>
+      String(selectedItem[props.valueKey]) !== itemId
+    )
+  }
+
+  console.log('选择后状态:', rightItems.value[index].selected)
+  console.log('右侧选中数组:', selectedRightItemsArray.value)
 }
 
 // 左侧全选/取消全选
@@ -436,34 +477,56 @@ function toggleAllLeft() {
   leftItems.value.forEach(item => {
     item.selected = shouldSelectAll
 
-    // 同时更新Map中的选择状态
+    // 同时更新左侧选中数组
     const itemId = String(item[props.valueKey])
     if (shouldSelectAll) {
-      selectedLeftItems.value.set(itemId, item)
+      // 添加到左侧选中数组（如果不存在的话）
+      const alreadyExists = selectedLeftItemsArray.value.some(selectedItem =>
+        String(selectedItem[props.valueKey]) === itemId
+      )
+      if (!alreadyExists) {
+        selectedLeftItemsArray.value.push({ ...item })
+      }
     } else {
-      selectedLeftItems.value.delete(itemId)
+      // 从左侧选中数组中移除
+      selectedLeftItemsArray.value = selectedLeftItemsArray.value.filter(selectedItem =>
+        String(selectedItem[props.valueKey]) !== itemId
+      )
     }
   })
 
   console.log('=== 左侧全选操作 ===')
   console.log('全选状态:', shouldSelectAll)
-  console.log('Map中的选择状态:', selectedLeftItems.value)
+  console.log('左侧选中数组:', selectedLeftItemsArray.value)
 }
 // 右侧全选/取消全选
 function toggleAllRight() {
   const shouldSelectAll = !isAllRightSelected.value
 
   rightItems.value.forEach(item => {
-    // 给右侧项目添加selected属性（如果没有的话）
-    if (item.selected === undefined) {
-      item.selected = false
-    }
     item.selected = shouldSelectAll
+
+    // 同时更新右侧选中数组
+    const itemId = String(item[props.valueKey])
+    if (shouldSelectAll) {
+      // 添加到右侧选中数组（如果不存在的话）
+      const alreadyExists = selectedRightItemsArray.value.some(selectedItem =>
+        String(selectedItem[props.valueKey]) === itemId
+      )
+      if (!alreadyExists) {
+        selectedRightItemsArray.value.push({ ...item })
+      }
+    } else {
+      // 从右侧选中数组中移除
+      selectedRightItemsArray.value = selectedRightItemsArray.value.filter(selectedItem =>
+        String(selectedItem[props.valueKey]) !== itemId
+      )
+    }
   })
 
   console.log('=== 右侧全选操作 ===')
   console.log('全选状态:', shouldSelectAll)
-  console.log('处理后的数据:', rightItems.value)
+  console.log('右侧选中数组:', selectedRightItemsArray.value)
 }
 
 // 选择当前页搜索结果
@@ -471,32 +534,38 @@ function selectAllLeftSearchResults() {
   leftItems.value.forEach(item => {
     item.selected = true
 
-    // 同时更新Map中的选择状态
+    // 同时更新左侧选中数组
     const itemId = String(item[props.valueKey])
-    selectedLeftItems.value.set(itemId, item)
+    const alreadyExists = selectedLeftItemsArray.value.some(selectedItem =>
+      String(selectedItem[props.valueKey]) === itemId
+    )
+    if (!alreadyExists) {
+      selectedLeftItemsArray.value.push({ ...item })
+    }
   })
 
   console.log('=== 搜索结果全选 ===')
   console.log('处理后的数据:', leftItems.value)
-  console.log('Map中的选择状态:', selectedLeftItems.value)
+  console.log('左侧选中数组:', selectedLeftItemsArray.value)
 }
 
 // 搜索功能
 function searchLeft() {
   leftPage.value = 1
-  selectedLeftItems.value.clear()
+  // 不清除选择状态，保持跨页面选择
   fetchLeftData()
 }
 
 function searchRight() {
   rightPage.value = 1
-  selectedRightItems.value.clear()
+  // 不清除选择状态，保持跨页面选择
   fetchRightData()
 }
 
 function clearLeftSearch() {
   leftSearchQuery.value = ''
-  searchLeft()
+  leftPage.value = 1
+  fetchLeftData()
 }
 
 function clearRightSearch() {
@@ -507,13 +576,13 @@ function clearRightSearch() {
 // 分页切换
 function changeLeftPage(page) {
   leftPage.value = page
-  selectedLeftItems.value.clear()
+  // 不清除选择状态，保持跨页面选择
   fetchLeftData()
 }
 
 function changeRightPage(page) {
   rightPage.value = page
-  selectedRightItems.value.clear()
+  // 不清除选择状态，保持跨页面选择
   fetchRightData()
 }
 
@@ -540,13 +609,10 @@ function moveItemToRight(item) {
 // 批量移动到右侧（点击箭头按钮时调用）
 function moveToRight() {
   console.log('=== 移动到右侧开始 ===')
-  console.log('左侧所有项目:', leftItems.value)
   console.log('当前已选项目:', props.modelValue)
+  console.log('左侧选中数组中的所有项目:', selectedLeftItemsArray.value)
 
-  // 从Map中获取所有选中的项目（包括所有页面的选择）
-  console.log('Map中所有选中的项目:', selectedLeftItems.value)
-
-  if (selectedLeftItems.value.size === 0) {
+  if (selectedLeftItemsArray.value.length === 0) {
     console.log('没有选中的项目')
     return
   }
@@ -554,13 +620,13 @@ function moveToRight() {
   const newSelected = [...props.modelValue]
   console.log('初始newSelected:', newSelected)
 
-  // 遍历Map中的所有选中项目
-  selectedLeftItems.value.forEach((item, id) => {
-    console.log(`处理项目 ${id}:`, item)
+  // 直接使用左侧选中数组中的所有项目
+  selectedLeftItemsArray.value.forEach(item => {
+    console.log(`处理项目:`, item)
 
     // 检查是否已存在（避免重复添加）
     const alreadyExists = newSelected.some(selected =>
-      String(typeof selected === 'object' ? selected[props.valueKey] : selected) === String(id)
+      String(typeof selected === 'object' ? selected[props.valueKey] : selected) === String(item[props.valueKey])
     )
     console.log(`项目已存在: ${alreadyExists}`)
 
@@ -576,7 +642,7 @@ function moveToRight() {
   emit('update:modelValue', newSelected)
 
   // 清除所有选择状态
-  selectedLeftItems.value.clear()
+  selectedLeftItemsArray.value = []
 
   // 刷新数据
   fetchLeftData()
@@ -601,19 +667,16 @@ function moveItemToLeft(item) {
 // 批量移动到左侧（点击箭头按钮时调用）
 function moveToLeft() {
   console.log('=== 移动到左侧开始 ===')
-  console.log('右侧所有项目:', rightItems.value)
+  console.log('当前已选项目:', props.modelValue)
+  console.log('右侧选中数组中的所有项目:', selectedRightItemsArray.value)
 
-  // 找出所有selected为true的项目
-  const selectedItems = rightItems.value.filter(item => item.selected)
-  console.log('右侧选中的项目:', selectedItems)
-
-  if (selectedItems.length === 0) {
+  if (selectedRightItemsArray.value.length === 0) {
     console.log('没有选中的右侧项目')
     return
   }
 
-  // 从modelValue中移除选中的项目
-  const selectedIds = selectedItems.map(item => String(item[props.valueKey]))
+  // 从modelValue中移除右侧选中数组中的所有项目
+  const selectedIds = selectedRightItemsArray.value.map(item => String(item[props.valueKey]))
   const newSelected = props.modelValue.filter(item => {
     const id = String(typeof item === 'object' ? item[props.valueKey] : item)
     return !selectedIds.includes(id)
@@ -621,6 +684,9 @@ function moveToLeft() {
 
   console.log('移除后的数据:', newSelected)
   emit('update:modelValue', newSelected)
+
+  // 清除右侧所有选择状态
+  selectedRightItemsArray.value = []
 
   // 刷新数据
   fetchLeftData()
