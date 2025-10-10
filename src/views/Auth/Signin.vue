@@ -2,6 +2,19 @@
   <FullScreenLayout>
     <div class="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <div class="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900">
+        <div class="relative items-center hidden w-full h-full lg:w-1/2  lg:grid bg-img">
+          <div class="flex items-center justify-center z-1">
+            <!-- <common-grid-shape /> -->
+            <div class="flex flex-col items-center max-w-2xl">
+              <!-- <router-link to="/" class="block mb-4">
+                <img width="{231}" height="{48}" src="/images/logo/auth-logo.svg" alt="Logo" />
+              </router-link> -->
+              <p class="text-center text-white dark:text-white/60 text-lg mt-200 whitespace-nowrap">
+                智能自动化营销，让您的品牌在全球社交媒体上大放异彩
+              </p>
+            </div>
+          </div>
+        </div>
         <div class="flex flex-col flex-1 w-full lg:w-1/2">
           <!-- <div class="w-full max-w-md pt-10 mx-auto">
             <router-link
@@ -188,19 +201,7 @@
             </div>
           </div>
         </div>
-        <div class="relative items-center hidden w-full h-full lg:w-1/2  lg:grid bg-img">
-          <div class="flex items-center justify-center z-1">
-            <!-- <common-grid-shape /> -->
-            <div class="flex flex-col items-center max-w-xs">
-              <!-- <router-link to="/" class="block mb-4">
-                <img width="{231}" height="{48}" src="/images/logo/auth-logo.svg" alt="Logo" />
-              </router-link> -->
-              <p class="text-center text-white dark:text-white/60 text-4xl font-bold">
-                Pulse AI
-              </p>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   </FullScreenLayout>
@@ -280,7 +281,7 @@ const handleSubmit = async () => {
 
 <style scoped>
 .bg-img {
-  background-image: url('@/assets/signin.webp');
+  background-image: url('@/assets/login.png');
   background-size: cover;
   background-position: center;
 }
