@@ -3,11 +3,112 @@
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div class="space-y-5 sm:space-y-6">
       <ComponentCard>
-        <div class="mb-4 flex items-center justify-between">
-          <div></div>
-          <div class="flex gap-2">
-            <Button size="sm" @click="openAdd">新增</Button>
+        <div class="flex justify-between items-center mb-4">
+          <Button size="sm" class="!text-blue-600"
+            style="border: 1px solid #2563eb; background-color: white !important;"
+            onmouseover="this.style.backgroundColor='white'"
+            onmouseout="this.style.backgroundColor='white'">切换企业数据</Button>
+          <div class="relative">
+            <Button size="sm" class="!text-blue-600 flex items-center gap-2"
+              style="border: 1px solid #2563eb; background-color: white !important;"
+              onmouseover="this.style.backgroundColor='white'" onmouseout="this.style.backgroundColor='white'"
+              @click="toggleTaskMenu">
+              <img src="/src/assets/images/add.png" alt="">
+              新建任务
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </Button>
+
+            <!-- 下拉菜单 -->
+            <div v-if="showTaskMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+              <div class="py-1">
+                <button @click="createInstantTask" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  创建即时任务
+                </button>
+                <button @click="createScheduledTask" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" stroke-width="2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v2M16 2v2"/>
+                  </svg>
+                  创建定时任务
+                </button>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <!-- 任务列表类型选择 -->
+        <div class="mb-4 flex items-center gap-1 border-b border-gray-200">
+          <button class="px-4 py-2 text-sm font-medium transition-colors relative"
+            :class="activeTaskType === 'instant' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+            @click="activeTaskType = 'instant'">
+            <div v-if="activeTaskType === 'instant'"
+              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-blue-600"></div>
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            即时任务列表
+          </button>
+          <button class="px-4 py-2 text-sm font-medium transition-colors relative"
+            :class="activeTaskType === 'scheduled' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+            @click="activeTaskType = 'scheduled'">
+            <div v-if="activeTaskType === 'scheduled'"
+              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-blue-600"></div>
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" stroke-width="2" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v2M16 2v2" />
+            </svg>
+            定时任务列表
+          </button>
+        </div>
+
+        <div class="mb-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <select v-model="typeFilter" @change="handleFilterChange"
+              class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+              <option value="">请选择类型</option>
+              <option value="post">发帖</option>
+              <option value="reply_comment">回复评论</option>
+            </select>
+
+            <select v-model="providerFilter" @change="handleFilterChange"
+              class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+              <option value="">请选择平台</option>
+              <option value="twitter">Twitter</option>
+              <option value="facebook">Facebook</option>
+            </select>
+
+            <select v-model="statusFilter" @change="handleFilterChange"
+              class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+              <option value="">请选择状态</option>
+              <option value="active">待执行</option>
+              <option value="inactive">执行中</option>
+              <option value="inactive">已完成</option>
+              <option value="inactive">已暂停</option>
+              <option value="inactive">部分成功</option>
+              <option value="inactive">部分失败</option>
+            </select>
+
+            <Button size="sm" @click="handleFilterChange" :disabled="isFiltering">
+              <span v-if="isFiltering" class="mr-2">搜索中...</span>
+              <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              搜索
+            </Button>
+            <Button size="sm" variant="outline" @click="clearSearch">
+              重置
+            </Button>
+          </div>
+
         </div>
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
@@ -27,7 +128,9 @@
               <TableHead class="whitespace-nowrap">Facebook页面ID</TableHead>
               <TableHead class="whitespace-nowrap">Facebook评论ID</TableHead> -->
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
-              <TableHead class="whitespace-nowrap text-right">操作</TableHead>
+              <TableHead class="whitespace-nowrap">发布时间</TableHead>
+              <TableHead class="whitespace-nowrap">状态</TableHead>
+              <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white z-10">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -40,25 +143,31 @@
                 <TableCell class="max-w-[200px] truncate" :title="task.text">{{ task.text || '-' }}</TableCell>
                 <TableCell class="max-w-[200px] truncate" :title="task.mentions">{{ task.mentions || '-' }}</TableCell>
                 <TableCell class="max-w-[200px] truncate" :title="task.tags">{{task.tags.map(item => item).join(',') ||
-                  '-' }}</TableCell>
+                  '-'}}</TableCell>
                 <!-- <TableCell class="max-w-[200px] truncate" :title="task.payload">{{ task.payload || '-' }}</TableCell> -->
                 <TableCell class="max-w-[200px] truncate"
                   :title="task.selected_accounts.map(item => item.name).join(',')">{{task.selected_accounts.map(item =>
-                    item.name).join(',') || '-' }}</TableCell>
+                    item.name).join(',') || '-'}}</TableCell>
                 <TableCell class="max-w-[200px] truncate" :title="task.prompt">{{ task.prompt_name || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">
-                  <div class="max-w-[200px] truncate" :title="task.task_remark">{{ task.task_remark || '-' }}</div>
+                  <div class="max-w-[200px] truncate" :title="task.task_remark">{{ task.task_remark || '无' }}</div>
                 </TableCell>
                 <!-- <TableCell class="whitespace-nowrap">{{ task.twitter_reply_to_tweet_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_page_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_comment_id || '-' }}</TableCell> -->
                 <TableCell class="whitespace-nowrap">{{ formatTime(task.created_at) }}</TableCell>
-                <TableCell class="text-right whitespace-nowrap">
+                <TableCell class="whitespace-nowrap">{{ formatTime(task.created_at) }}</TableCell>
+                <TableCell class="whitespace-nowrap text-blue-600">状态</TableCell>
+                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white z-10">
                   <div class="flex items-center justify-end gap-2">
+                    <!-- <Button size="sm" variant="outline" @click="btn(task)">
+                      执行任务
+                    </Button> -->
                     <Button size="sm" variant="outline" @click="btn(task)">
-                      立即执行
+                      暂停任务
                     </Button>
-                    <Button size="sm" variant="outline" @click="onEdit(task)">编辑</Button>
+                    <Button size="sm" variant="outline" @click="onEdit(task)"
+                      class="!text-blue-600 hover:!text-blue-700">编辑任务</Button>
                     <button
                       class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
                       @click="onDelete(task, $event)">
@@ -96,7 +205,7 @@
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
         <template #body>
           <div class="relative z-10 w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-          <div style="height:30vh"></div>
+            <div style="height:30vh"></div>
             <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
@@ -169,12 +278,8 @@
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">机器人<span
                     class="text-error-500">*</span></label>
-                <PaginatedTransfer
-                  v-model="form.selected_accounts"
-                  :fetchApi="fetchBotListPaginated"
-                  labelKey="name"
-                  valueKey="id"
-                />
+                <PaginatedTransfer v-model="form.selected_accounts" :fetchApi="fetchBotListPaginated" labelKey="name"
+                  valueKey="id" />
               </div>
 
               <div>
@@ -241,7 +346,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
@@ -264,6 +369,18 @@ const tasks = ref([])
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
+
+// 任务类型选择
+const activeTaskType = ref('instant')
+
+// 新建任务下拉菜单
+const showTaskMenu = ref(false)
+
+// 筛选条件
+const typeFilter = ref('')
+const providerFilter = ref('')
+const statusFilter = ref('')
+const isFiltering = ref(false)
 const langer = {
   zh: '中文',
   en: '英文',
@@ -663,15 +780,67 @@ const fetchPromptList = async () => {
   }
 }
 
+// 切换任务菜单
+const toggleTaskMenu = () => {
+  showTaskMenu.value = !showTaskMenu.value
+}
+
+// 创建即时任务
+const createInstantTask = () => {
+  showTaskMenu.value = false
+  activeTaskType.value = 'instant'
+  openAdd()
+}
+
+// 创建定时任务
+const createScheduledTask = () => {
+  showTaskMenu.value = false
+  activeTaskType.value = 'scheduled'
+  openAdd()
+}
+
+// 筛选处理函数
+const handleFilterChange = async () => {
+  isFiltering.value = true
+  page.value = 1 // 重置到第一页
+  try {
+    await fetchlist()
+  } finally {
+    isFiltering.value = false
+  }
+}
+
+// 清除搜索
+const clearSearch = () => {
+  typeFilter.value = ''
+  providerFilter.value = ''
+  statusFilter.value = ''
+  page.value = 1
+  fetchlist()
+}
+
 // 获取列表数据
 const fetchlist = async () => {
   console.log(111);
 
   try {
-    let res = await getAutoPlay({
+    const params = {
       page: page.value,
       page_size: pageSize.value
-    })
+    }
+
+    // 添加筛选条件
+    if (typeFilter.value) {
+      params.type = typeFilter.value
+    }
+    if (providerFilter.value) {
+      params.provider = providerFilter.value
+    }
+    if (statusFilter.value) {
+      params.status = statusFilter.value
+    }
+
+    let res = await getAutoPlay(params)
 
     tasks.value = res.results || res.data || []
     total.value = res.count || res.total || 0
@@ -694,9 +863,21 @@ watch(page, (newPage) => {
 
 // 已移除点击外部关闭下拉框的逻辑
 
+// 点击外部关闭菜单
+const handleClickOutside = (event) => {
+  if (showTaskMenu.value && !event.target.closest('.relative')) {
+    showTaskMenu.value = false
+  }
+}
+
 onMounted(() => {
   fetchlist()
   fetchPromptList()
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
