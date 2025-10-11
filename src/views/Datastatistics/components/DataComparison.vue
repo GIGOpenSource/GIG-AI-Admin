@@ -21,14 +21,14 @@
       </div>
       <!-- 日期范围显示 -->
       <div>
-        <span class="text-sm text-gray-600">{{ dateRange }}</span>
+        <span class="text-sm text-gray-900" style="color: #4d63f2">{{ dateRange }}</span>
       </div>
     </div>
 
     <!-- 图表和图例布局 -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <!-- 左侧：ECharts折线图 -->
-      <div class="lg:col-span-3">
+      <div class="lg:col-span-4">
         <div class="h-80 bg-gray-50 rounded-lg p-4">
           <v-chart
             class="w-full h-full"
@@ -53,7 +53,7 @@
             @click="toggleSeries(series.name)"
           >
             <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: series.color }"></div>
-            <span class="text-sm text-gray-600">{{ series.name }}</span>
+            <span class="text-sm text-gray-900">{{ series.name }}</span>
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, computed } from 'vue'
+import { ref, defineEmits, defineProps, computed, watch } from 'vue'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
@@ -105,8 +105,78 @@ interface TooltipParams {
   color: string
 }
 
+// Props
+const props = defineProps<{
+  selectedDate: string
+}>()
+
 const selectedPlatform = ref('X')
 const dateRange = ref('2015-10-15~2015-10-20')
+
+// 根据选择的日期生成日期范围
+const generateDateRange = (dateStr: string) => {
+  if (!dateStr) return '2015-10-15~2015-10-20'
+
+  // 如果已经是日期范围格式 (YYYY-MM-DD~YYYY-MM-DD)，直接返回
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}~\d{4}-\d{2}-\d{2}$/)) {
+    return dateStr
+  }
+
+  // 获取当前日期字符串
+  const today = new Date()
+  const currentDateStr = today.toISOString().split('T')[0]
+
+  // 如果是当前日期，直接显示当前日期
+  if (dateStr === currentDateStr) {
+    return currentDateStr
+  }
+
+  // 如果是具体日期格式 (YYYY-MM-DD) 但不是当前日期
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const date = new Date(dateStr)
+    const startDate = new Date(date)
+    startDate.setDate(date.getDate() - 5) // 向前推5天作为开始日期
+
+    const startStr = startDate.toISOString().split('T')[0]
+    const endStr = date.toISOString().split('T')[0]
+    return `${startStr}~${endStr}`
+  }
+
+  // 如果是相对日期 (近X日)
+  const startDate = new Date(today)
+
+  switch (dateStr) {
+    case 'last3days':
+      startDate.setDate(today.getDate() - 3)
+      break
+    case 'last7days':
+      startDate.setDate(today.getDate() - 7)
+      break
+    case 'last14days':
+      startDate.setDate(today.getDate() - 14)
+      break
+    case 'last30days':
+      startDate.setDate(today.getDate() - 30)
+      break
+    default:
+      startDate.setDate(today.getDate() - 5)
+  }
+
+  const startStr = startDate.toISOString().split('T')[0]
+  const endStr = today.toISOString().split('T')[0]
+  return `${startStr}~${endStr}`
+}
+
+// 监听选择的日期变化
+watch(
+  () => props.selectedDate,
+  (newDate) => {
+    if (newDate) {
+      dateRange.value = generateDateRange(newDate)
+    }
+  },
+  { immediate: true },
+)
 
 const platforms: Platform[] = [
   { label: 'X', value: 'X' },
@@ -308,11 +378,11 @@ const handleChartMouseOut = () => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .lg\\:grid-cols-4 {
+  .lg\\:grid-cols-5 {
     grid-template-columns: 1fr;
   }
 
-  .lg\\:col-span-3,
+  .lg\\:col-span-4,
   .lg\\:col-span-1 {
     grid-column: span 1;
   }
