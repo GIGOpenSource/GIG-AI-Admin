@@ -2,9 +2,26 @@
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <h3 class="text-lg font-semibold text-gray-900 mb-6">总数据量</h3>
 
-    <!-- ECharts环形图 -->
-    <div class="flex justify-center mb-8">
-      <div class="w-48 h-48">
+    <!-- ECharts环形图和图例布局 -->
+    <div class="relative flex justify-center items-center mb-8">
+      <!-- 左侧图例 -->
+      <div class="absolute left-0 top-1/2 transform -translate-y-1/2 space-y-4">
+        <div
+          v-for="(item, index) in leftLegendData"
+          :key="item.name"
+          class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          @click="selectPlatform(item.name)"
+        >
+          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color }"></div>
+          <div class="text-sm text-gray-600">
+            <div class="font-medium">{{ item.name }}</div>
+            <div class="text-xs text-gray-500">{{ item.value }} ({{ item.percentage }}%)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 中间环形图 -->
+      <div class="w-64 h-64">
         <v-chart
           class="w-full h-full"
           :option="donutChartOption"
@@ -12,74 +29,116 @@
           @click="handleDonutClick"
         />
       </div>
-    </div>
 
-    <!-- 图例 -->
-    <div class="flex justify-center gap-6 mb-8">
-      <div
-        v-for="item in donutData"
-        :key="item.name"
-        class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-        @click="selectPlatform(item.name)"
-      >
-        <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color }"></div>
-        <span class="text-sm text-gray-600">
-          {{ item.name }} {{ item.value }} ({{ item.percentage }}%)
-        </span>
+      <!-- 右侧图例 -->
+      <div class="absolute right-0 top-1/2 transform -translate-y-1/2 space-y-4">
+        <div
+          v-for="(item, index) in rightLegendData"
+          :key="item.name"
+          class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          @click="selectPlatform(item.name)"
+        >
+          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color }"></div>
+          <div class="text-sm text-gray-600">
+            <div class="font-medium">{{ item.name }}</div>
+            <div class="text-xs text-gray-500">{{ item.value }} ({{ item.percentage }}%)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部图例 -->
+      <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+        <div
+          v-for="(item, index) in bottomLegendData"
+          :key="item.name"
+          class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity justify-center"
+          @click="selectPlatform(item.name)"
+        >
+          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color }"></div>
+          <div class="text-sm text-gray-600">
+            <div class="font-medium">{{ item.name }}</div>
+            <div class="text-xs text-gray-500">{{ item.value }} ({{ item.percentage }}%)</div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- 水平条形图 - 可点击 -->
-    <div class="space-y-4">
+    <div class="space-y-1">
       <div
         v-for="metric in metrics"
         :key="metric.key"
         :class="[
-          'cursor-pointer p-3 rounded-lg transition-all hover:bg-gray-50 hover:shadow-sm',
-          selectedMetric === metric.key ? 'bg-blue-50 border border-blue-200' : '',
+          'cursor-pointer p-3 rounded-lg transition-all',
         ]"
         @click="selectMetric(metric.key)"
       >
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm text-gray-600">{{ metric.label }}</span>
-          <span class="text-sm font-semibold text-gray-900">{{ metric.value }}</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
-          <div
-            class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            :style="{ width: metric.percentage + '%' }"
-          ></div>
+        <div class="flex items-center gap-3">
+          <span
+            class="text-sm text-gray-600 min-w-[80px] px-3 py-2 rounded-full"
+            :class="selectedMetric === metric.key ? 'bg-gray-200' : ''"
+          >{{ metric.label }}</span>
+          <div class="flex-1 rounded-full h-3" style="background-color: #ced5ff;">
+            <div
+              class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+              :style="{ width: metric.percentage + '%' }"
+            ></div>
+          </div>
+          <span class="text-sm text-gray-600 min-w-[60px] text-right">{{ metric.value }}</span>
         </div>
       </div>
     </div>
 
-    <!-- 比率统计 - 可点击 -->
-    <div class="mt-8">
-      <h4 class="text-sm font-medium text-gray-700 mb-4">比率统计</h4>
-      <div class="space-y-4">
+
+   </div>
+   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-6">
+      <!-- 分段控制器 -->
+      <div class="flex mb-6">
+        <div
+          class="cursor-pointer px-4 py-1 rounded-l-2xl border border-gray-300 font-medium text-black"
+          :class="selectedSegment === 'X' ? 'bg-blue-100' : 'bg-white'"
+          @click="selectSegment('X')"
+        >
+          X
+        </div>
+        <div
+          class="cursor-pointer px-4 py-1 border-t border-b border-gray-300 font-medium text-black"
+          :class="selectedSegment === 'Ins' ? 'bg-blue-100' : 'bg-white'"
+          @click="selectSegment('Ins')"
+        >
+          Ins
+        </div>
+        <div
+          class="cursor-pointer px-4 py-1 rounded-r-2xl border border-gray-300 font-medium text-black"
+          :class="selectedSegment === 'FB' ? 'bg-blue-100' : 'bg-white'"
+          @click="selectSegment('FB')"
+        >
+          FB
+        </div>
+      </div>
+      <!-- 比率统计 - 可点击 -->
+      <div class="space-y-1">
         <div
           v-for="rate in rates"
           :key="rate.key"
           :class="[
-            'cursor-pointer p-3 rounded-lg transition-all hover:bg-gray-50 hover:shadow-sm',
-            selectedRate === rate.key ? 'bg-green-50 border border-green-200' : '',
+            'cursor-pointer p-3 rounded-lg transition-all',
           ]"
           @click="selectRate(rate.key)"
         >
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm text-gray-600">{{ rate.label }}</span>
-            <span class="text-sm font-semibold text-gray-900">{{ rate.value }}%</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div
-              class="bg-green-600 h-2 rounded-full transition-all duration-300"
-              :style="{ width: rate.value + '%' }"
-            ></div>
+          <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-600 min-w-[80px]">{{ rate.label }}</span>
+            <div class="flex-1 rounded-full h-3" style="background-color: #ced5ff;">
+              <div
+                class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                :style="{ width: rate.value + '%' }"
+              ></div>
+            </div>
+            <span class="text-sm text-gray-600 min-w-[60px] text-right">{{ rate.value }}%</span>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -128,28 +187,34 @@ const props = defineProps<{
 const selectedPlatform = ref('')
 const selectedMetric = ref('')
 const selectedRate = ref('')
+const selectedSegment = ref('X') // 默认选中X
 
-// 环形图数据
+// 环形图数据 - 重新排序以匹配图例显示
 const donutData = computed(() => [
   {
     name: 'Instagram',
     value: props.totalData.instagram,
-    color: '#10B981',
+    color: '#10B981', // 绿色
     percentage: Math.round((props.totalData.instagram / props.totalData.total) * 100),
   },
   {
     name: 'X (Twitter)',
     value: props.totalData.x,
-    color: '#F59E0B',
+    color: '#F59E0B', // 橙色
     percentage: Math.round((props.totalData.x / props.totalData.total) * 100),
   },
   {
     name: 'Facebook',
     value: props.totalData.facebook,
-    color: '#3B82F6',
+    color: '#3B82F6', // 蓝色
     percentage: Math.round((props.totalData.facebook / props.totalData.total) * 100),
   },
 ])
+
+// 图例分组数据
+const leftLegendData = computed(() => [donutData.value[0]]) // Instagram
+const rightLegendData = computed(() => [donutData.value[1]]) // X (Twitter)
+const bottomLegendData = computed(() => [donutData.value[2]]) // Facebook
 
 // ECharts环形图配置
 const donutChartOption = computed(() => ({
@@ -161,6 +226,9 @@ const donutChartOption = computed(() => ({
       radius: ['60%', '80%'],
       center: ['50%', '50%'],
       avoidLabelOverlap: false,
+      sort: null, // 禁用自动排序，保持数据原始顺序
+      startAngle: 210, // 固定起始角度
+      roseType: false, // 确保不是玫瑰图模式
       label: {
         show: false,
         position: 'center',
@@ -181,12 +249,14 @@ const donutChartOption = computed(() => ({
       labelLine: {
         show: false,
       },
-      data: donutData.value.map((item) => ({
+      data: donutData.value.map((item, index) => ({
         name: item.name,
         value: item.value,
         itemStyle: {
           color: item.color,
         },
+        // 添加索引确保顺序
+        _index: index,
       })),
     },
   ],
@@ -296,6 +366,11 @@ const handleDonutClick = (params: ECElementEvent) => {
   if (params?.data && typeof params.data === 'object' && 'name' in params.data) {
     selectPlatform(params.data.name as string)
   }
+}
+
+const selectSegment = (segment: string) => {
+  selectedSegment.value = segment
+  console.log('Selected segment:', segment)
 }
 </script>
 

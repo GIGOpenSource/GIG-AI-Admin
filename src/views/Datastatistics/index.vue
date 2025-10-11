@@ -24,7 +24,7 @@
 
         <!-- 右侧：总数据量 -->
         <div class="lg:col-span-1">
-          <TotalVolume :total-data="totalData" />
+          <TotalVol ume :total-data="totalData" />
         </div>
       </div>
     </div>
