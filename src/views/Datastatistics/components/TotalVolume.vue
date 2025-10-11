@@ -21,7 +21,7 @@
       </div>
 
       <!-- 中间环形图 -->
-      <div class="w-64 h-64">
+      <div class="w-48 h-48">
         <v-chart
           class="w-full h-full"
           :option="donutChartOption"

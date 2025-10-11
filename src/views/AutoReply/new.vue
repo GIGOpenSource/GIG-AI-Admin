@@ -4,10 +4,11 @@
     <div class="space-y-5 sm:space-y-6">
       <ComponentCard>
         <div class="flex justify-between items-center mb-4">
-          <Button size="sm" class="!text-blue-600"
+          <!-- <Button size="sm" class="!text-blue-600"
             style="border: 1px solid #2563eb; background-color: white !important;"
             onmouseover="this.style.backgroundColor='white'"
-            onmouseout="this.style.backgroundColor='white'">切换企业数据</Button>
+            onmouseout="this.style.backgroundColor='white'">切换企业数据</Button> -->
+            <div></div>
           <div class="relative">
             <Button size="sm" class="!text-blue-600 flex items-center gap-2"
               style="border: 1px solid #2563eb; background-color: white !important;"
