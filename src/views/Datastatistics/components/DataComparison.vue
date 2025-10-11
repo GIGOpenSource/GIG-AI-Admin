@@ -4,20 +4,21 @@
 
     <!-- 平台选择按钮 -->
     <div class="flex gap-2 mb-6 justify-between items-center">
-      <div class="flex gap-2">
-        <button
-          v-for="platform in platforms"
+      <div class="flex">
+        <div
+          v-for="(platform, index) in platforms"
           :key="platform.value"
+          class="cursor-pointer px-4 py-1 font-medium text-black border border-gray-300 transition-all hover:bg-blue-50"
           :class="[
-            'px-4 py-2 rounded-lg text-sm transition-all',
-            selectedPlatform === platform.value
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+            index === 0 ? 'rounded-l-2xl' : '',
+            index === platforms.length - 1 ? 'rounded-r-2xl' : '',
+            index > 0 ? 'border-l-0' : '',
+            selectedPlatform === platform.value ? 'bg-blue-100' : 'bg-white',
           ]"
           @click="selectPlatform(platform.value)"
         >
           {{ platform.label }}
-        </button>
+        </div>
       </div>
       <!-- 日期范围显示 -->
       <div>
@@ -26,10 +27,10 @@
     </div>
 
     <!-- 图表和图例布局 -->
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-7 gap-6">
       <!-- 左侧：ECharts折线图 -->
-      <div class="lg:col-span-4">
-        <div class="h-80 bg-gray-50 rounded-lg p-4">
+      <div class="lg:col-span-6">
+        <div class="h-90 bg-gray-50 rounded-lg p-4">
           <v-chart
             class="w-full h-full"
             :option="chartOption"
@@ -48,12 +49,12 @@
             :key="series.name"
             :class="[
               'flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all',
-              series.visible ? 'bg-gray-100 border border-gray-300' : 'hover:bg-gray-50',
+              series.visible ? 'bg-gray-100  border-gray-300' : 'hover:bg-gray-50',
             ]"
             @click="toggleSeries(series.name)"
           >
+            <span class="text-sm text-gray-900 text-right flex-1">{{ series.name }}</span>
             <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: series.color }"></div>
-            <span class="text-sm text-gray-900">{{ series.name }}</span>
           </div>
         </div>
       </div>
@@ -374,6 +375,16 @@ const handleChartMouseOut = () => {
 .h-80:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 悬停效果 */
+.cursor-pointer:hover {
+  transform: translateY(-1px);
+}
+
+/* 选中状态动画 */
+.transition-all {
+  transition: all 0.2s ease-in-out;
 }
 
 /* 响应式设计 */

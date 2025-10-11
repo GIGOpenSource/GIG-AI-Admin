@@ -68,17 +68,16 @@
       <div
         v-for="metric in metrics"
         :key="metric.key"
-        :class="[
-          'cursor-pointer p-3 rounded-lg transition-all',
-        ]"
+        :class="['cursor-pointer p-3 rounded-lg transition-all']"
         @click="selectMetric(metric.key)"
       >
         <div class="flex items-center gap-3">
           <span
             class="text-sm text-gray-600 min-w-[80px] px-3 py-2 rounded-full"
             :class="selectedMetric === metric.key ? 'bg-gray-200' : ''"
-          >{{ metric.label }}</span>
-          <div class="flex-1 rounded-full h-3" style="background-color: #ced5ff;">
+            >{{ metric.label }}</span
+          >
+          <div class="flex-1 rounded-full h-3" style="background-color: #ced5ff">
             <div
               class="bg-blue-600 h-3 rounded-full transition-all duration-300"
               :style="{ width: metric.percentage + '%' }"
@@ -88,57 +87,53 @@
         </div>
       </div>
     </div>
-
-
-   </div>
-   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-6">
-      <!-- 分段控制器 -->
-      <div class="flex mb-6">
-        <div
-          class="cursor-pointer px-4 py-1 rounded-l-2xl border border-gray-300 font-medium text-black"
-          :class="selectedSegment === 'X' ? 'bg-blue-100' : 'bg-white'"
-          @click="selectSegment('X')"
-        >
-          X
-        </div>
-        <div
-          class="cursor-pointer px-4 py-1 border-t border-b border-gray-300 font-medium text-black"
-          :class="selectedSegment === 'Ins' ? 'bg-blue-100' : 'bg-white'"
-          @click="selectSegment('Ins')"
-        >
-          Ins
-        </div>
-        <div
-          class="cursor-pointer px-4 py-1 rounded-r-2xl border border-gray-300 font-medium text-black"
-          :class="selectedSegment === 'FB' ? 'bg-blue-100' : 'bg-white'"
-          @click="selectSegment('FB')"
-        >
-          FB
-        </div>
+  </div>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-6">
+    <!-- 分段控制器 -->
+    <div class="flex mb-6">
+      <div
+        class="cursor-pointer px-4 py-1 rounded-l-2xl border border-gray-300 font-medium text-black"
+        :class="selectedSegment === 'X' ? 'bg-blue-100' : 'bg-white'"
+        @click="selectSegment('X')"
+      >
+        X
       </div>
-      <!-- 比率统计 - 可点击 -->
-      <div class="space-y-1">
-        <div
-          v-for="rate in rates"
-          :key="rate.key"
-          :class="[
-            'cursor-pointer p-3 rounded-lg transition-all',
-          ]"
-          @click="selectRate(rate.key)"
-        >
-          <div class="flex items-center gap-3">
-            <span class="text-sm text-gray-600 min-w-[80px]">{{ rate.label }}</span>
-            <div class="flex-1 rounded-full h-3" style="background-color: #ced5ff;">
-              <div
-                class="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                :style="{ width: rate.value + '%' }"
-              ></div>
-            </div>
-            <span class="text-sm text-gray-600 min-w-[60px] text-right">{{ rate.value }}%</span>
+      <div
+        class="cursor-pointer px-4 py-1 border-t border-b border-gray-300 font-medium text-black"
+        :class="selectedSegment === 'Ins' ? 'bg-blue-100' : 'bg-white'"
+        @click="selectSegment('Ins')"
+      >
+        Ins
+      </div>
+      <div
+        class="cursor-pointer px-4 py-1 rounded-r-2xl border border-gray-300 font-medium text-black"
+        :class="selectedSegment === 'FB' ? 'bg-blue-100' : 'bg-white'"
+        @click="selectSegment('FB')"
+      >
+        FB
+      </div>
+    </div>
+    <!-- 比率统计 - 可点击 -->
+    <div class="space-y-1">
+      <div
+        v-for="rate in rates"
+        :key="rate.key"
+        :class="['cursor-pointer p-3 rounded-lg transition-all']"
+        @click="selectRate(rate.key)"
+      >
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-600 min-w-[80px]">{{ rate.label }}</span>
+          <div class="flex-1 rounded-full h-3" style="background-color: #ced5ff">
+            <div
+              class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+              :style="{ width: rate.value + '%' }"
+            ></div>
           </div>
+          <span class="text-sm text-gray-600 min-w-[60px] text-right">{{ rate.value }}%</span>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
