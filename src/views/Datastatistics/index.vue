@@ -5,7 +5,7 @@
       <!-- 左侧：企业按钮、日期选择、平台数据、数据对比 -->
       <div class="lg:col-span-5 space-y-6">
         <!-- 企业按钮 -->
-        <div class="mb-6">
+        <!-- <div class="mb-6">
           <Button
             variant="primary"
             class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
@@ -13,7 +13,7 @@
           >
             {{ selectedCompany?.name || '切换企业数据' }}
           </Button>
-        </div>
+        </div> -->
 
         <!-- 企业数据选择弹窗 -->
         <Modal v-if="showCompanyPicker" :fullScreenBackdrop="true" @close="closeCompanyPicker">
