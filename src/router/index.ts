@@ -55,6 +55,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/taskLog',
+      name: 'task Log',
+      component: () => import('../views/taskLog/taskLog.vue'),
+      meta: {
+        title: '任务日志',
+      },
+    },
+    {
       path: '/prompt-templates',
       name: 'Prompt Templates',
       component: () => import('../views/PromptTemplates/index.vue'),
