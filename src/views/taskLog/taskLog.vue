@@ -318,9 +318,48 @@ const fetchTaskLogs = async () => {
       params.platform = platformFilter.value
     }
 
-    const res = await getTaskLogs(params)
-    taskLogs.value = res.results || res.data || []
-    total.value = res.count || res.total || 0
+    // 临时使用假数据进行展示
+    taskLogs.value = [
+      {
+        id: 1,
+        created_at: new Date().toISOString(),
+        created_by: '管理员',
+        type: 'post',
+        platform: 'twitter',
+        text_content: '这是一条测试发帖内容，用于展示任务日志的效果。欢迎使用 Pulse AI 系统进行社交媒体管理。',
+        bot_count: 5,
+        success_count: 4,
+        failed_count: 1
+      },
+      {
+        id: 2,
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+        created_by: '测试用户',
+        type: 'reply_comment',
+        platform: 'facebook',
+        text_content: '这是一条回复评论的测试内容，感谢您的关注和支持！',
+        bot_count: 3,
+        success_count: 3,
+        failed_count: 0
+      },
+      {
+        id: 3,
+        created_at: new Date(Date.now() - 7200000).toISOString(),
+        created_by: '运营团队',
+        type: 'post',
+        platform: 'instagram',
+        text_content: '今天的营销活动进展顺利，已成功发布到多个平台。',
+        bot_count: 8,
+        success_count: 7,
+        failed_count: 1
+      }
+    ]
+    total.value = 3
+
+    // 正式环境请使用以下代码
+    // const res = await getTaskLogs(params)
+    // taskLogs.value = res.results || res.data || []
+    // total.value = res.count || res.total || 0
 
   } catch (error) {
     console.error('获取任务日志失败:', error)
