@@ -6,11 +6,8 @@
       <div class="lg:col-span-5 space-y-6">
         <!-- 企业按钮 -->
         <div class="mb-6">
-          <Button
-            variant="primary"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-            @click="openCompanyPicker"
-          >
+          <Button variant="primary" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+            @click="openCompanyPicker">
             {{ selectedCompany?.name || '切换企业数据' }}
           </Button>
         </div>
@@ -21,17 +18,9 @@
             <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-3xl mx-auto">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-semibold text-gray-900">选择企业数据</h3>
-                <button
-                  @click="closeCompanyPicker"
-                  class="text-gray-400 hover:text-gray-600 transition-colors"
-                >
+                <button @click="closeCompanyPicker" class="text-gray-400 hover:text-gray-600 transition-colors">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
@@ -39,24 +28,12 @@
               <!-- 搜索框 -->
               <div class="mb-4">
                 <div class="relative">
-                  <input
-                    v-model="searchQuery"
-                    type="text"
-                    placeholder="搜索企业名称..."
-                    class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <svg
-                    class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
+                  <input v-model="searchQuery" type="text" placeholder="搜索企业名称..."
+                    class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
               </div>
@@ -66,35 +43,28 @@
                 <p class="text-sm text-gray-600">
                   当前企业:
                   <span class="font-semibold text-orange-600">
-                    {{ companies.find((c) => c.id === tempSelectedCompanyId)?.name || '未选择' }}
+                    {{companies.find((c) => c.id === tempSelectedCompanyId)?.name || '未选择'}}
                   </span>
                 </p>
               </div>
 
               <!-- 企业列表 -->
               <div class="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
-                <div
-                  v-for="company in filteredCompanies"
-                  :key="company.id"
-                  :class="[
-                    'p-4 border-b border-gray-100 cursor-pointer transition-all hover:bg-gray-50',
-                    tempSelectedCompanyId === company.id
-                      ? 'bg-orange-50 border-l-4 border-l-orange-500'
-                      : '',
-                  ]"
-                  @click="selectCompany(company)"
-                >
+                <div v-for="company in filteredCompanies" :key="company.id" :class="[
+                  'p-4 border-b border-gray-100 cursor-pointer transition-all hover:bg-gray-50',
+                  tempSelectedCompanyId === company.id
+                    ? 'bg-orange-50 border-l-4 border-l-orange-500'
+                    : '',
+                ]" @click="selectCompany(company)">
                   <div class="flex items-center justify-between">
                     <div class="flex-1">
                       <h4 class="font-semibold text-gray-900">{{ company.name }}</h4>
                     </div>
                     <div v-if="tempSelectedCompanyId === company.id">
                       <svg class="w-6 h-6 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                          fill-rule="evenodd"
+                        <path fill-rule="evenodd"
                           d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clip-rule="evenodd"
-                        />
+                          clip-rule="evenodd" />
                       </svg>
                     </div>
                   </div>
@@ -103,37 +73,21 @@
 
               <!-- 没有搜索结果 -->
               <div v-if="filteredCompanies.length === 0" class="p-8 text-center text-gray-500">
-                <svg
-                  class="w-16 h-16 mx-auto mb-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
+                <svg class="w-16 h-16 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p>未找到匹配的企业</p>
               </div>
 
               <!-- 操作按钮 -->
               <div class="flex justify-end gap-3 mt-6">
-                <Button
-                  variant="outline"
-                  class="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  @click="closeCompanyPicker"
-                >
+                <Button variant="outline" class="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                  @click="closeCompanyPicker">
                   取消
                 </Button>
-                <Button
-                  variant="primary"
-                  class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white"
-                  @click="confirmCompanySelection"
-                  :disabled="!tempSelectedCompanyId"
-                >
+                <Button variant="primary" class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white"
+                  @click="confirmCompanySelection" :disabled="!tempSelectedCompanyId">
                   确定
                 </Button>
               </div>
@@ -144,18 +98,11 @@
         <!-- 日期选择器 -->
         <div class="mb-6">
           <div class="flex gap-2">
-            <Button
-              v-for="(option, index) in dateOptions"
-              :key="index"
-              :variant="selectedDate === option.value ? 'primary' : 'outline'"
-              :class="
-                selectedDate === option.value
+            <Button v-for="(option, index) in dateOptions" :key="index"
+              :variant="selectedDate === option.value ? 'primary' : 'outline'" :class="selectedDate === option.value
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
-              "
-              class="px-4 py-2 rounded-lg text-sm"
-              @click="selectDate(option.value)"
-            >
+                " class="px-4 py-2 rounded-lg text-sm" @click="selectDate(option.value)">
               {{ option.label }}
             </Button>
           </div>
@@ -167,28 +114,16 @@
             <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-4xl mx-auto">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">选择日期范围</h3>
-                <button
-                  @click="closeDatePicker"
-                  class="text-gray-400 hover:text-gray-600 transition-colors"
-                >
+                <button @click="closeDatePicker" class="text-gray-400 hover:text-gray-600 transition-colors">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
               <!-- 日期范围选择器 -->
               <div class="mb-6">
-                <RangeCalendar
-                  v-model="dateRange"
-                  :locale="'zh-CN'"
-                  class="border border-gray-200 rounded-lg"
-                />
+                <RangeCalendar v-model="dateRange" :locale="'zh-CN'" class="border border-gray-200 rounded-lg" />
               </div>
 
               <!-- 选中的日期范围显示 -->
@@ -203,19 +138,12 @@
 
               <!-- 操作按钮 -->
               <div class="flex justify-end gap-3">
-                <Button
-                  variant="outline"
-                  class="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  @click="closeDatePicker"
-                >
+                <Button variant="outline" class="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                  @click="closeDatePicker">
                   取消
                 </Button>
-                <Button
-                  variant="primary"
-                  class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white"
-                  @click="confirmDateRange"
-                  :disabled="!isDateRangeValid"
-                >
+                <Button variant="primary" class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white"
+                  @click="confirmDateRange" :disabled="!isDateRangeValid">
                   确定
                 </Button>
               </div>
@@ -225,12 +153,8 @@
 
         <!-- 平台数据卡片 -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <PlatformCard
-            v-for="platform in platforms"
-            :key="platform.name"
-            :platform="platform"
-            :data="getPlatformData()"
-          />
+          <PlatformCard v-for="platform in platforms" :key="platform.name" :platform="platform"
+            :data="getPlatformData()" />
         </div>
 
         <!-- 数据对比组件 -->
@@ -256,7 +180,7 @@ import { RangeCalendar } from '@/components/ui/range-calendar'
 import PlatformCard from './components/PlatformCard.vue'
 import TotalVolume from './components/TotalVolume.vue'
 import DataComparison from './components/DataComparison.vue'
-import { getdate } from '@/api/index.ts'
+import { getdate, getdata } from '@/api/index.ts'
 import { toast } from 'vue-sonner'
 
 // 导入图片
@@ -546,12 +470,12 @@ const totalData = ref({
   instagram: 12314,
   x: 12314,
   facebook: 12314,
-  totalPosts: 12314,
-  totalImpressions: 12314,
-  totalComments: 114,
-  totalReplies: 114,
-  totalLikes: 12314,
-  totalClicks: 114,
+  totalPosts: 12314,//总发布数
+  totalImpressions: 12314,//总曝光数
+  totalComments: 114, //总评论数
+  totalReplies: 114,//总回复数
+  totalLikes: 12314,//总点赞数
+  totalClicks: 114,//总点击量
 })
 // 获取平台数据
 const getPlatformData = () => {
@@ -573,20 +497,54 @@ const handlePlatformChange = (platform: string) => {
 }
 
 const fetchData = async () => {
-  try {
-    const res = await getdate({
-      page: 1,
-    })
+ getdata({
+    end_date: '',
+    enterprise_id: '',
+    start_date: ''
+  }).then(res => {
+    const apiData = res
+    totalData.value = {
+      totalPosts: apiData.fb.total_public_count +
+        apiData.ins.total_public_count +
+        apiData.twitter.total_public_count,
 
-    // 处理API返回的数据
-    console.log('Data fetched successfully:', res)
+      totalImpressions: apiData.fb.total_impression_count +
+        apiData.ins.total_impression_count +
+        apiData.twitter.total_impression_count,
 
-    // 这里可以根据实际API返回的数据更新totalData
-    // 例如：totalData.value = processApiData(res)
-  } catch (error) {
-    console.error('获取数据统计失败:', error)
-    toast.error('获取数据统计失败')
-  }
+      totalComments: apiData.fb.total_comment_count +
+        apiData.ins.total_comment_count +
+        apiData.twitter.total_comment_count,
+
+      totalReplies: apiData.fb.total_comment_count +
+        apiData.ins.total_comment_count +
+        apiData.twitter.total_comment_count,
+
+      totalLikes: apiData.fb.total_like_count +
+        apiData.ins.total_like_count +
+        apiData.twitter.total_like_count,
+
+      totalClicks: apiData.fb.total_click_count +
+        apiData.ins.total_click_count +
+        apiData.twitter.total_click_count,
+
+      total: apiData.fb.total_public_count +
+        apiData.ins.total_public_count +
+        apiData.twitter.total_public_count,
+
+
+      instagram:apiData.ins.total_public_count,
+      x: apiData.twitter.total_public_count,
+      facebook:apiData.fb.total_public_count
+
+    }
+
+    return res
+  })
+
+  // 处理API返回的数据
+console.log(totalData.value,'totalData.valu11etotalData.value');
+
 }
 
 onMounted(() => {
