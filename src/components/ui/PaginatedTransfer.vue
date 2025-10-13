@@ -83,7 +83,7 @@
           </div>
         </div>
         <!-- 左侧分页 -->
-        <div v-if="leftTotalPages > 1" class="transfer-pagination">
+        <!-- <div v-if="leftTotalPages > 1" class="transfer-pagination">
           <button
             type="button"
             @click="leftPage > 1 && changeLeftPage(leftPage - 1)"
@@ -101,11 +101,11 @@
           >
             下一页
           </button>
-        </div>
+        </div> -->
       </div>
 
       <!-- 中间操作按钮 -->
-      <div class="transfer-buttons">
+      <!-- <div class="transfer-buttons">
           <button
             type="button"
             @click="moveToRight"
@@ -128,10 +128,10 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
           </svg>
         </button>
-      </div>
+      </div> -->
 
       <!-- 右侧已选列表 -->
-      <div class="transfer-panel">
+      <!-- <div class="transfer-panel">
         <div class="transfer-header">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -145,7 +145,6 @@
               <span class="text-sm font-medium">全选</span>
             </div>
           </div>
-          <!-- 搜索框 -->
           <div class="mt-2 relative">
             <input
               v-model="rightSearchQuery"
@@ -201,7 +200,7 @@
             </div>
           </div>
         </div>
-        <!-- 右侧分页 -->
+
         <div v-if="rightTotalPages > 1" class="transfer-pagination">
           <button
             type="button"
@@ -221,7 +220,7 @@
             下一页
           </button>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
