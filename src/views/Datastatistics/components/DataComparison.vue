@@ -1,5 +1,13 @@
 <template>
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+  <!-- 根据日期选择显示不同的图表组件 -->
+  <BarChartComparison
+    v-if="isSingleDay"
+    :selected-date="selectedDate"
+    @platform-change="handlePlatformChange"
+  />
+
+  <!-- 多日数据显示折线图 -->
+  <div v-else class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <h3 class="text-lg font-semibold text-gray-900 mb-6">数据对比</h3>
 
     <!-- 平台选择按钮 -->
@@ -75,6 +83,7 @@ import {
   DataZoomComponent,
 } from 'echarts/components'
 import VChart from 'vue-echarts'
+import BarChartComparison from './BarChartComparison.vue'
 
 // 注册ECharts组件
 use([
@@ -113,6 +122,18 @@ const props = defineProps<{
 
 const selectedPlatform = ref('X')
 const dateRange = ref('2015-10-15~2015-10-20')
+
+// 判断是否为单日选择
+const isSingleDay = computed(() => {
+  if (!props.selectedDate) return false
+
+  // 如果是具体的日期格式 (YYYY-MM-DD)，且不是相对日期，则为单日
+  if (props.selectedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return true
+  }
+
+  return false
+})
 
 // 根据选择的日期生成日期范围
 const generateDateRange = (dateStr: string) => {
@@ -265,7 +286,7 @@ const chartOption = computed(() => {
       left: '50px',
       right: '20px',
       top: '30px',
-      bottom: '40px',
+      bottom: '10px',
       containLabel: true,
     },
     xAxis: {
@@ -346,6 +367,12 @@ const emit = defineEmits(['platform-change'])
 const selectPlatform = (value: string) => {
   selectedPlatform.value = value
   emit('platform-change', value)
+}
+
+// 处理平台变化事件（从柱形图组件传递过来）
+const handlePlatformChange = (platform: string) => {
+  selectedPlatform.value = platform
+  emit('platform-change', platform)
 }
 
 // 切换数据系列的可见性

@@ -1,6 +1,6 @@
 <template>
   <ThemeProvider>
-    <Toaster position="top-right"/>
+    <Toaster position="top-right" />
 
     <SidebarProvider>
       <RouterView />
