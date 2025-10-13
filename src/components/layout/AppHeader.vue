@@ -75,6 +75,9 @@
         class="items-center justify-between w-full gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none"
       >
         <div class="flex items-center gap-2 2xsm:gap-3">
+          <button class="!text-blue-600 px-4 py-2 text-sm font-medium rounded-lg" style="border: 1px solid #2563eb; background-color: white !important;" onmouseover="this.style.backgroundColor='white'" onmouseout="this.style.backgroundColor='white'" title="切换企业数据">
+            切换企业数据
+          </button>
           <ThemeToggler />
           <!-- <NotificationMenu /> -->
         </div>
