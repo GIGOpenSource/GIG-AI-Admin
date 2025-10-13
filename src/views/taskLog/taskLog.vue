@@ -5,6 +5,22 @@
       <ComponentCard>
         <div class="mb-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
+            <div class="relative">
+              <input v-model="textContentFilter" type="text" placeholder="请输入文本内容"
+                class="w-80 h-10 pl-10 pr-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                @keyup.enter="handleFilterChange" />
+              <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
             <select v-model="typeFilter" @change="handleFilterChange"
               class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
               <option value="">请选择类型</option>
@@ -21,6 +37,23 @@
               <option value="threads">Threads</option>
             </select>
 
+            <select v-model="promptFilter" @change="handleFilterChange"
+              class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+              <option value="">请选择提示词</option>
+              <option value="prompt1">默认提示词</option>
+              <option value="prompt2">营销提示词</option>
+              <option value="prompt3">客服提示词</option>
+            </select>
+
+            <select v-model="timeFilter" @change="handleFilterChange"
+              class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+              <option value="">请选择时间</option>
+              <option value="today">今天</option>
+              <option value="yesterday">昨天</option>
+              <option value="last7days">最近7天</option>
+              <option value="last30days">最近30天</option>
+            </select>
+
             <Button size="sm" @click="handleFilterChange" :disabled="isFiltering">
               <span v-if="isFiltering" class="mr-2">搜索中...</span>
               <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,6 +65,11 @@
             <Button size="sm" variant="outline" @click="clearSearch">
               重置
             </Button>
+            <button
+              class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-2 text-sm bg-white text-rose-600 ring-1 ring-inset ring-rose-300 hover:bg-rose-50 dark:bg-gray-800 dark:text-rose-400 dark:ring-rose-500/30 dark:hover:bg-rose-500/10"
+              @click="handleRefresh">
+              刷新
+            </button>
           </div>
         </div>
 
@@ -81,10 +119,11 @@
                 </TableCell>
                 <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 z-10">
                   <div class="flex items-center justify-end gap-2">
-                    <Button size="sm" variant="outline" @click="onViewDetail(log)"
-                      class="!text-blue-600 hover:!text-blue-700">
+                    <button
+                      class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500"
+                      @click="onViewDetail(log)">
                       查看详情
-                    </Button>
+                    </button>
                     <!-- <button
                       class="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300 text-rose-600 ring-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:ring-rose-500/30"
                       @click="onDelete(log, $event)">
@@ -122,7 +161,7 @@
       <!-- 查看详情弹窗 -->
       <Modal v-if="showDetailModal" :fullScreenBackdrop="true" @close="closeDetailModal">
         <template #body>
-          <div class="relative z-10 w-full max-w-3xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+          <div class="relative z-10 w-full max-w-3xl rounded-xl bg-white p-6 dark:bg-gray-900 border-0">
             <h3 class="mb-6 text-lg font-semibold">任务日志详情</h3>
             <div class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
@@ -170,7 +209,7 @@
               </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex justify-end gap-3 pt-6 mt-6">
               <Button variant="outline" @click="closeDetailModal">关闭</Button>
             </div>
           </div>
@@ -212,8 +251,11 @@ const pageSize = ref(20)
 const total = ref(0)
 
 // 筛选条件
+const textContentFilter = ref('')
 const typeFilter = ref('')
 const platformFilter = ref('')
+const promptFilter = ref('')
+const timeFilter = ref('')
 const isFiltering = ref(false)
 
 // 详情弹窗
@@ -296,10 +338,19 @@ const handleFilterChange = async () => {
 
 // 清除搜索
 const clearSearch = () => {
+  textContentFilter.value = ''
   typeFilter.value = ''
   platformFilter.value = ''
+  promptFilter.value = ''
+  timeFilter.value = ''
   page.value = 1
   fetchTaskLogs()
+}
+
+// 刷新列表
+const handleRefresh = () => {
+  fetchTaskLogs()
+  toast.success('刷新成功')
 }
 
 // 获取任务日志列表
@@ -311,11 +362,20 @@ const fetchTaskLogs = async () => {
     }
 
     // 添加筛选条件
+    if (textContentFilter.value) {
+      params.text_content = textContentFilter.value
+    }
     if (typeFilter.value) {
       params.type = typeFilter.value
     }
     if (platformFilter.value) {
       params.platform = platformFilter.value
+    }
+    if (promptFilter.value) {
+      params.prompt = promptFilter.value
+    }
+    if (timeFilter.value) {
+      params.time_range = timeFilter.value
     }
 
     // 临时使用假数据进行展示
