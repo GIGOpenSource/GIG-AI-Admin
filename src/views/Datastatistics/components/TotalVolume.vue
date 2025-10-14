@@ -6,9 +6,12 @@
     <div class="relative flex justify-center items-center mb-8">
       <!-- 左侧图例 -->
       <div class="absolute left-0 top-1/2 transform -translate-y-1/2 space-y-4">
-        <div v-for="(item, index) in leftLegendData" :key="item.name"
+        <div
+          v-for="(item, index) in leftLegendData"
+          :key="item.name"
           class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-          @click="selectPlatform(item.name)">
+          @click="selectPlatform(item.name)"
+        >
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color }"></div>
           <div class="text-sm text-gray-600">
             <div class="font-medium">{{ item.name }}</div>
@@ -18,15 +21,23 @@
       </div>
 
       <!-- 中间环形图 -->
-      <div class="w-48 h-48">
-        <v-chart class="w-full h-full" :option="donutChartOption" :autoresize="true" @click="handleDonutClick" />
+      <div class="w-64 h-64">
+        <v-chart
+          class="w-full h-full"
+          :option="donutChartOption"
+          :autoresize="true"
+          @click="handleDonutClick"
+        />
       </div>
 
       <!-- 右侧图例 -->
       <div class="absolute right-0 top-1/2 transform -translate-y-1/2 space-y-4">
-        <div v-for="(item, index) in rightLegendData" :key="item.name"
+        <div
+          v-for="(item, index) in rightLegendData"
+          :key="item.name"
           class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-          @click="selectPlatform(item.name)">
+          @click="selectPlatform(item.name)"
+        >
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color }"></div>
           <div class="text-sm text-gray-600">
             <div class="font-medium">{{ item.name }}</div>
@@ -37,9 +48,12 @@
 
       <!-- 底部图例 -->
       <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-        <div v-for="(item, index) in bottomLegendData" :key="item.name"
+        <div
+          v-for="(item, index) in bottomLegendData"
+          :key="item.name"
           class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity justify-center"
-          @click="selectPlatform(item.name)">
+          @click="selectPlatform(item.name)"
+        >
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color }"></div>
           <div class="text-sm text-gray-600">
             <div class="font-medium">{{ item.name }}</div>
@@ -51,14 +65,23 @@
 
     <!-- 水平条形图 - 可点击 -->
     <div class="space-y-1">
-      <div v-for="metric in metrics" :key="metric.key" :class="['cursor-pointer p-3 rounded-lg transition-all']"
-        @click="selectMetric(metric.key)">
+      <div
+        v-for="metric in metrics"
+        :key="metric.key"
+        :class="['cursor-pointer p-3 rounded-lg transition-all']"
+        @click="selectMetric(metric.key)"
+      >
         <div class="flex items-center gap-3">
-          <span class="text-sm text-gray-600 min-w-[80px] px-3 py-2 rounded-full"
-            :class="selectedMetric === metric.key ? 'bg-gray-200' : ''">{{ metric.label }}</span>
+          <span
+            class="text-sm text-gray-600 min-w-[80px] px-3 py-2 rounded-full"
+            :class="selectedMetric === metric.key ? 'bg-gray-200' : ''"
+            >{{ metric.label }}</span
+          >
           <div class="flex-1 rounded-full h-3" style="background-color: #ced5ff">
-            <div class="bg-blue-600 h-3 rounded-full transition-all duration-300"
-              :style="{ width: metric.percentage + '%' }"></div>
+            <div
+              class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+              :style="{ width: metric.percentage + '%' }"
+            ></div>
           </div>
           <span class="text-sm text-gray-600 min-w-[60px] text-right">{{ metric.value }}</span>
         </div>
@@ -68,28 +91,43 @@
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-6">
     <!-- 分段控制器 -->
     <div class="flex mb-6">
-      <div class="cursor-pointer px-4 py-1 rounded-l-2xl border border-gray-300 font-medium text-black"
-        :class="selectedSegment === 'X' ? 'bg-blue-100' : 'bg-white'" @click="selectSegment('X')">
+      <div
+        class="cursor-pointer px-4 py-1 rounded-l-2xl border border-gray-300 font-medium text-black"
+        :class="selectedSegment === 'X' ? 'bg-blue-100' : 'bg-white'"
+        @click="selectSegment('X')"
+      >
         X
       </div>
-      <div class="cursor-pointer px-4 py-1 border-t border-b border-gray-300 font-medium text-black"
-        :class="selectedSegment === 'Ins' ? 'bg-blue-100' : 'bg-white'" @click="selectSegment('Ins')">
+      <div
+        class="cursor-pointer px-4 py-1 border-t border-b border-gray-300 font-medium text-black"
+        :class="selectedSegment === 'Ins' ? 'bg-blue-100' : 'bg-white'"
+        @click="selectSegment('Ins')"
+      >
         Ins
       </div>
-      <div class="cursor-pointer px-4 py-1 rounded-r-2xl border border-gray-300 font-medium text-black"
-        :class="selectedSegment === 'FB' ? 'bg-blue-100' : 'bg-white'" @click="selectSegment('FB')">
+      <div
+        class="cursor-pointer px-4 py-1 rounded-r-2xl border border-gray-300 font-medium text-black"
+        :class="selectedSegment === 'FB' ? 'bg-blue-100' : 'bg-white'"
+        @click="selectSegment('FB')"
+      >
         FB
       </div>
     </div>
     <!-- 比率统计 - 可点击 -->
     <div class="space-y-1">
-      <div v-for="rate in rates" :key="rate.key" :class="['cursor-pointer p-3 rounded-lg transition-all']"
-        @click="selectRate(rate.key)">
+      <div
+        v-for="rate in rates"
+        :key="rate.key"
+        :class="['cursor-pointer p-3 rounded-lg transition-all']"
+        @click="selectRate(rate.key)"
+      >
         <div class="flex items-center gap-3">
           <span class="text-sm text-gray-600 min-w-[80px]">{{ rate.label }}</span>
           <div class="flex-1 rounded-full h-3" style="background-color: #ced5ff">
-            <div class="bg-blue-600 h-3 rounded-full transition-all duration-300" :style="{ width: rate.value + '%' }">
-            </div>
+            <div
+              class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+              :style="{ width: rate.value + '%' }"
+            ></div>
           </div>
           <span class="text-sm text-gray-600 min-w-[60px] text-right">{{ rate.value }}%</span>
         </div>
@@ -99,14 +137,14 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, computed, onMounted, watch } from 'vue'
+import { defineProps, ref, computed } from 'vue'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { PieChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import type { ECElementEvent } from 'echarts/core'
 import VChart from 'vue-echarts'
-import { getdate, getdata } from '@/api/index.ts'
+
 // 注册ECharts组件
 use([CanvasRenderer, PieChart, TitleComponent, TooltipComponent, LegendComponent])
 
@@ -138,39 +176,38 @@ interface RateItem {
 
 const props = defineProps<{
   totalData: TotalData
-  startDate?: string
-  endDate?: string
-  enterpriseId?: string
 }>()
 
 // 选择状态
 const selectedPlatform = ref('')
-const selectedMetric = ref('totalPosts')
+const selectedMetric = ref('')
 const selectedRate = ref('')
 const selectedSegment = ref('X') // 默认选中X
-const apiData = ref<any>({})
 
 // 环形图数据 - 重新排序以匹配图例显示
-const donutData = computed(() => [
-  {
-    name: 'Instagram',
-    value: props.totalData.instagram,
-    color: '#10B981', // 绿色
-    percentage: Math.round((props.totalData.instagram / props.totalData.total) * 100),
-  },
-  {
-    name: 'X (Twitter)',
-    value: props.totalData.x,
-    color: '#F59E0B', // 橙色
-    percentage: Math.round((props.totalData.x / props.totalData.total) * 100),
-  },
-  {
-    name: 'Facebook',
-    value: props.totalData.facebook,
-    color: '#3B82F6', // 蓝色
-    percentage: Math.round((props.totalData.facebook / props.totalData.total) * 100),
-  },
-])
+const donutData = computed(() => {
+  const total = props.totalData.total || 0
+  return [
+    {
+      name: 'Instagram',
+      value: props.totalData.instagram,
+      color: '#10B981', // 绿色
+      percentage: total > 0 ? Math.round((props.totalData.instagram / total) * 100) : 0,
+    },
+    {
+      name: 'X (Twitter)',
+      value: props.totalData.x,
+      color: '#F59E0B', // 橙色
+      percentage: total > 0 ? Math.round((props.totalData.x / total) * 100) : 0,
+    },
+    {
+      name: 'Facebook',
+      value: props.totalData.facebook,
+      color: '#3B82F6', // 蓝色
+      percentage: total > 0 ? Math.round((props.totalData.facebook / total) * 100) : 0,
+    },
+  ]
+})
 
 // 图例分组数据
 const leftLegendData = computed(() => [donutData.value[0]]) // Instagram
@@ -287,28 +324,22 @@ const metrics = computed((): MetricItem[] => [
   },
 ])
 
-// 比率数据 - 使用响应式变量
-const currentRates = ref({
-  impressionRate: 12,
-  likeRate: 15,
-  clickRate: 12
-})
-
+// 比率数据
 const rates = computed((): RateItem[] => [
   {
     key: 'impressionRate',
     label: '曝光率',
-    value: currentRates.value.impressionRate,
+    value: 100,
   },
   {
     key: 'likeRate',
     label: '点赞率',
-    value: currentRates.value.likeRate,
+    value: 15,
   },
   {
     key: 'clickRate',
     label: '点击率',
-    value: currentRates.value.clickRate,
+    value: 12,
   },
 ])
 
@@ -317,76 +348,15 @@ const selectPlatform = (platformName: string) => {
   selectedPlatform.value = platformName
   console.log('Selected platform:', platformName)
 }
-//点击
+
 const selectMetric = (metricKey: string) => {
   selectedMetric.value = metricKey
-  const data = apiData.value
-  console.log(data, 'apiData from selectMetric')
-  console.log(metricKey, 'selected metric')
-
-  if (data && data.fb && data.ins && data.twitter) {
-    if (metricKey == 'totalPosts') {
-      props.totalData.total = data.fb.total_public_count + data.ins.total_public_count + data.twitter.total_public_count
-      props.totalData.instagram = data.ins.total_public_count
-      props.totalData.x = data.twitter.total_public_count
-      props.totalData.facebook = data.fb.total_public_count
-    } else if (metricKey == 'totalImpressions') {
-      props.totalData.total = data.fb.total_impression_count + data.ins.total_impression_count + data.twitter.total_impression_count
-      props.totalData.instagram = data.ins.total_impression_count
-      props.totalData.x = data.twitter.total_impression_count
-      props.totalData.facebook = data.fb.total_impression_count
-    } else if (metricKey == 'totalComments') {
-      props.totalData.total = data.fb.total_comment_count + data.ins.total_comment_count + data.twitter.total_comment_count
-      props.totalData.instagram = data.ins.total_comment_count
-      props.totalData.x = data.twitter.total_comment_count
-      props.totalData.facebook = data.fb.total_comment_count
-    } else if (metricKey == 'totalReplies') {
-      // 如果回复数≠评论数，请换成对应字段，如 total_reply_count
-      props.totalData.total = data.fb.total_comment_count + data.ins.total_comment_count + data.twitter.total_comment_count
-      props.totalData.instagram = data.ins.total_comment_count
-      props.totalData.x = data.twitter.total_comment_count
-      props.totalData.facebook = data.fb.total_comment_count
-    } else if (metricKey == 'totalLikes') {
-      props.totalData.total = data.fb.total_like_count + data.ins.total_like_count + data.twitter.total_like_count
-      props.totalData.instagram = data.ins.total_like_count
-      props.totalData.x = data.twitter.total_like_count
-      props.totalData.facebook = data.fb.total_like_count
-    } else if (metricKey == 'totalClicks') {
-      props.totalData.total = data.fb.total_click_count + data.ins.total_click_count + data.twitter.total_click_count
-      props.totalData.instagram = data.ins.total_click_count
-      props.totalData.x = data.twitter.total_click_count
-      props.totalData.facebook = data.fb.total_click_count
-    }
-
-    console.log('Updated totalData:', props.totalData)
-  } else {
-    console.log('No data available or data structure is incorrect')
-  }
+  console.log('Selected metric:', metricKey)
 }
-
-
-const fetchData = async () => {
-  getdata({
-     start_date: props.startDate || '',
-    end_date: props.endDate || '',
-    enterprise_id: '',
-  }).then(res => {
-    apiData.value = res
-
-    // 初始化默认选中X平台的比率
-    if (res && res.twitter) {
-      currentRates.value.impressionRate = res.twitter.exposure_rate || 0
-      currentRates.value.likeRate = res.twitter.like_rate || 0
-      currentRates.value.clickRate = res.twitter.click_rate || 0
-    }
-  })
-}
-
 
 const selectRate = (rateKey: string) => {
   selectedRate.value = rateKey
-
-
+  console.log('Selected rate:', rateKey)
 }
 
 const handleDonutClick = (params: ECElementEvent) => {
@@ -398,40 +368,8 @@ const handleDonutClick = (params: ECElementEvent) => {
 
 const selectSegment = (segment: string) => {
   selectedSegment.value = segment
-  const data = apiData.value
-
-  if (data && data.fb && data.ins && data.twitter) {
-    if (segment == 'X') {
-      currentRates.value.impressionRate = data.twitter.exposure_rate || 0
-      currentRates.value.likeRate = data.twitter.like_rate || 0
-      currentRates.value.clickRate = data.twitter.click_rate || 0
-    } else if (segment == 'Ins') {
-      currentRates.value.impressionRate = data.ins.exposure_rate || 0
-      currentRates.value.likeRate = data.ins.like_rate || 0
-      currentRates.value.clickRate = data.ins.click_rate || 0
-    } else if (segment == 'FB') {
-      currentRates.value.impressionRate = data.fb.exposure_rate || 0
-      currentRates.value.likeRate = data.fb.like_rate || 0
-      currentRates.value.clickRate = data.fb.click_rate || 0
-    }
-
-    console.log('Updated rates for segment:', segment, currentRates.value)
-  }
+  console.log('Selected segment:', segment)
 }
-// 监听 props 变化，重新获取数据
-watch(
-  () => [props.startDate, props.endDate, props.enterpriseId],
-  () => {
-    if (props.startDate && props.endDate) {
-      fetchData()
-    }
-  },
-  { immediate: false }
-)
-
-onMounted(() => {
-  fetchData()
-})
 </script>
 
 <style scoped>

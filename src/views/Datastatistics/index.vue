@@ -11,9 +11,6 @@
             class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
             @click="openCompanyPicker"
           >
-        <div class="mb-6">
-          <Button variant="primary" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-            @click="openCompanyPicker">
             {{ selectedCompany?.name || '切换企业数据' }}
           </Button>
         </div> -->
@@ -24,9 +21,17 @@
             <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-3xl mx-auto">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-semibold text-gray-900">选择企业数据</h3>
-                <button @click="closeCompanyPicker" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <button
+                  @click="closeCompanyPicker"
+                  class="text-gray-400 hover:text-gray-600 transition-colors"
+                >
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -34,12 +39,24 @@
               <!-- 搜索框 -->
               <div class="mb-4">
                 <div class="relative">
-                  <input v-model="searchQuery" type="text" placeholder="搜索企业名称..."
-                    class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                  <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="搜索企业名称..."
+                    class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <svg
+                    class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </div>
               </div>
@@ -49,28 +66,35 @@
                 <p class="text-sm text-gray-600">
                   当前企业:
                   <span class="font-semibold text-orange-600">
-                    {{companies.find((c) => c.id === tempSelectedCompanyId)?.name || '未选择'}}
+                    {{ companies.find((c) => c.id === tempSelectedCompanyId)?.name || '未选择' }}
                   </span>
                 </p>
               </div>
 
               <!-- 企业列表 -->
               <div class="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
-                <div v-for="company in filteredCompanies" :key="company.id" :class="[
-                  'p-4 border-b border-gray-100 cursor-pointer transition-all hover:bg-gray-50',
-                  tempSelectedCompanyId === company.id
-                    ? 'bg-orange-50 border-l-4 border-l-orange-500'
-                    : '',
-                ]" @click="selectCompany(company)">
+                <div
+                  v-for="company in filteredCompanies"
+                  :key="company.id"
+                  :class="[
+                    'p-4 border-b border-gray-100 cursor-pointer transition-all hover:bg-gray-50',
+                    tempSelectedCompanyId === company.id
+                      ? 'bg-orange-50 border-l-4 border-l-orange-500'
+                      : '',
+                  ]"
+                  @click="selectCompany(company)"
+                >
                   <div class="flex items-center justify-between">
                     <div class="flex-1">
                       <h4 class="font-semibold text-gray-900">{{ company.name }}</h4>
                     </div>
                     <div v-if="tempSelectedCompanyId === company.id">
                       <svg class="w-6 h-6 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
+                        <path
+                          fill-rule="evenodd"
                           d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clip-rule="evenodd" />
+                          clip-rule="evenodd"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -79,21 +103,37 @@
 
               <!-- 没有搜索结果 -->
               <div v-if="filteredCompanies.length === 0" class="p-8 text-center text-gray-500">
-                <svg class="w-16 h-16 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  class="w-16 h-16 mx-auto mb-3 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <p>未找到匹配的企业</p>
               </div>
 
               <!-- 操作按钮 -->
               <div class="flex justify-end gap-3 mt-6">
-                <Button variant="outline" class="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  @click="closeCompanyPicker">
+                <Button
+                  variant="outline"
+                  class="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                  @click="closeCompanyPicker"
+                >
                   取消
                 </Button>
-                <Button variant="primary" class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white"
-                  @click="confirmCompanySelection" :disabled="!tempSelectedCompanyId">
+                <Button
+                  variant="primary"
+                  class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white"
+                  @click="confirmCompanySelection"
+                  :disabled="!tempSelectedCompanyId"
+                >
                   确定
                 </Button>
               </div>
@@ -104,11 +144,18 @@
         <!-- 日期选择器 -->
         <div class="mb-6">
           <div class="flex gap-2">
-            <Button v-for="(option, index) in dateOptions" :key="index"
-              :variant="selectedDate === option.value ? 'primary' : 'outline'" :class="selectedDate === option.value
+            <Button
+              v-for="(option, index) in dateOptions"
+              :key="index"
+              :variant="selectedDate === option.value ? 'primary' : 'outline'"
+              :class="
+                selectedDate === option.value
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
-                " class="px-4 py-2 rounded-lg text-sm" @click="selectDate(option.value)">
+              "
+              class="px-4 py-2 rounded-lg text-sm"
+              @click="selectDate(option.value)"
+            >
               {{ option.label }}
             </Button>
           </div>
@@ -120,16 +167,28 @@
             <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-4xl mx-auto">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">选择日期范围</h3>
-                <button @click="closeDatePicker" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <button
+                  @click="closeDatePicker"
+                  class="text-gray-400 hover:text-gray-600 transition-colors"
+                >
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
               <!-- 日期范围选择器 -->
               <div class="mb-6">
-                <RangeCalendar v-model="dateRange" :locale="'zh-CN'" class="border border-gray-200 rounded-lg" />
+                <RangeCalendar
+                  v-model="dateRange"
+                  :locale="'zh-CN'"
+                  class="border border-gray-200 rounded-lg"
+                />
               </div>
 
               <!-- 选中的日期范围显示 -->
@@ -144,12 +203,19 @@
 
               <!-- 操作按钮 -->
               <div class="flex justify-end gap-3">
-                <Button variant="outline" class="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  @click="closeDatePicker">
+                <Button
+                  variant="outline"
+                  class="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                  @click="closeDatePicker"
+                >
                   取消
                 </Button>
-                <Button variant="primary" class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white"
-                  @click="confirmDateRange" :disabled="!isDateRangeValid">
+                <Button
+                  variant="primary"
+                  class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white"
+                  @click="confirmDateRange"
+                  :disabled="!isDateRangeValid"
+                >
                   确定
                 </Button>
               </div>
@@ -165,8 +231,6 @@
             :platform="platform"
             :data="getPlatformData(platform.name)"
           />
-          <PlatformCard v-for="platform in platforms" :key="platform.name" :platform="platform"
-            :data="getPlatformData()" />
         </div>
 
         <!-- 数据对比组件 -->
@@ -179,12 +243,7 @@
 
       <!-- 右侧：总数据量 -->
       <div class="lg:col-span-2">
-        <TotalVolume
-          :total-data="totalData"
-          :start-date="currentDateRange.start_date"
-          :end-date="currentDateRange.end_date"
-          :enterprise-id="selectedCompany.id"
-        />
+        <TotalVolume :total-data="totalData" />
       </div>
     </div>
   </AdminLayout>
@@ -201,13 +260,14 @@ import { RangeCalendar } from '@/components/ui/range-calendar'
 import PlatformCard from './components/PlatformCard.vue'
 import TotalVolume from './components/TotalVolume.vue'
 import DataComparison from './components/DataComparison.vue'
-import { getdate, getdata } from '@/api/index.ts'
+import { getdate } from '@/api/home'
 import { toast } from 'vue-sonner'
 
 // 导入图片
 import maskGroupIcon from '@/assets/images/Mask group@3x-2.png'
 import maskGroupIcon1 from '@/assets/images/Mask group@3x-1.png'
 import maskGroupIcon2 from '@/assets/images/Mask group@3x.png'
+
 const currentPageTitle = ref('数据统计')
 
 // 获取当前日期的格式化字符串
@@ -563,18 +623,6 @@ const totalData = computed(() => {
     totalLikes,
     totalClicks,
   }
-// 总数据量
-const totalData = ref({
-  total: 36942,
-  instagram: 12314,
-  x: 12314,
-  facebook: 12314,
-  totalPosts: 12314,//总发布数
-  totalImpressions: 12314,//总曝光数
-  totalComments: 114, //总评论数
-  totalReplies: 114,//总回复数
-  totalLikes: 12314,//总点赞数
-  totalClicks: 114,//总点击量
 })
 
 // 获取平台数据
@@ -654,101 +702,15 @@ const getDateRange = (dateValue: string) => {
   return { startDate, endDate }
 }
 
-// 计算日期范围的辅助函数
-const calculateDateRange = (dateValue: string) => {
-  const today = new Date()
-  const formatDate = (date: Date) => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
-  if (dateValue.includes('~')) {
-    // 自定义日期范围
-    const [start, end] = dateValue.split('~')
-    return { start_date: start, end_date: end }
-  } else if (dateValue === 'last3days') {
-    const endDate = new Date(today)
-    const startDate = new Date(today)
-    startDate.setDate(today.getDate() - 2)
-    return { start_date: formatDate(startDate), end_date: formatDate(endDate) }
-  } else if (dateValue === 'last7days') {
-    const endDate = new Date(today)
-    const startDate = new Date(today)
-    startDate.setDate(today.getDate() - 6)
-    return { start_date: formatDate(startDate), end_date: formatDate(endDate) }
-  } else if (dateValue === 'last14days') {
-    const endDate = new Date(today)
-    const startDate = new Date(today)
-    startDate.setDate(today.getDate() - 13)
-    return { start_date: formatDate(startDate), end_date: formatDate(endDate) }
-  } else if (dateValue === 'last30days') {
-    const endDate = new Date(today)
-    const startDate = new Date(today)
-    startDate.setDate(today.getDate() - 29)
-    return { start_date: formatDate(startDate), end_date: formatDate(endDate) }
-  } else {
-    // 单日选择
-    return { start_date: dateValue, end_date: dateValue }
-  }
-}
-
-// 计算当前日期范围的计算属性
-const currentDateRange = computed(() => {
-  return calculateDateRange(selectedDate.value)
-})
-
 const fetchData = async () => {
   try {
     const { startDate, endDate } = getDateRange(selectedDate.value)
-  const { start_date, end_date } = calculateDateRange(selectedDate.value)
-
- getdata({
-   start_date: start_date,
-    end_date: end_date,
-    enterprise_id: '',
-
-  }).then(res => {
-    const apiData = res
-    totalData.value = {
-      totalPosts: apiData.fb.total_public_count +
-        apiData.ins.total_public_count +
-        apiData.twitter.total_public_count,
-
-      totalImpressions: apiData.fb.total_impression_count +
-        apiData.ins.total_impression_count +
-        apiData.twitter.total_impression_count,
-
-      totalComments: apiData.fb.total_comment_count +
-        apiData.ins.total_comment_count +
-        apiData.twitter.total_comment_count,
-
-      totalReplies: apiData.fb.total_comment_count +
-        apiData.ins.total_comment_count +
-        apiData.twitter.total_comment_count,
-
-      totalLikes: apiData.fb.total_like_count +
-        apiData.ins.total_like_count +
-        apiData.twitter.total_like_count,
-
-      totalClicks: apiData.fb.total_click_count +
-        apiData.ins.total_click_count +
-        apiData.twitter.total_click_count,
-
-      total: apiData.fb.total_public_count +
-        apiData.ins.total_public_count +
-        apiData.twitter.total_public_count,
-
 
     // 只调用汇总数据接口（折线图数据由 DataComparison 组件自己调用）
     const summaryRes = await getdate({
       start_date: startDate,
       end_date: endDate,
     })
-      instagram:apiData.ins.total_public_count,
-      x: apiData.twitter.total_public_count,
-      facebook:apiData.fb.total_public_count
 
     // 处理汇总数据
     console.log('Summary data fetched successfully:', summaryRes)
@@ -759,9 +721,6 @@ const fetchData = async () => {
     console.error('获取数据统计失败:', error)
     toast.error('获取数据统计失败')
   }
-    }
-    return res
-  })
 }
 
 onMounted(() => {
