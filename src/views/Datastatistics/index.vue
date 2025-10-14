@@ -262,7 +262,7 @@ import TotalVolume from './components/TotalVolume.vue'
 import DataComparison from './components/DataComparison.vue'
 import { getdate } from '@/api/home'
 import { toast } from 'vue-sonner'
-
+import {  getdata } from '@/api/index.ts'
 // 导入图片
 import maskGroupIcon from '@/assets/images/Mask group@3x-2.png'
 import maskGroupIcon1 from '@/assets/images/Mask group@3x-1.png'
@@ -573,88 +573,32 @@ const apiData = ref<{
   }
 }>({})
 
-// 总数据量（计算属性）
-const totalData = computed(() => {
-  const fb = apiData.value.fb || {
-    total_impression_count: 0,
-    total_comment_count: 0,
-    total_message_count: 0,
-    total_like_count: 0,
-    total_click_count: 0,
-    total_public_count: 0,
-  }
-  const ins = apiData.value.ins || {
-    total_impression_count: 0,
-    total_comment_count: 0,
-    total_message_count: 0,
-    total_like_count: 0,
-    total_click_count: 0,
-    total_public_count: 0,
-  }
-  const twitter = apiData.value.twitter || {
-    total_impression_count: 0,
-    total_comment_count: 0,
-    total_message_count: 0,
-    total_like_count: 0,
-    total_click_count: 0,
-    total_public_count: 0,
-  }
-
-  // 计算总数
-  const totalPosts = fb.total_public_count + ins.total_public_count + twitter.total_public_count
-  const totalImpressions =
-    fb.total_impression_count + ins.total_impression_count + twitter.total_impression_count
-  const totalComments =
-    fb.total_comment_count + ins.total_comment_count + twitter.total_comment_count
-  const totalReplies =
-    fb.total_message_count + ins.total_message_count + twitter.total_message_count
-  const totalLikes = fb.total_like_count + ins.total_like_count + twitter.total_like_count
-  const totalClicks = fb.total_click_count + ins.total_click_count + twitter.total_click_count
-
-  return {
-    total: totalPosts + totalImpressions + totalComments + totalReplies + totalLikes + totalClicks,
-    instagram: ins.total_public_count,
-    x: twitter.total_public_count,
-    facebook: fb.total_public_count,
-    totalPosts,
-    totalImpressions,
-    totalComments,
-    totalReplies,
-    totalLikes,
-    totalClicks,
-  }
+// 总数据量
+const totalData = ref({
+  total:0,
+  instagram:0,
+  x:0,
+  facebook:0,
+  totalPosts:0,//总发布数
+  totalImpressions:0,//总曝光数
+  totalComments:0, //总评论数
+  totalReplies:0,//总回复数
+  totalLikes:0,//总点赞数
+  totalClicks:0,//总点击量
 })
 
 // 获取平台数据
-const getPlatformData = (platformName: string) => {
-  let platformData = {
-    total_impression_count: 0,
-    total_comment_count: 0,
-    total_message_count: 0,
-    total_like_count: 0,
-    total_click_count: 0,
-    total_public_count: 0,
-  }
-
-  // 根据平台名称映射到API返回的数据
-  if (platformName === 'Facebook' && apiData.value.fb) {
-    platformData = apiData.value.fb
-  } else if (platformName === 'Instagram' && apiData.value.ins) {
-    platformData = apiData.value.ins
-  } else if (platformName === 'X (Twitter)' && apiData.value.twitter) {
-    platformData = apiData.value.twitter
-  }
-
+const getPlatformData = () => {
+  // 这里可以根据实际API返回的数据进行映射
   return {
-    posts: platformData.total_public_count,
-    impressions: platformData.total_impression_count,
-    replyComments: platformData.total_comment_count,
-    replyMessages: platformData.total_message_count,
-    likes: platformData.total_like_count,
-    clicks: platformData.total_click_count,
+    posts:0,
+    impressions: 0,
+    replyComments: 0,
+    replyMessages:0,
+    likes:0,
+    clicks:0,
   }
 }
-
 // 处理平台变化
 const handlePlatformChange = (platform: string) => {
   console.log('Platform changed to:', platform)
@@ -703,24 +647,45 @@ const getDateRange = (dateValue: string) => {
 }
 
 const fetchData = async () => {
-  try {
-    const { startDate, endDate } = getDateRange(selectedDate.value)
+  getdata({}).then(res => {
+    const apiData = res
+    totalData.value = {
+      totalPosts: apiData.fb.total_public_count +
+        apiData.ins.total_public_count +
+        apiData.twitter.total_public_count,
 
-    // 只调用汇总数据接口（折线图数据由 DataComparison 组件自己调用）
-    const summaryRes = await getdate({
-      start_date: startDate,
-      end_date: endDate,
-    })
+      totalImpressions: apiData.fb.total_impression_count +
+        apiData.ins.total_impression_count +
+        apiData.twitter.total_impression_count,
 
-    // 处理汇总数据
-    console.log('Summary data fetched successfully:', summaryRes)
-    if (summaryRes && typeof summaryRes === 'object') {
-      apiData.value = summaryRes as typeof apiData.value
+      totalComments: apiData.fb.total_comment_count +
+        apiData.ins.total_comment_count +
+        apiData.twitter.total_comment_count,
+
+      totalReplies: apiData.fb.total_comment_count +
+        apiData.ins.total_comment_count +
+        apiData.twitter.total_comment_count,
+
+      totalLikes: apiData.fb.total_like_count +
+        apiData.ins.total_like_count +
+        apiData.twitter.total_like_count,
+
+      totalClicks: apiData.fb.total_click_count +
+        apiData.ins.total_click_count +
+        apiData.twitter.total_click_count,
+
+      total: apiData.fb.total_public_count +
+        apiData.ins.total_public_count +
+        apiData.twitter.total_public_count,
+
+
+      instagram:apiData.ins.total_public_count,
+      x: apiData.twitter.total_public_count,
+      facebook:apiData.fb.total_public_count
+
     }
-  } catch (error) {
-    console.error('获取数据统计失败:', error)
-    toast.error('获取数据统计失败')
-  }
+    return res
+  })
 }
 
 onMounted(() => {

@@ -392,11 +392,7 @@ const selectMetric = (metricKey: string) => {
 
 
 const fetchData = async () => {
-  getdata({
-     start_date: props.startDate || '',
-    end_date: props.endDate || '',
-    enterprise_id: '',
-  }).then(res => {
+  getdata({}).then(res => {
     apiData.value = res
 
     // 初始化默认选中X平台的比率
@@ -407,16 +403,11 @@ const fetchData = async () => {
     }
   })
 }
-
-
 const selectRate = (rateKey: string) => {
   selectedRate.value = rateKey
-
-
 }
 
 const handleDonutClick = (params: ECElementEvent) => {
-  console.log('Donut chart clicked:', params)
   if (params?.data && typeof params.data === 'object' && 'name' in params.data) {
     selectPlatform(params.data.name as string)
   }
