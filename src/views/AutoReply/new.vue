@@ -28,7 +28,7 @@
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  即时任务
+                  创建即时任务
                 </button>
                 <button @click="createScheduledTask" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,10 +206,10 @@
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
         <template #body>
           <div class="relative z-10 w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <div style="height:30vh"></div>
+            <div style="height:43vh"></div>
             <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-3 gap-4">
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">类型<span
                       class="text-error-500">*</span></label>
@@ -230,9 +230,6 @@
                     <option value="facebook">Facebook</option>
                   </select>
                 </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">语言<span
                       class="text-error-500">*</span></label>
@@ -248,11 +245,44 @@
                     <option value="de">德文</option>
                   </select>
                 </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">文本内容<span
-                      class="text-error-500">*</span></label>
-                  <input v-model="form.text" placeholder="请输入文本内容"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></input>
+              </div>
+
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">执行频率<span
+                    class="text-error-500">*</span></label>
+                <div class="grid grid-cols-2 gap-4">
+                  <select v-model="form.frequency_type" @change="handleFrequencyTypeChange"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                    <option value="">请选择频率类型</option>
+                    <option value="hourly">每小时</option>
+                    <option value="daily">每天</option>
+                    <option value="weekly">每周</option>
+                    <option value="monthly">每月</option>
+                  </select>
+                  <select v-model="form.frequency_value"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    :disabled="!form.frequency_type">
+                    <option value="">请选择频率值</option>
+                    <option v-for="option in frequencyValueOptions" :key="option.value" :value="option.value">
+                      {{ option.label }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">文本内容<span
+                    class="text-error-500">*</span></label>
+                <div class="relative">
+                  <textarea
+                    v-model="form.text"
+                    placeholder="请输入文本内容，最多300字"
+                    maxlength="300"
+                    rows="4"
+                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"></textarea>
+                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                    {{ form.text?.length || 0 }}/300
+                  </div>
                 </div>
               </div>
 
@@ -428,8 +458,52 @@ const form = ref({
   facebook_page_id: '',
   facebook_comment_id: '',
   task_orig_id: '',
-  task_remark: ''
+  task_remark: '',
+  frequency_type: '',
+  frequency_value: ''
 })
+
+// 执行频率值选项
+const frequencyValueOptions = ref([])
+
+// 处理频率类型变化
+const handleFrequencyTypeChange = () => {
+  form.value.frequency_value = ''
+
+  switch (form.value.frequency_type) {
+    case 'hourly':
+      frequencyValueOptions.value = Array.from({ length: 24 }, (_, i) => ({
+        value: `${i}`,
+        label: `${i}时`
+      }))
+      break
+    case 'daily':
+      frequencyValueOptions.value = Array.from({ length: 24 }, (_, i) => ({
+        value: `${i}:00`,
+        label: `${i}:00`
+      }))
+      break
+    case 'weekly':
+      frequencyValueOptions.value = [
+        { value: '1', label: '星期一' },
+        { value: '2', label: '星期二' },
+        { value: '3', label: '星期三' },
+        { value: '4', label: '星期四' },
+        { value: '5', label: '星期五' },
+        { value: '6', label: '星期六' },
+        { value: '7', label: '星期日' }
+      ]
+      break
+    case 'monthly':
+      frequencyValueOptions.value = Array.from({ length: 31 }, (_, i) => ({
+        value: `${i + 1}`,
+        label: `${i + 1}号`
+      }))
+      break
+    default:
+      frequencyValueOptions.value = []
+  }
+}
 // 立即执行任务 - 使用btn接口
 async function btn(item) {
   // 防止重复执行
@@ -509,7 +583,16 @@ async function onEdit(task) {
       twitter_reply_to_tweet_id: detailData.twitter_reply_to_tweet_id || '',
       facebook_page_id: detailData.facebook_page_id || '',
       facebook_comment_id: detailData.facebook_comment_id || '',
-      task_remark: detailData.task_remark || ''
+      task_remark: detailData.task_remark || '',
+      frequency_type: detailData.frequency_type || '',
+      frequency_value: detailData.frequency_value || ''
+    }
+
+    // 如果有频率类型，则加载对应的频率值选项
+    if (detailData.frequency_type) {
+      form.value.frequency_type = detailData.frequency_type
+      handleFrequencyTypeChange()
+      form.value.frequency_value = detailData.frequency_value || ''
     }
 
     // 打开弹窗
@@ -583,8 +666,11 @@ function openAdd() {
     twitter_reply_to_tweet_id: '',
     facebook_page_id: '',
     facebook_comment_id: '',
-    task_remark: ''
+    task_remark: '',
+    frequency_type: '',
+    frequency_value: ''
   }
+  frequencyValueOptions.value = []
   showAdd.value = true
 }
 
@@ -605,8 +691,11 @@ function closeAdd() {
     twitter_reply_to_tweet_id: '',
     facebook_page_id: '',
     facebook_comment_id: '',
-    task_remark: ''
+    task_remark: '',
+    frequency_type: '',
+    frequency_value: ''
   }
+  frequencyValueOptions.value = []
 }
 
 // 提交表单
@@ -650,6 +739,20 @@ async function submitAdd() {
     return
   }
 
+  if (!form.value.frequency_type || form.value.frequency_type.trim() === '') {
+    toast.error('请选择执行频率类型', {
+      description: '执行频率类型不能为空'
+    })
+    return
+  }
+
+  if (!form.value.frequency_value || form.value.frequency_value.trim() === '') {
+    toast.error('请选择执行频率值', {
+      description: '执行频率值不能为空'
+    })
+    return
+  }
+
   isLoading.value = true
 
   try {
@@ -683,7 +786,9 @@ async function submitAdd() {
       twitter_reply_to_tweet_id: '',
       facebook_page_id: '',
       facebook_comment_id: '',
-      task_remark: form.value.task_remark.trim() || ''
+      task_remark: form.value.task_remark.trim() || '',
+      frequency_type: form.value.frequency_type,
+      frequency_value: form.value.frequency_value
     }
 
     // 根据模式调用不同的接口
