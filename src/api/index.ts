@@ -20,7 +20,7 @@ export const getUserDetail = (id: string) => get(`/accounts/users/${id}/`)
 //数据统计
 export const getdate = (data:{page:number}) => get('/stats/overview/', {params:data})
 
-export const getdata = (data:any) => get('/stats/summary/',data)
+export const getdata = (params:any) => get('/stats/summary/',{params})
 
 // 修改密码
 export const changePassword = (data: { password: string }) => post('/accounts/auth/change-password/', data)

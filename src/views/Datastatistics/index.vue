@@ -163,7 +163,12 @@
 
       <!-- 右侧：总数据量 -->
       <div class="lg:col-span-2">
-        <TotalVolume :total-data="totalData" />
+        <TotalVolume
+          :total-data="totalData"
+          :start-date="currentDateRange.start_date"
+          :end-date="currentDateRange.end_date"
+          :enterprise-id="selectedCompany.id"
+        />
       </div>
     </div>
   </AdminLayout>
@@ -496,11 +501,59 @@ const handlePlatformChange = (platform: string) => {
   // 这里可以更新数据对比图表
 }
 
+// 计算日期范围的辅助函数
+const calculateDateRange = (dateValue: string) => {
+  const today = new Date()
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  if (dateValue.includes('~')) {
+    // 自定义日期范围
+    const [start, end] = dateValue.split('~')
+    return { start_date: start, end_date: end }
+  } else if (dateValue === 'last3days') {
+    const endDate = new Date(today)
+    const startDate = new Date(today)
+    startDate.setDate(today.getDate() - 2)
+    return { start_date: formatDate(startDate), end_date: formatDate(endDate) }
+  } else if (dateValue === 'last7days') {
+    const endDate = new Date(today)
+    const startDate = new Date(today)
+    startDate.setDate(today.getDate() - 6)
+    return { start_date: formatDate(startDate), end_date: formatDate(endDate) }
+  } else if (dateValue === 'last14days') {
+    const endDate = new Date(today)
+    const startDate = new Date(today)
+    startDate.setDate(today.getDate() - 13)
+    return { start_date: formatDate(startDate), end_date: formatDate(endDate) }
+  } else if (dateValue === 'last30days') {
+    const endDate = new Date(today)
+    const startDate = new Date(today)
+    startDate.setDate(today.getDate() - 29)
+    return { start_date: formatDate(startDate), end_date: formatDate(endDate) }
+  } else {
+    // 单日选择
+    return { start_date: dateValue, end_date: dateValue }
+  }
+}
+
+// 计算当前日期范围的计算属性
+const currentDateRange = computed(() => {
+  return calculateDateRange(selectedDate.value)
+})
+
 const fetchData = async () => {
+  const { start_date, end_date } = calculateDateRange(selectedDate.value)
+
  getdata({
-    end_date: '',
+   start_date: start_date,
+    end_date: end_date,
     enterprise_id: '',
-    start_date: ''
+
   }).then(res => {
     const apiData = res
     totalData.value = {
@@ -538,13 +591,8 @@ const fetchData = async () => {
       facebook:apiData.fb.total_public_count
 
     }
-
     return res
   })
-
-  // 处理API返回的数据
-console.log(totalData.value,'totalData.valu11etotalData.value');
-
 }
 
 onMounted(() => {

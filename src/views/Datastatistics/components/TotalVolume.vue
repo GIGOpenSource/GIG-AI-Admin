@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, computed, onMounted } from 'vue'
+import { defineProps, ref, computed, onMounted, watch } from 'vue'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { PieChart } from 'echarts/charts'
@@ -138,6 +138,9 @@ interface RateItem {
 
 const props = defineProps<{
   totalData: TotalData
+  startDate?: string
+  endDate?: string
+  enterpriseId?: string
 }>()
 
 // 选择状态
@@ -364,9 +367,9 @@ const selectMetric = (metricKey: string) => {
 
 const fetchData = async () => {
   getdata({
-    end_date: '',
+     start_date: props.startDate || '',
+    end_date: props.endDate || '',
     enterprise_id: '',
-    start_date: ''
   }).then(res => {
     apiData.value = res
 
@@ -415,6 +418,17 @@ const selectSegment = (segment: string) => {
     console.log('Updated rates for segment:', segment, currentRates.value)
   }
 }
+// 监听 props 变化，重新获取数据
+watch(
+  () => [props.startDate, props.endDate, props.enterpriseId],
+  () => {
+    if (props.startDate && props.endDate) {
+      fetchData()
+    }
+  },
+  { immediate: false }
+)
+
 onMounted(() => {
   fetchData()
 })
