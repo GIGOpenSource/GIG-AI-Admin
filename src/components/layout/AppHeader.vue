@@ -71,6 +71,7 @@
       </div>
 
       <div
+      v-if="role == 'admin'"
         :class="[isApplicationMenuOpen ? 'flex' : 'hidden']"
         class="items-center justify-between w-full gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none"
       >
@@ -97,7 +98,7 @@ import NotificationMenu from './header/NotificationMenu.vue'
 import UserMenu from './header/UserMenu.vue'
 
 const { toggleSidebar, toggleMobileSidebar, isMobileOpen } = useSidebar()
-
+const role = localStorage.getItem('role')
 const handleToggle = () => {
   if (window.innerWidth >= 1024) {
     toggleSidebar()
