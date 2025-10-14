@@ -57,6 +57,7 @@ interface Platform {
 // Props
 const props = defineProps<{
   selectedDate: string
+  apiData?: any
 }>()
 
 const selectedPlatform = ref('all')
@@ -86,49 +87,102 @@ const platforms: Platform[] = [
   { label: 'FB', value: 'FB' },
 ]
 
-// 根据图片中的数据创建柱形图数据
-const barChartData = {
-  categories: ['发布数', '回复评论数', '回复消息数', '点赞数', '点击量', '总曝光量'],
-  X: [998, 998, 998, 998, 998, 998],
-  Ins: [120, 120, 120, 120, 120, 120],
-  FB: [130, 130, 130, 130, 130, 130],
-}
+// 根据 apiData 生成柱形图数据
+const barChartData = computed(() => {
+  const categories = ['发布数', '回复评论数', '回复消息数', '点赞数', '点击量', '总曝光量']
+
+  // 获取各平台数据
+  const twitter = props.apiData?.twitter || {
+    total_public_count: 0,
+    total_comment_count: 0,
+    total_message_count: 0,
+    total_like_count: 0,
+    total_click_count: 0,
+    total_impression_count: 0,
+  }
+
+  const ins = props.apiData?.ins || {
+    total_public_count: 0,
+    total_comment_count: 0,
+    total_message_count: 0,
+    total_like_count: 0,
+    total_click_count: 0,
+    total_impression_count: 0,
+  }
+
+  const fb = props.apiData?.fb || {
+    total_public_count: 0,
+    total_comment_count: 0,
+    total_message_count: 0,
+    total_like_count: 0,
+    total_click_count: 0,
+    total_impression_count: 0,
+  }
+
+  return {
+    categories,
+    X: [
+      twitter.total_public_count,
+      twitter.total_comment_count,
+      twitter.total_message_count,
+      twitter.total_like_count,
+      twitter.total_click_count,
+      twitter.total_impression_count,
+    ],
+    Ins: [
+      ins.total_public_count,
+      ins.total_comment_count,
+      ins.total_message_count,
+      ins.total_like_count,
+      ins.total_click_count,
+      ins.total_impression_count,
+    ],
+    FB: [
+      fb.total_public_count,
+      fb.total_comment_count,
+      fb.total_message_count,
+      fb.total_like_count,
+      fb.total_click_count,
+      fb.total_impression_count,
+    ],
+  }
+})
 
 // 根据选择的平台过滤数据
 const filteredData = computed(() => {
   if (selectedPlatform.value === 'all') {
     // 显示所有平台
     return {
-      categories: barChartData.categories,
+      categories: barChartData.value.categories,
       data: [
-        { name: 'X (Twitter)', data: barChartData.X, color: '#F59E0B' },
-        { name: 'Instagram', data: barChartData.Ins, color: '#10B981' },
-        { name: 'Facebook', data: barChartData.FB, color: '#3B82F6' },
+        { name: 'X (Twitter)', data: barChartData.value.X, color: '#F59E0B' },
+        { name: 'Instagram', data: barChartData.value.Ins, color: '#10B981' },
+        { name: 'Facebook', data: barChartData.value.FB, color: '#3B82F6' },
       ],
     }
   } else if (selectedPlatform.value === 'X') {
     return {
-      categories: barChartData.categories,
-      data: [{ name: 'X (Twitter)', data: barChartData.X, color: '#F59E0B' }],
+      categories: barChartData.value.categories,
+      data: [{ name: 'X (Twitter)', data: barChartData.value.X, color: '#F59E0B' }],
     }
   } else if (selectedPlatform.value === 'Ins') {
     return {
-      categories: barChartData.categories,
-      data: [{ name: 'Instagram', data: barChartData.Ins, color: '#10B981' }],
+      categories: barChartData.value.categories,
+      data: [{ name: 'Instagram', data: barChartData.value.Ins, color: '#10B981' }],
     }
   } else if (selectedPlatform.value === 'FB') {
     return {
-      categories: barChartData.categories,
-      data: [{ name: 'Facebook', data: barChartData.FB, color: '#3B82F6' }],
+      categories: barChartData.value.categories,
+      data: [{ name: 'Facebook', data: barChartData.value.FB, color: '#3B82F6' }],
     }
   } else {
     // 默认显示所有平台
     return {
-      categories: barChartData.categories,
+      categories: barChartData.value.categories,
       data: [
-        { name: 'X (Twitter)', data: barChartData.X, color: '#F59E0B' },
-        { name: 'Instagram', data: barChartData.Ins, color: '#10B981' },
-        { name: 'Facebook', data: barChartData.FB, color: '#3B82F6' },
+        { name: 'X (Twitter)', data: barChartData.value.X, color: '#F59E0B' },
+        { name: 'Instagram', data: barChartData.value.Ins, color: '#10B981' },
+        { name: 'Facebook', data: barChartData.value.FB, color: '#3B82F6' },
       ],
     }
   }

@@ -3,6 +3,7 @@
   <BarChartComparison
     v-if="isSingleDay"
     :selected-date="selectedDate"
+    :api-data="apiData"
     @platform-change="handlePlatformChange"
   />
 
@@ -84,6 +85,7 @@ import {
 } from 'echarts/components'
 import VChart from 'vue-echarts'
 import BarChartComparison from './BarChartComparison.vue'
+import { statsdetail } from '@/api/home'
 
 // 注册ECharts组件
 use([
@@ -118,6 +120,7 @@ interface TooltipParams {
 // Props
 const props = defineProps<{
   selectedDate: string
+  apiData?: any
 }>()
 
 const selectedPlatform = ref('X')
@@ -206,41 +209,175 @@ const platforms: Platform[] = [
   { label: 'FB', value: 'FB' },
 ]
 
+// 定义接口返回的数据类型
+interface StatsDetailItem {
+  created_date: string
+  total_public_count: number
+  total_impression_count: number
+  total_comment_count: number
+  total_message_count: number
+  total_like_count: number
+  total_click_count: number
+}
+
+// 存储日期数组（X轴数据）
+const chartDates = ref<string[]>([])
+
+// 获取折线图数据
+const fetchLineChartData = async () => {
+  // 只在非单日模式下获取数据（折线图）
+  if (isSingleDay.value) return
+
+  try {
+    // 计算日期范围
+    const dateRangeValue = generateDateRange(props.selectedDate)
+    let startDate = ''
+    let endDate = ''
+
+    if (dateRangeValue.includes('~')) {
+      const [start, end] = dateRangeValue.split('~')
+      startDate = start
+      endDate = end
+    } else {
+      startDate = dateRangeValue
+      endDate = dateRangeValue
+    }
+
+    // 映射平台名称到接口参数
+    const platformMap: Record<string, string> = {
+      X: 'twitter',
+      Ins: 'ins',
+      FB: 'fb',
+    }
+
+    const platform = platformMap[selectedPlatform.value] || 'twitter'
+
+    const res = await statsdetail({
+      start_date: startDate,
+      end_date: endDate,
+      platform: platform,
+    })
+
+    console.log('Line chart data fetched successfully:', res)
+
+    // 处理返回的数据并更新 chartSeries
+    if (res && Array.isArray(res)) {
+      const data = res as StatsDetailItem[]
+
+      // 提取日期数组（保持 YYYY-MM-DD 格式）
+      chartDates.value = data.map((item) => {
+        try {
+          // 直接使用 YYYY-MM-DD 格式
+          if (item.created_date && item.created_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            return item.created_date
+          } else {
+            console.warn('Invalid date format:', item.created_date)
+            return 'Invalid Date'
+          }
+        } catch (error) {
+          console.error('Date parsing error:', error, item.created_date)
+          return 'Invalid Date'
+        }
+      })
+
+      // 保存当前的可见性状态
+      const visibilityState = chartSeries.value.reduce(
+        (acc, series) => {
+          acc[series.name] = series.visible
+          return acc
+        },
+        {} as Record<string, boolean>,
+      )
+
+      // 更新各个数据系列，保留可见性状态
+      chartSeries.value = [
+        {
+          name: '发布数',
+          data: data.map((item) => item.total_public_count),
+          color: '#F59E0B',
+          visible: visibilityState['发布数'] ?? true,
+        },
+        {
+          name: '回复评论数',
+          data: data.map((item) => item.total_comment_count),
+          color: '#F97316',
+          visible: visibilityState['回复评论数'] ?? false,
+        },
+        {
+          name: '回复消息数',
+          data: data.map((item) => item.total_message_count),
+          color: '#EF4444',
+          visible: visibilityState['回复消息数'] ?? false,
+        },
+        {
+          name: '点赞数',
+          data: data.map((item) => item.total_like_count),
+          color: '#8B5CF6',
+          visible: visibilityState['点赞数'] ?? false,
+        },
+        {
+          name: '点击量',
+          data: data.map((item) => item.total_click_count),
+          color: '#3B82F6',
+          visible: visibilityState['点击量'] ?? false,
+        },
+        {
+          name: '总曝光量',
+          data: data.map((item) => item.total_impression_count),
+          color: '#10B981',
+          visible: visibilityState['总曝光量'] ?? false,
+        },
+      ]
+    }
+  } catch (error) {
+    console.error('获取折线图数据失败:', error)
+  }
+}
+
+// 监听平台和日期变化，重新获取数据
+watch(
+  [selectedPlatform, () => props.selectedDate],
+  () => {
+    fetchLineChartData()
+  },
+  { immediate: true },
+)
+
 // 图表数据系列 - 默认显示发布数
 const chartSeries = ref<ChartSeries[]>([
   {
     name: '发布数',
-    data: [200, 200, 998],
+    data: [],
     color: '#F59E0B', // 橙色
     visible: true, // 默认显示发布数
   },
   {
     name: '回复评论数',
-    data: [150, 180, 850],
+    data: [],
     color: '#F97316', // 深橙色
     visible: false,
   },
   {
     name: '回复消息数',
-    data: [120, 160, 720],
+    data: [],
     color: '#EF4444', // 红色
     visible: false,
   },
   {
     name: '点赞数',
-    data: [300, 350, 1200],
+    data: [],
     color: '#8B5CF6', // 紫色
     visible: false,
   },
   {
     name: '点击量',
-    data: [80, 100, 400],
+    data: [],
     color: '#3B82F6', // 蓝色
     visible: false,
   },
   {
     name: '总曝光量',
-    data: [500, 600, 2000],
+    data: [],
     color: '#10B981', // 绿色
     visible: false,
   },
@@ -286,12 +423,53 @@ const chartOption = computed(() => {
       left: '50px',
       right: '20px',
       top: '30px',
-      bottom: '10px',
+      bottom: chartDates.value.length > 10 ? '100px' : '20px', // 动态设置底部空间
       containLabel: true,
     },
+    dataZoom: [
+      {
+        type: 'slider',
+        show: chartDates.value.length > 10, // 数据超过10条时显示滑动条
+        start: chartDates.value.length > 10 ? 70 : 0, // 默认显示最后30%的数据
+        end: 100,
+        height: 40,
+        bottom: 20,
+        borderColor: '#E5E7EB',
+        fillerColor: 'rgba(59, 130, 246, 0.1)',
+        handleStyle: {
+          color: '#3B82F6',
+          borderColor: '#3B82F6',
+        },
+        textStyle: {
+          color: '#6B7280',
+          fontSize: 11,
+        },
+        dataBackground: {
+          lineStyle: {
+            color: '#D1D5DB',
+          },
+          areaStyle: {
+            color: '#F3F4F6',
+          },
+        },
+        selectedDataBackground: {
+          lineStyle: {
+            color: '#3B82F6',
+          },
+          areaStyle: {
+            color: 'rgba(59, 130, 246, 0.2)',
+          },
+        },
+      },
+      {
+        type: 'inside', // 支持鼠标滚轮缩放
+        start: chartDates.value.length > 10 ? 70 : 0,
+        end: 100,
+      },
+    ],
     xAxis: {
       type: 'category',
-      data: ['2015-10-18', '2015-10-19', '2015-10-20'],
+      data: chartDates.value,
       axisLine: {
         lineStyle: {
           color: '#E5E7EB',
@@ -307,8 +485,6 @@ const chartOption = computed(() => {
     },
     yAxis: {
       type: 'value',
-      min: -50,
-      max: 2500,
       axisLine: {
         show: false,
       },

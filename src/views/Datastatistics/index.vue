@@ -229,12 +229,16 @@
             v-for="platform in platforms"
             :key="platform.name"
             :platform="platform"
-            :data="getPlatformData()"
+            :data="getPlatformData(platform.name)"
           />
         </div>
 
         <!-- 数据对比组件 -->
-        <DataComparison :selected-date="selectedDate" @platform-change="handlePlatformChange" />
+        <DataComparison
+          :selected-date="selectedDate"
+          :api-data="apiData"
+          @platform-change="handlePlatformChange"
+        />
       </div>
 
       <!-- 右侧：总数据量 -->
@@ -256,8 +260,8 @@ import { RangeCalendar } from '@/components/ui/range-calendar'
 import PlatformCard from './components/PlatformCard.vue'
 import TotalVolume from './components/TotalVolume.vue'
 import DataComparison from './components/DataComparison.vue'
-import { getdate } from '@/api/index.ts'
 import { toast } from 'vue-sonner'
+import { getdate } from '@/api/home'
 
 // 导入图片
 import maskGroupIcon from '@/assets/images/Mask group@3x-2.png'
@@ -540,29 +544,113 @@ const platforms = ref([
   },
 ])
 
-// 总数据量
-const totalData = ref({
-  total: 36942,
-  instagram: 12314,
-  x: 12314,
-  facebook: 12314,
-  totalPosts: 12314,
-  totalImpressions: 12314,
-  totalComments: 114,
-  totalReplies: 114,
-  totalLikes: 12314,
-  totalClicks: 114,
-})
-// 获取平台数据
-const getPlatformData = () => {
-  // 这里可以根据实际API返回的数据进行映射
+// API返回的原始数据
+const apiData = ref<{
+  fb?: {
+    total_impression_count: number
+    total_comment_count: number
+    total_message_count: number
+    total_like_count: number
+    total_click_count: number
+    total_public_count: number
+  }
+  ins?: {
+    total_impression_count: number
+    total_comment_count: number
+    total_message_count: number
+    total_like_count: number
+    total_click_count: number
+    total_public_count: number
+  }
+  twitter?: {
+    total_impression_count: number
+    total_comment_count: number
+    total_message_count: number
+    total_like_count: number
+    total_click_count: number
+    total_public_count: number
+  }
+}>({})
+
+// 总数据量（计算属性）
+const totalData = computed(() => {
+  const fb = apiData.value.fb || {
+    total_impression_count: 0,
+    total_comment_count: 0,
+    total_message_count: 0,
+    total_like_count: 0,
+    total_click_count: 0,
+    total_public_count: 0,
+  }
+  const ins = apiData.value.ins || {
+    total_impression_count: 0,
+    total_comment_count: 0,
+    total_message_count: 0,
+    total_like_count: 0,
+    total_click_count: 0,
+    total_public_count: 0,
+  }
+  const twitter = apiData.value.twitter || {
+    total_impression_count: 0,
+    total_comment_count: 0,
+    total_message_count: 0,
+    total_like_count: 0,
+    total_click_count: 0,
+    total_public_count: 0,
+  }
+
+  // 计算总数
+  const totalPosts = fb.total_public_count + ins.total_public_count + twitter.total_public_count
+  const totalImpressions =
+    fb.total_impression_count + ins.total_impression_count + twitter.total_impression_count
+  const totalComments =
+    fb.total_comment_count + ins.total_comment_count + twitter.total_comment_count
+  const totalReplies =
+    fb.total_message_count + ins.total_message_count + twitter.total_message_count
+  const totalLikes = fb.total_like_count + ins.total_like_count + twitter.total_like_count
+  const totalClicks = fb.total_click_count + ins.total_click_count + twitter.total_click_count
+
   return {
-    posts: 46,
-    impressions: 12314,
-    replyComments: 12314,
-    replyMessages: 12314,
-    likes: 12314,
-    clicks: 12314,
+    total: totalPosts + totalImpressions + totalComments + totalReplies + totalLikes + totalClicks,
+    instagram: ins.total_public_count,
+    x: twitter.total_public_count,
+    facebook: fb.total_public_count,
+    totalPosts,
+    totalImpressions,
+    totalComments,
+    totalReplies,
+    totalLikes,
+    totalClicks,
+  }
+})
+
+// 获取平台数据
+const getPlatformData = (platformName: string) => {
+  let platformData = {
+    total_impression_count: 0,
+    total_comment_count: 0,
+    total_message_count: 0,
+    total_like_count: 0,
+    total_click_count: 0,
+    total_public_count: 0,
+  }
+
+  // 根据平台名称映射到API返回的数据
+  if (platformName === 'Facebook' && apiData.value.fb) {
+    platformData = apiData.value.fb
+  } else if (platformName === 'Instagram' && apiData.value.ins) {
+    platformData = apiData.value.ins
+  } else if (platformName === 'X (Twitter)' && apiData.value.twitter) {
+    platformData = apiData.value.twitter
+  }
+
+  return {
+    posts: platformData.total_public_count,
+    impressions: platformData.total_impression_count,
+    replyComments: platformData.total_comment_count,
+    replyMessages: platformData.total_message_count,
+    likes: platformData.total_like_count,
+    clicks: platformData.total_click_count,
   }
 }
 
@@ -572,17 +660,62 @@ const handlePlatformChange = (platform: string) => {
   // 这里可以更新数据对比图表
 }
 
+// 计算日期范围
+const getDateRange = (dateValue: string) => {
+  const today = new Date()
+  let startDate = ''
+  let endDate = ''
+
+  // 格式化日期为 YYYY-MM-DD
+  const formatDateToString = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  if (dateValue.includes('~')) {
+    // 自定义日期范围，格式为 "YYYY-MM-DD~YYYY-MM-DD"
+    const [start, end] = dateValue.split('~')
+    startDate = start
+    endDate = end
+  } else if (dateValue.startsWith('last')) {
+    // 近几日的情况
+    endDate = formatDateToString(today)
+    const daysMap: Record<string, number> = {
+      last3days: 3,
+      last7days: 7,
+      last14days: 14,
+      last30days: 30,
+    }
+    const days = daysMap[dateValue] || 1
+    const startDateObj = new Date(today)
+    startDateObj.setDate(today.getDate() - days + 1)
+    startDate = formatDateToString(startDateObj)
+  } else {
+    // 单日日期，格式为 "YYYY-MM-DD"
+    startDate = dateValue
+    endDate = dateValue
+  }
+
+  return { startDate, endDate }
+}
+
 const fetchData = async () => {
   try {
-    const res = await getdate({
-      page: 1,
+    const { startDate, endDate } = getDateRange(selectedDate.value)
+
+    // 只调用汇总数据接口（折线图数据由 DataComparison 组件自己调用）
+    const summaryRes = await getdate({
+      start_date: startDate,
+      end_date: endDate,
     })
 
-    // 处理API返回的数据
-    console.log('Data fetched successfully:', res)
-
-    // 这里可以根据实际API返回的数据更新totalData
-    // 例如：totalData.value = processApiData(res)
+    // 处理汇总数据
+    console.log('Summary data fetched successfully:', summaryRes)
+    if (summaryRes && typeof summaryRes === 'object') {
+      apiData.value = summaryRes as typeof apiData.value
+    }
   } catch (error) {
     console.error('获取数据统计失败:', error)
     toast.error('获取数据统计失败')
