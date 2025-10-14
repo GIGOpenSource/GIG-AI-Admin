@@ -107,7 +107,7 @@
               size="sm"
               @click="refreshData"
               variant="outline"
-              class="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+              class="!text-red-500 !bg-white !border-red-500 hover:!text-red-500 hover:!bg-white hover:!border-red-500"
             >
               刷新
             </Button>
@@ -123,6 +123,7 @@
               <TableHead class="whitespace-nowrap">类型</TableHead>
               <TableHead class="whitespace-nowrap">平台</TableHead>
               <TableHead class="whitespace-nowrap">文本内容</TableHead>
+               <TableHead class="whitespace-nowrap">提示词</TableHead>
               <TableHead class="whitespace-nowrap">机器人数量</TableHead>
               <TableHead class="whitespace-nowrap">发送成功数</TableHead>
               <TableHead
@@ -140,14 +141,7 @@
                 <TableCell class="whitespace-nowrap">{{ formatTime(log.created_at) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ log.created_by || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">
-                  <span
-                    :class="[
-                      'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-                      log.type === 'post'
-                        ? 'bg-blue-50 text-blue-600 ring-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/30'
-                        : 'bg-purple-50 text-purple-600 ring-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:ring-purple-500/30',
-                    ]"
-                  >
+                  <span class="text-black dark:text-white">
                     {{ log.type === 'post' ? '发帖' : '回复评论' }}
                   </span>
                 </TableCell>
@@ -155,6 +149,7 @@
                 <TableCell class="max-w-[300px] truncate" :title="log.text_content">{{
                   log.text_content || '--'
                 }}</TableCell>
+                <TableHead class="whitespace-nowrap">提示词</TableHead>
                 <TableCell class="whitespace-nowrap text-center">{{
                   log.bot_count || 0
                 }}</TableCell>
@@ -171,9 +166,8 @@
                   <div class="flex items-center justify-end gap-2">
                     <Button
                       size="sm"
-                      variant="outline"
                       @click="onViewDetail(log)"
-                      class="!text-blue-600 hover:!text-blue-700"
+                      class="!text-blue-600 hover:!text-blue-700 !border-none !bg-transparent hover:!bg-blue-50 dark:hover:!bg-blue-500/10"
                     >
                       查看详情
                     </Button>
