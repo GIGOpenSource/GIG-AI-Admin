@@ -206,7 +206,7 @@
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
         <template #body>
           <div class="relative z-10 w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <div style="height:43vh"></div>
+            <div style="height:24vh"></div>
             <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div class="grid grid-cols-3 gap-4">
@@ -309,7 +309,7 @@
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">机器人<span
                     class="text-error-500">*</span></label>
-                <PaginatedTransfer v-model="form.selected_accounts" :fetchApi="fetchBotListPaginated" labelKey="name"
+                <RobotSelector v-model="form.selected_accounts" :fetchApi="fetchBotListPaginated" labelKey="name"
                   valueKey="id" />
               </div>
 
@@ -384,7 +384,7 @@ import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import PaginatedTransfer from '@/components/ui/PaginatedTransfer.vue'
+import RobotSelector from '@/components/ui/RobotSelector.vue'
 import { getAutoPlay, getAutoPlayDetail, createAutoPlay, updateAutoPlay, deleteAutoPlay, runNow } from '@/api/autoPlay.ts'
 import { getUser } from '@/api/index.ts'
 import { getTags } from '@/api/tag.ts'
