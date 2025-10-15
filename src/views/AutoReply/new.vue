@@ -310,7 +310,7 @@
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">机器人<span
                     class="text-error-500">*</span></label>
                 <RobotSelector v-model="form.selected_accounts" :fetchApi="fetchBotListPaginated" labelKey="name"
-                  valueKey="id" />
+                  valueKey="id" @selectionChange="handleSelectionChange" />
               </div>
 
               <div>
@@ -462,6 +462,23 @@ const form = ref({
   frequency_type: '',
   frequency_value: ''
 })
+
+// 选择状态管理
+const selectionStatus = ref({
+  selected: false,
+  selectStatus: false,
+  selected_accounts: []
+})
+
+// 处理选择状态变化
+const handleSelectionChange = (status) => {
+  console.log('机器人选择状态变化:', status)
+  selectionStatus.value = { ...status }
+
+  // 注意：不要在这里修改 form.value.selected_accounts
+  // 因为 v-model 会自动处理这个更新
+  // 这里只保存状态信息，用于提交时的数据处理
+}
 
 // 执行频率值选项
 const frequencyValueOptions = ref([])
@@ -732,7 +749,12 @@ async function submitAdd() {
     return
   }
 
-  if (!form.value.selected_accounts || form.value.selected_accounts.length === 0) {
+  // 检查是否选择了机器人（包括全选状态）
+  const hasSelectedRobots = selectionStatus.value.selected === true ||
+                           (selectionStatus.value.selectStatus === false && selectionStatus.value.selected_accounts.length > 0) ||
+                           form.value.selected_accounts.length > 0
+
+  if (!hasSelectedRobots) {
     toast.error('请选择机器人', {
       description: '机器人不能为空'
     })
@@ -764,13 +786,39 @@ async function submitAdd() {
       tagsArray = form.value.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
     }
 
-    // 处理 selected_accounts 格式：保持数组格式，确保id是字符串
-    let selectedAccountsArray = []
-    if (Array.isArray(form.value.selected_accounts)) {
-      selectedAccountsArray = form.value.selected_accounts.map(account => ({
-        id: String(account.id),
-        name: account.name || String(account.id)
-      }))
+    // 处理 selected_accounts 格式：根据选择状态传递不同的数据格式
+    let submitDataForAPI = {}
+
+    if (selectionStatus.value.selected === true && selectionStatus.value.selected_accounts.length === 0) {
+      // 全选模式
+      submitDataForAPI = {
+        selected: true,
+        selected_accounts: []
+      }
+    } else if (selectionStatus.value.selected === true && selectionStatus.value.selected_accounts.length > 0) {
+      // 自定义选择模式
+      submitDataForAPI = {
+        selected: true,
+        selected_accounts: selectionStatus.value.selected_accounts.map(account => ({
+          id: String(account.id),
+          name: account.name || String(account.id)
+        }))
+      }
+    } else if (selectionStatus.value.selectStatus === false) {
+      // 反选模式
+      submitDataForAPI = {
+        selectStatus: false,
+        selected_accounts: selectionStatus.value.selected_accounts.map(account => ({
+          id: String(account.id),
+          name: account.name || String(account.id)
+        }))
+      }
+    } else {
+      // 默认情况
+      submitDataForAPI = {
+        selected: true,
+        selected_accounts: []
+      }
     }
 
     const submitData = {
@@ -781,7 +829,8 @@ async function submitAdd() {
       mentions: form.value.mentions || '',
       tags: tagsArray,
       payload: '',
-      selected_accounts: selectedAccountsArray,
+      // 根据选择状态传递不同的数据格式
+      ...submitDataForAPI,
       prompt: form.value.prompt || '',
       twitter_reply_to_tweet_id: '',
       facebook_page_id: '',
@@ -790,6 +839,9 @@ async function submitAdd() {
       frequency_type: form.value.frequency_type,
       frequency_value: form.value.frequency_value
     }
+
+    // 调试：打印提交数据
+    console.log('=== 提交给 createAutoPlay 的数据 ===', submitData)
 
     // 根据模式调用不同的接口
     if (isEditMode.value) {

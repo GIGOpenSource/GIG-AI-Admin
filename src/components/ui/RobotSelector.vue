@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
   // 获取机器人列表的API函数
@@ -114,7 +114,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'selectionChange'])
 
 // 响应式数据
 const searchQuery = ref('')
@@ -127,6 +127,8 @@ const hasMoreData = ref(true)
 const totalCount = ref(0)
 const pageSize = ref(20)
 const isGlobalSelectAll = ref(false) // 全局全选状态
+const allAvailableItems = ref([]) // 所有可用的项目（用于全选）
+const totalAvailableCount = ref(0) // 所有可用项目的总数
 
 // 计算属性
 const filteredRobots = computed(() => {
@@ -147,14 +149,77 @@ const selectedRobotIds = computed(() => {
   )
 })
 
+// 监听 robots 变化，确保在全选状态下数据正确显示
+watch([robots, isGlobalSelectAll], () => {
+  if (isGlobalSelectAll.value && props.modelValue.length === 0) {
+    // 真正的全选状态，确保所有机器人显示为选中
+    console.log('全选状态：robots 变化，所有机器人应该显示为选中')
+  } else if (isGlobalSelectAll.value && props.modelValue.length > 0) {
+    // 反选状态，根据 modelValue 决定选中状态
+    console.log('反选状态：robots 变化，根据 modelValue 决定选中状态')
+  }
+}, { deep: true })
+
 const isAllSelected = computed(() => {
+  // 如果处于全局全选状态，全选复选框应该显示为选中
+  if (isGlobalSelectAll.value) {
+    return true
+  }
+
   return filteredRobots.value.length > 0 &&
          filteredRobots.value.every(robot => isRobotSelected(robot))
 })
 
 const isIndeterminate = computed(() => {
+  // 如果处于全局全选状态，不应该显示为半选状态
+  if (isGlobalSelectAll.value) {
+    return false
+  }
+
   const selectedCount = filteredRobots.value.filter(robot => isRobotSelected(robot)).length
   return selectedCount > 0 && selectedCount < filteredRobots.value.length
+})
+
+// 选择状态计算
+const selectionStatus = computed(() => {
+  if (isGlobalSelectAll.value && props.modelValue.length === 0) {
+    // 全选时：selected: true, selected_accounts: []
+    return {
+      selected: true,
+      selected_accounts: []
+    }
+  } else if (isGlobalSelectAll.value && props.modelValue.length > 0) {
+    // 反选时（从全选中移除了一些）：selectStatus: false, selected_accounts: [未被选中的项]
+    const unselectedItems = allAvailableItems.value.filter(item => {
+      const itemId = String(item[props.valueKey])
+      return !props.modelValue.some(selected =>
+        String(typeof selected === 'object' ? selected[props.valueKey] : selected) === itemId
+      )
+    })
+
+    return {
+      selectStatus: false,
+      selected_accounts: unselectedItems.map(item => ({
+        id: String(item[props.valueKey]),
+        name: item[props.labelKey] || item[props.valueKey] || String(item)
+      }))
+    }
+  } else if (props.modelValue.length > 0) {
+    // 自定义选择时：selected: true, selected_accounts: [具体选中项]
+    return {
+      selected: true,
+      selected_accounts: props.modelValue.map(item => ({
+        id: String(typeof item === 'object' ? item[props.valueKey] : item),
+        name: typeof item === 'object' ? (item[props.labelKey] || item[props.valueKey] || String(item)) : String(item)
+      }))
+    }
+  } else {
+    // 未选择任何项：selected: false, selected_accounts: []
+    return {
+      selected: false,
+      selected_accounts: []
+    }
+  }
 })
 
 // 方法
@@ -165,6 +230,20 @@ const getRobotDisplayName = (robot) => {
 }
 
 const isRobotSelected = (robot) => {
+  // 如果处于全局全选状态
+  if (isGlobalSelectAll.value) {
+    // 如果 modelValue 为空（真正的全选），所有机器人都显示为选中
+    if (props.modelValue.length === 0) {
+      return true
+    }
+    // 如果 modelValue 不为空（反选模式），检查是否在反选列表中
+    const robotId = String(robot[props.valueKey])
+    return props.modelValue.some(item => {
+      const itemId = typeof item === 'object' ? String(item[props.valueKey]) : String(item)
+      return itemId === robotId
+    })
+  }
+
   const robotId = robot[props.valueKey]
   return selectedRobotIds.value.includes(robotId)
 }
@@ -173,13 +252,67 @@ const toggleRobot = (robot) => {
   const robotId = robot[props.valueKey]
   const isSelected = isRobotSelected(robot)
 
+  console.log('=== toggleRobot 被调用 ===')
+  console.log('机器人:', robot)
+  console.log('机器人ID:', robotId)
+  console.log('当前是否选中:', isSelected)
+  console.log('是否全局全选:', isGlobalSelectAll.value)
+  console.log('当前modelValue:', props.modelValue)
+
+  // 如果当前是全局全选状态，需要特殊处理
+  if (isGlobalSelectAll.value) {
+    if (props.modelValue.length === 0) {
+      // 真正的全选状态，点击任何机器人都进入反选模式
+      const newSelected = allAvailableItems.value.filter(i => String(i[props.valueKey]) !== robotId)
+      emit('update:modelValue', newSelected)
+      console.log('从全局全选中移除项目，进入反选模式')
+    } else {
+      // 反选模式，点击机器人切换其选中状态
+      let newSelected = [...props.modelValue]
+
+      if (isSelected) {
+        // 如果当前项目已选中，取消选择（从反选列表中移除）
+        newSelected = newSelected.filter(item => {
+          const itemId = typeof item === 'object' ? String(item[props.valueKey]) : String(item)
+          return itemId !== robotId
+        })
+        console.log('从反选列表中移除项目')
+
+        // 如果反选列表为空，回到真正的全选状态
+        if (newSelected.length === 0) {
+          emit('update:modelValue', [])
+          console.log('反选列表为空，回到真正的全选状态')
+        } else {
+          emit('update:modelValue', newSelected)
+        }
+      } else {
+        // 如果当前项目未选中，选择它（从反选列表中移除）
+        newSelected = newSelected.filter(item => {
+          const itemId = typeof item === 'object' ? String(item[props.valueKey]) : String(item)
+          return itemId !== robotId
+        })
+        emit('update:modelValue', newSelected)
+        console.log('从反选列表中移除项目')
+
+        // 如果反选列表为空，回到真正的全选状态
+        if (newSelected.length === 0) {
+          emit('update:modelValue', [])
+          console.log('反选列表为空，回到真正的全选状态')
+        }
+      }
+    }
+
+    // 延迟触发选择状态变化事件，确保 modelValue 已更新
+    nextTick(() => {
+      emit('selectionChange', selectionStatus.value)
+    })
+    return
+  }
+
   let newSelected = [...props.modelValue]
 
   if (isSelected) {
-    // 移除 - 如果处于全局全选状态，退出全选状态
-    if (isGlobalSelectAll.value) {
-      isGlobalSelectAll.value = false
-    }
+    // 移除
     newSelected = newSelected.filter(item => {
       const itemId = typeof item === 'object' ? item[props.valueKey] : item
       return itemId !== robotId
@@ -187,33 +320,34 @@ const toggleRobot = (robot) => {
   } else {
     // 添加
     newSelected.push(robot)
+    console.log('添加机器人到选择列表:', robot)
+    console.log('新的选择列表:', newSelected)
   }
 
+  console.log('准备发送 update:modelValue 事件:', newSelected)
   emit('update:modelValue', newSelected)
+
+  // 延迟触发选择状态变化事件，确保 modelValue 已更新
+  nextTick(() => {
+    console.log('触发 selectionChange 事件:', selectionStatus.value)
+    emit('selectionChange', selectionStatus.value)
+  })
 }
 
 const toggleSelectAll = () => {
   const shouldSelectAll = !isAllSelected.value
 
-  // 更新全局全选状态
-  isGlobalSelectAll.value = shouldSelectAll
-
   if (shouldSelectAll) {
-    // 全选当前过滤结果
-    const newSelected = [...props.modelValue]
-    filteredRobots.value.forEach(robot => {
-      const robotId = robot[props.valueKey]
-      const alreadySelected = newSelected.some(item => {
-        const itemId = typeof item === 'object' ? item[props.valueKey] : item
-        return itemId === robotId
-      })
-
-      if (!alreadySelected) {
-        newSelected.push(robot)
-      }
-    })
-    emit('update:modelValue', newSelected)
+    // 启用全局全选模式
+    isGlobalSelectAll.value = true
+    // 全选时传递空数组
+    emit('update:modelValue', [])
+    console.log('=== 启用全局全选模式 ===')
+    console.log('全选模式：selected: true, selected_accounts: []')
   } else {
+    // 取消全局全选模式
+    isGlobalSelectAll.value = false
+
     // 取消全选当前过滤结果
     const filteredIds = filteredRobots.value.map(robot => robot[props.valueKey])
     const newSelected = props.modelValue.filter(item => {
@@ -222,6 +356,11 @@ const toggleSelectAll = () => {
     })
     emit('update:modelValue', newSelected)
   }
+
+  // 延迟触发选择状态变化事件，确保 modelValue 已更新
+  nextTick(() => {
+    emit('selectionChange', selectionStatus.value)
+  })
 }
 
 const handleSearch = async () => {
@@ -273,6 +412,12 @@ const fetchRobots = async (reset = false) => {
     const newRobots = response.results || response.data || []
     totalCount.value = response.count || response.total || 0
 
+    // 如果是第一页且没有搜索条件，更新所有可用项目列表
+    if (reset && currentPage.value === 1 && !searchQuery.value.trim()) {
+      allAvailableItems.value = response.results || response.data || []
+      totalAvailableCount.value = response.count || response.total || 0
+    }
+
     if (reset) {
       robots.value = newRobots
     } else {
@@ -297,6 +442,22 @@ const fetchRobots = async (reset = false) => {
         })
         emit('update:modelValue', newSelected)
       }
+
+      // 更新所有可用项目列表（包括新加载的数据）
+      if (uniqueNewRobots.length > 0) {
+        allAvailableItems.value = [...allAvailableItems.value, ...uniqueNewRobots]
+        totalAvailableCount.value = response.count || response.total || 0
+      }
+    }
+
+    // 确保在全选状态下，当前显示的数据正确反映选中状态
+    // 这解决了滚动后回到第一页时选中状态丢失的问题
+    if (isGlobalSelectAll.value && props.modelValue.length === 0) {
+      // 真正的全选状态，不需要额外处理，isRobotSelected 会自动返回 true
+      console.log('全选状态下加载数据，当前页机器人应该都显示为选中')
+    } else if (isGlobalSelectAll.value && props.modelValue.length > 0) {
+      // 反选状态，确保数据一致性
+      console.log('反选状态下加载数据，根据 modelValue 决定选中状态')
     }
 
     // 检查是否还有更多数据

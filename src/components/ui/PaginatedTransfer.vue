@@ -15,6 +15,12 @@
               />
               <span class="text-sm font-medium">全选</span>
             </div>
+            <!-- 选择状态显示 -->
+            <div v-if="supportSelectAll" class="text-xs text-gray-500">
+              <span v-if="isGlobalSelectAll" class="text-orange-600 font-medium">全局全选模式</span>
+              <span v-else-if="selectedLeftItemsArray.length > 0" class="text-blue-600">已选 {{ selectedLeftItemsArray.length }} 项</span>
+              <span v-else class="text-gray-400">未选择</span>
+            </div>
           </div>
           <!-- 搜索框 -->
           <div class="mt-2 relative">
@@ -46,6 +52,14 @@
               class="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
             >
               重置
+            </button>
+            <button
+              v-if="supportSelectAll && (isGlobalSelectAll || selectedLeftItemsArray.length > 0)"
+              type="button"
+              @click="toggleInvertSelection"
+              class="px-2 py-1 text-xs bg-orange-500 text-white rounded hover:bg-orange-600"
+            >
+              反选
             </button>
           </div>
           <!-- 搜索结果全选 -->
@@ -253,10 +267,15 @@ const props = defineProps({
   pageSize: {
     type: Number,
     default: 20
+  },
+  // 是否支持全选模式
+  supportSelectAll: {
+    type: Boolean,
+    default: true
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'selectionChange'])
 
 // 搜索查询
 const leftSearchQuery = ref('')
@@ -281,6 +300,11 @@ const rightItems = ref([])
 // 选中的项目 - 使用数组保存所有选中的数据
 const selectedLeftItemsArray = ref([]) // 保存左侧所有选中的完整项目对象
 const selectedRightItemsArray = ref([]) // 保存右侧所有选中的完整项目对象
+
+// 全选状态管理
+const isGlobalSelectAll = ref(false) // 全局全选状态
+const allAvailableItems = ref([]) // 所有可用的项目（用于全选）
+const totalAvailableCount = ref(0) // 所有可用项目的总数
 
 // 左侧全选状态
 const isAllLeftSelected = computed(() =>
@@ -307,6 +331,42 @@ const hasLeftSelected = computed(() => selectedLeftItemsArray.value.length > 0)
 
 // 右侧是否有选中项目
 const hasRightSelected = computed(() => selectedRightItemsArray.value.length > 0)
+
+// 选择状态计算
+const selectionStatus = computed(() => {
+  if (isGlobalSelectAll.value) {
+    // 全选时：selected: true, selected_accounts: []
+    return {
+      selected: true,
+      selected_accounts: []
+    }
+  } else if (props.modelValue.length > 0) {
+    // 自定义选择时：selected: true, selected_accounts: [具体选中项]
+    return {
+      selected: true,
+      selected_accounts: props.modelValue.map(item => ({
+        id: String(typeof item === 'object' ? item[props.valueKey] : item),
+        name: typeof item === 'object' ? (item[props.labelKey] || item[props.valueKey] || String(item)) : String(item)
+      }))
+    }
+  } else {
+    // 反选时（未选择任何项）：selectStatus: false, selected_accounts: [未被选中的项]
+    const unselectedItems = allAvailableItems.value.filter(item => {
+      const itemId = String(item[props.valueKey])
+      return !props.modelValue.some(selected =>
+        String(typeof selected === 'object' ? selected[props.valueKey] : selected) === itemId
+      )
+    })
+
+    return {
+      selectStatus: false,
+      selected_accounts: unselectedItems.map(item => ({
+        id: String(item[props.valueKey]),
+        name: item[props.labelKey] || item[props.valueKey] || String(item)
+      }))
+    }
+  }
+})
 
 // 获取项目标签
 function getItemLabel(item) {
@@ -347,7 +407,7 @@ async function fetchLeftData() {
 
       return {
         ...item,
-        selected: wasSelected // 保留之前的选择状态
+        selected: wasSelected || isGlobalSelectAll.value // 全局全选时默认选中
       }
     })
 
@@ -355,6 +415,12 @@ async function fetchLeftData() {
     console.log('=== 过滤后的左侧数据（排除右侧已有） ===', leftItems.value)
     leftTotal.value = response.count || response.total || 0
     leftTotalPages.value = Math.ceil(leftTotal.value / props.pageSize)
+
+    // 如果是第一页且没有搜索条件，更新所有可用项目列表
+    if (leftPage.value === 1 && !leftSearchQuery.value) {
+      allAvailableItems.value = response.results || response.data || []
+      totalAvailableCount.value = response.count || response.total || 0
+    }
 
     console.log('=== 处理后的左侧数据 ===', leftItems.value)
   } catch (error) {
@@ -423,6 +489,32 @@ function toggleLeftItem(item, index) {
   console.log('点击的项目:', item)
   console.log('索引:', index)
   console.log('选择前状态:', item.selected)
+  console.log('全局全选状态:', isGlobalSelectAll.value)
+
+  // 如果当前是全局全选状态，取消全局全选
+  if (isGlobalSelectAll.value) {
+    isGlobalSelectAll.value = false
+    // 清空所有选择，然后重新选择除了当前项目之外的所有项目
+    const allIds = allAvailableItems.value.map(i => String(i[props.valueKey]))
+    const currentId = String(item[props.valueKey])
+
+    if (leftItems.value[index].selected) {
+      // 如果当前项目已选中，取消选择（从全局全选中移除）
+      const newSelected = allAvailableItems.value.filter(i => String(i[props.valueKey]) !== currentId)
+      emit('update:modelValue', newSelected)
+    } else {
+      // 如果当前项目未选中，选择它（保持全局全选状态）
+      emit('update:modelValue', [...allAvailableItems.value])
+    }
+
+    // 刷新数据
+    fetchLeftData()
+    fetchRightData()
+
+    console.log('取消全局全选，重新选择')
+    emit('selectionChange', selectionStatus.value)
+    return
+  }
 
   // 直接修改项目的selected属性
   leftItems.value[index].selected = !leftItems.value[index].selected
@@ -444,8 +536,15 @@ function toggleLeftItem(item, index) {
     )
   }
 
+  // 更新右侧显示
+  const newSelected = [...selectedLeftItemsArray.value]
+  emit('update:modelValue', newSelected)
+
   console.log('选择后状态:', leftItems.value[index].selected)
   console.log('左侧选中数组:', selectedLeftItemsArray.value)
+
+  // 触发选择状态变化事件
+  emit('selectionChange', selectionStatus.value)
 }
 
 // 切换右侧项目选择
@@ -483,30 +582,54 @@ function toggleRightItem(item, index) {
 function toggleAllLeft() {
   const shouldSelectAll = !isAllLeftSelected.value
 
-  leftItems.value.forEach(item => {
-    item.selected = shouldSelectAll
+  if (shouldSelectAll && props.supportSelectAll) {
+    // 启用全局全选模式
+    isGlobalSelectAll.value = true
+    // 清空现有的选择，因为全局全选时传递空数组
+    selectedLeftItemsArray.value = []
 
-    // 同时更新左侧选中数组
-    const itemId = String(item[props.valueKey])
-    if (shouldSelectAll) {
-      // 添加到左侧选中数组（如果不存在的话）
-      const alreadyExists = selectedLeftItemsArray.value.some(selectedItem =>
-        String(selectedItem[props.valueKey]) === itemId
-      )
-      if (!alreadyExists) {
-        selectedLeftItemsArray.value.push({ ...item })
+    // 全选时传递空数组
+    emit('update:modelValue', [])
+
+    console.log('=== 启用全局全选模式 ===')
+    console.log('全选模式：selected: true, selected_accounts: []')
+  } else {
+    // 取消全局全选模式
+    isGlobalSelectAll.value = false
+
+    // 处理当前页面的选择
+    leftItems.value.forEach(item => {
+      item.selected = shouldSelectAll
+
+      // 同时更新左侧选中数组
+      const itemId = String(item[props.valueKey])
+      if (shouldSelectAll) {
+        // 添加到左侧选中数组（如果不存在的话）
+        const alreadyExists = selectedLeftItemsArray.value.some(selectedItem =>
+          String(selectedItem[props.valueKey]) === itemId
+        )
+        if (!alreadyExists) {
+          selectedLeftItemsArray.value.push({ ...item })
+        }
+      } else {
+        // 从左侧选中数组中移除
+        selectedLeftItemsArray.value = selectedLeftItemsArray.value.filter(selectedItem =>
+          String(selectedItem[props.valueKey]) !== itemId
+        )
       }
-    } else {
-      // 从左侧选中数组中移除
-      selectedLeftItemsArray.value = selectedLeftItemsArray.value.filter(selectedItem =>
-        String(selectedItem[props.valueKey]) !== itemId
-      )
-    }
-  })
+    })
 
-  console.log('=== 左侧全选操作 ===')
-  console.log('全选状态:', shouldSelectAll)
-  console.log('左侧选中数组:', selectedLeftItemsArray.value)
+    // 更新右侧显示
+    const newSelected = [...selectedLeftItemsArray.value]
+    emit('update:modelValue', newSelected)
+
+    console.log('=== 左侧全选操作 ===')
+    console.log('全选状态:', shouldSelectAll)
+    console.log('左侧选中数组:', selectedLeftItemsArray.value)
+  }
+
+  // 触发选择状态变化事件
+  emit('selectionChange', selectionStatus.value)
 }
 // 右侧全选/取消全选
 function toggleAllRight() {
@@ -561,7 +684,7 @@ function selectAllLeftSearchResults() {
 // 搜索功能
 function searchLeft() {
   leftPage.value = 1
-  // 不清除选择状态，保持跨页面选择
+  // 搜索时不清除全局全选状态，但需要重新获取数据
   fetchLeftData()
 }
 
@@ -620,6 +743,13 @@ function moveToRight() {
   console.log('=== 移动到右侧开始 ===')
   console.log('当前已选项目:', props.modelValue)
   console.log('左侧选中数组中的所有项目:', selectedLeftItemsArray.value)
+  console.log('全局全选状态:', isGlobalSelectAll.value)
+
+  if (isGlobalSelectAll.value) {
+    // 全局全选状态：所有可用项目都已选中，无需额外操作
+    console.log('全局全选状态，所有项目已在右侧')
+    return
+  }
 
   if (selectedLeftItemsArray.value.length === 0) {
     console.log('没有选中的项目')
@@ -656,6 +786,9 @@ function moveToRight() {
   // 刷新数据
   fetchLeftData()
   fetchRightData()
+
+  // 触发选择状态变化事件
+  emit('selectionChange', selectionStatus.value)
 }
 
 // 移动单个项目到左侧（双击时调用）
@@ -678,6 +811,38 @@ function moveToLeft() {
   console.log('=== 移动到左侧开始 ===')
   console.log('当前已选项目:', props.modelValue)
   console.log('右侧选中数组中的所有项目:', selectedRightItemsArray.value)
+  console.log('全局全选状态:', isGlobalSelectAll.value)
+
+  if (isGlobalSelectAll.value) {
+    // 全局全选状态：需要取消全局全选，并移除选中的项目
+    isGlobalSelectAll.value = false
+
+    if (selectedRightItemsArray.value.length === 0) {
+      console.log('全局全选状态，但没有选中的右侧项目')
+      return
+    }
+
+    // 从全局全选中移除选中的项目
+    const selectedIds = selectedRightItemsArray.value.map(item => String(item[props.valueKey]))
+    const newSelected = allAvailableItems.value.filter(item => {
+      const id = String(item[props.valueKey])
+      return !selectedIds.includes(id)
+    })
+
+    console.log('从全局全选中移除后的数据:', newSelected)
+    emit('update:modelValue', newSelected)
+
+    // 清除右侧所有选择状态
+    selectedRightItemsArray.value = []
+
+    // 刷新数据
+    fetchLeftData()
+    fetchRightData()
+
+    // 触发选择状态变化事件
+    emit('selectionChange', selectionStatus.value)
+    return
+  }
 
   if (selectedRightItemsArray.value.length === 0) {
     console.log('没有选中的右侧项目')
@@ -700,6 +865,51 @@ function moveToLeft() {
   // 刷新数据
   fetchLeftData()
   fetchRightData()
+
+  // 触发选择状态变化事件
+  emit('selectionChange', selectionStatus.value)
+}
+
+// 反选功能
+function toggleInvertSelection() {
+  console.log('=== 反选操作开始 ===')
+  console.log('当前全局全选状态:', isGlobalSelectAll.value)
+  console.log('当前选中项目数量:', selectedLeftItemsArray.value.length)
+  console.log('当前modelValue数量:', props.modelValue.length)
+
+  if (isGlobalSelectAll.value) {
+    // 如果当前是全局全选，则取消全选（反选模式）
+    isGlobalSelectAll.value = false
+    selectedLeftItemsArray.value = []
+    emit('update:modelValue', [])
+    console.log('取消全局全选，进入反选模式')
+  } else if (props.modelValue.length > 0) {
+    // 如果有部分选中，则反选（选择未被选中的）
+    const selectedIds = new Set(props.modelValue.map(item =>
+      String(typeof item === 'object' ? item[props.valueKey] : item)
+    ))
+    const newSelected = allAvailableItems.value.filter(item => {
+      const itemId = String(item[props.valueKey])
+      return !selectedIds.has(itemId)
+    })
+
+    selectedLeftItemsArray.value = newSelected
+    emit('update:modelValue', newSelected)
+    console.log('反选完成，新选中项目数量:', newSelected.length)
+  } else {
+    // 如果没有选中任何项目，则全选
+    isGlobalSelectAll.value = true
+    selectedLeftItemsArray.value = []
+    emit('update:modelValue', []) // 全选时传空数组
+    console.log('启用全局全选')
+  }
+
+  // 刷新数据
+  fetchLeftData()
+  fetchRightData()
+
+  // 触发选择状态变化事件
+  emit('selectionChange', selectionStatus.value)
 }
 
 // 监听modelValue变化
