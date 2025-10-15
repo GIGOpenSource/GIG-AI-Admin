@@ -46,11 +46,11 @@
               <TableRow>
                 <TableHead class="whitespace-nowrap">序号</TableHead>
                 <TableHead class="whitespace-nowrap">平台</TableHead>
-                <TableHead class="whitespace-nowrap">名称</TableHead>
-                <TableHead class="whitespace-nowrap">API Key</TableHead>
-                <TableHead class="whitespace-nowrap">API Secret</TableHead>
-                <TableHead class="whitespace-nowrap">Access Token</TableHead>
-                <TableHead class="whitespace-nowrap">Access Token Secret</TableHead>
+                <TableHead class="whitespace-nowrap w-[120px]">名称</TableHead>
+                <TableHead class="whitespace-nowrap w-[150px]">API Key</TableHead>
+                <TableHead class="whitespace-nowrap w-[150px]">API Secret</TableHead>
+                <TableHead class="whitespace-nowrap w-[150px]">Access Token</TableHead>
+                <TableHead class="whitespace-nowrap w-[150px]">Access Token Secret</TableHead>
                 <TableHead class="whitespace-nowrap min-w-[100px]">是否封禁</TableHead>
                 <TableHead class="whitespace-nowrap">状态</TableHead>
                 <TableHead class="whitespace-nowrap">限制次数</TableHead>
@@ -66,18 +66,20 @@
                 <TableRow v-for="(acc, index) in accounts" :key="acc.id">
                   <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
                   <TableCell class="whitespace-nowrap">{{ formdata[acc.provider] || acc.provider }}</TableCell>
-                  <TableCell class="whitespace-nowrap">{{ acc.name }}</TableCell>
-                  <TableCell>
-                    <div class="max-w-[200px] truncate" :title="acc.api_key">{{ acc.api_key || '-' }}</div>
+                  <TableCell class="whitespace-nowrap w-[120px]">
+                    <div class="max-w-[100px] truncate" :title="acc.name">{{ acc.name || '-' }}</div>
                   </TableCell>
-                  <TableCell>
-                    <div class="max-w-[200px] truncate" :title="acc.api_secret">{{ acc.api_secret || '-' }}</div>
+                  <TableCell class="w-[150px]">
+                    <div class="max-w-[130px] truncate" :title="acc.api_key">{{ acc.api_key || '-' }}</div>
                   </TableCell>
-                  <TableCell>
-                    <div class="max-w-[200px] truncate" :title="acc.access_token">{{ acc.access_token || '-' }}</div>
+                  <TableCell class="w-[150px]">
+                    <div class="max-w-[130px] truncate" :title="acc.api_secret">{{ acc.api_secret || '-' }}</div>
                   </TableCell>
-                  <TableCell>
-                    <div class="max-w-[200px] truncate" :title="acc.access_token_secret">{{ acc.access_token_secret ||
+                  <TableCell class="w-[150px]">
+                    <div class="max-w-[130px] truncate" :title="acc.access_token">{{ acc.access_token || '-' }}</div>
+                  </TableCell>
+                  <TableCell class="w-[150px]">
+                    <div class="max-w-[130px] truncate" :title="acc.access_token_secret">{{ acc.access_token_secret ||
                       '-' }}</div>
                   </TableCell>
                   <TableCell class="whitespace-nowrap min-w-[100px]">

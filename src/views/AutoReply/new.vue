@@ -24,13 +24,13 @@
             <!-- 下拉菜单 -->
             <div v-if="showTaskMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
               <div class="py-1">
-                <button @click="createInstantTask" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                <button @click="createInstantTask('once')" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   创建即时任务
                 </button>
-                <button @click="createScheduledTask" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                <button @click="createScheduledTask('timing')" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="9" stroke-width="2"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
@@ -46,9 +46,9 @@
         <!-- 任务列表类型选择 -->
         <div class="mb-4 flex items-center gap-1 border-b border-gray-200">
           <button class="px-4 py-2 text-sm font-medium transition-colors relative"
-            :class="activeTaskType === 'instant' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-            @click="activeTaskType = 'instant'">
-            <div v-if="activeTaskType === 'instant'"
+            :class="activeTaskType === 'once' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+            @click="activeTaskType = 'once'">
+            <div v-if="activeTaskType === 'once'"
               class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-blue-600"></div>
             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -57,9 +57,9 @@
             即时任务列表
           </button>
           <button class="px-4 py-2 text-sm font-medium transition-colors relative"
-            :class="activeTaskType === 'scheduled' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-            @click="activeTaskType = 'scheduled'">
-            <div v-if="activeTaskType === 'scheduled'"
+            :class="activeTaskType === 'timing' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+            @click="activeTaskType = 'timing'">
+            <div v-if="activeTaskType === 'timing'"
               class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-blue-600"></div>
             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="9" stroke-width="2" />
@@ -114,52 +114,52 @@
         <Table class="[&_td]:py-3.5 [&_th]:py-3.5">
           <TableHeader>
             <TableRow>
-              <TableHead class="whitespace-nowrap">序号</TableHead>
-              <TableHead class="whitespace-nowrap">类型</TableHead>
-              <TableHead class="whitespace-nowrap">平台</TableHead>
-              <TableHead class="whitespace-nowrap">语言</TableHead>
-              <TableHead class="whitespace-nowrap">文本内容</TableHead>
-              <TableHead class="whitespace-nowrap">提及</TableHead>
-              <TableHead class="whitespace-nowrap">话题</TableHead>
+              <TableHead class="whitespace-nowrap w-[60px]">序号</TableHead>
+              <TableHead class="whitespace-nowrap w-[80px]">类型</TableHead>
+              <TableHead class="whitespace-nowrap w-[80px]">平台</TableHead>
+              <TableHead class="whitespace-nowrap w-[80px]">语言</TableHead>
+              <TableHead class="whitespace-nowrap w-[120px]">文本内容</TableHead>
+              <TableHead class="whitespace-nowrap w-[100px]">提及</TableHead>
+              <TableHead class="whitespace-nowrap w-[100px]">话题</TableHead>
               <!-- <TableHead class="whitespace-nowrap">载荷</TableHead> -->
-              <TableHead class="whitespace-nowrap">机器人</TableHead>
-              <TableHead class="whitespace-nowrap">提示词</TableHead>
-              <TableHead class="whitespace-nowrap">备注</TableHead>
+              <TableHead class="whitespace-nowrap w-[120px]">机器人</TableHead>
+              <TableHead class="whitespace-nowrap w-[100px]">提示词</TableHead>
+              <TableHead class="whitespace-nowrap w-[100px]">备注</TableHead>
               <!-- <TableHead class="whitespace-nowrap">Twitter回复ID</TableHead>
               <TableHead class="whitespace-nowrap">Facebook页面ID</TableHead>
               <TableHead class="whitespace-nowrap">Facebook评论ID</TableHead> -->
-              <TableHead class="whitespace-nowrap">创建时间</TableHead>
-              <TableHead class="whitespace-nowrap">发布时间</TableHead>
-              <TableHead class="whitespace-nowrap">状态</TableHead>
-              <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white z-10">操作</TableHead>
+              <TableHead class="whitespace-nowrap w-[120px]">创建时间</TableHead>
+              <TableHead class="whitespace-nowrap w-[120px]">发布时间</TableHead>
+              <TableHead class="whitespace-nowrap w-[80px]">状态</TableHead>
+              <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white z-10 w-[160px]">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <template v-if="tasks.length">
               <TableRow v-for="(task, index) in tasks" :key="task.id">
-                <TableCell class="whitespace-nowrap">{{ index + 1 }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ task.type == 'post' ? '发帖' : '回复评论' }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ task.provider || '-' }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ langer[task.language] || '-' }}</TableCell>
-                <TableCell class="max-w-[200px] truncate" :title="task.text">{{ task.text || '-' }}</TableCell>
-                <TableCell class="max-w-[200px] truncate" :title="task.mentions">{{ task.mentions || '-' }}</TableCell>
-                <TableCell class="max-w-[200px] truncate" :title="task.tags">{{task.tags.map(item => item).join(',') ||
+                <TableCell class="whitespace-nowrap w-[60px]">{{ index + 1 }}</TableCell>
+                <TableCell class="whitespace-nowrap w-[80px]">{{ task.type == 'post' ? '发帖' : '回复评论' }}</TableCell>
+                <TableCell class="whitespace-nowrap w-[80px]">{{ task.provider || '-' }}</TableCell>
+                <TableCell class="whitespace-nowrap w-[80px]">{{ langer[task.language] || '-' }}</TableCell>
+                <TableCell class="w-[120px] max-w-[100px] truncate" :title="task.text">{{ task.text || '-' }}</TableCell>
+                <TableCell class="w-[100px] max-w-[80px] truncate" :title="task.mentions">{{ task.mentions || '-' }}</TableCell>
+                <TableCell class="w-[100px] max-w-[80px] truncate" :title="task.tags">{{task.tags.map(item => item).join(',') ||
                   '-'}}</TableCell>
                 <!-- <TableCell class="max-w-[200px] truncate" :title="task.payload">{{ task.payload || '-' }}</TableCell> -->
-                <TableCell class="max-w-[200px] truncate"
+                <TableCell class="w-[120px] max-w-[100px] truncate"
                   :title="task.selected_accounts.map(item => item.name).join(',')">{{task.selected_accounts.map(item =>
                     item.name).join(',') || '-'}}</TableCell>
-                <TableCell class="max-w-[200px] truncate" :title="task.prompt">{{ task.prompt_name || '-' }}</TableCell>
-                <TableCell class="whitespace-nowrap">
-                  <div class="max-w-[200px] truncate" :title="task.task_remark">{{ task.task_remark || '无' }}</div>
+                <TableCell class="w-[100px] max-w-[80px] truncate" :title="task.prompt">{{ task.prompt_name || '-' }}</TableCell>
+                <TableCell class="whitespace-nowrap w-[100px]">
+                  <div class="max-w-[80px] truncate" :title="task.task_remark">{{ task.task_remark || '无' }}</div>
                 </TableCell>
                 <!-- <TableCell class="whitespace-nowrap">{{ task.twitter_reply_to_tweet_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_page_id || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ task.facebook_comment_id || '-' }}</TableCell> -->
-                <TableCell class="whitespace-nowrap">{{ formatTime(task.created_at) }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ formatTime(task.created_at) }}</TableCell>
-                <TableCell class="whitespace-nowrap text-blue-600">状态</TableCell>
-                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white z-10">
+                <TableCell class="whitespace-nowrap w-[120px]">{{ formatTime(task.created_at) }}</TableCell>
+                <TableCell class="whitespace-nowrap w-[120px]">{{ formatTime(task.created_at) }}</TableCell>
+                <TableCell class="whitespace-nowrap w-[80px] text-blue-600">状态</TableCell>
+                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white z-10 w-[160px]">
                   <div class="flex items-center justify-end gap-2">
                     <!-- <Button size="sm" variant="outline" @click="btn(task)">
                       执行任务
@@ -206,7 +206,7 @@
       <Modal v-if="showAdd" :fullScreenBackdrop="true" @close="closeAdd">
         <template #body>
           <div class="relative z-10 w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
-            <div style="height:43vh"></div>
+            <div style="height:24vh"></div>
             <h3 class="mb-4 text-lg font-semibold">{{ isEditMode ? '编辑任务' : '新增任务' }}</h3>
             <form @submit.prevent="submitAdd" class="space-y-4">
               <div class="grid grid-cols-3 gap-4">
@@ -223,7 +223,7 @@
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">平台<span
                       class="text-error-500">*</span></label>
-                  <select v-model="form.provider"
+                  <select v-model="form.provider" @change="handleProviderChange"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option value="">请选择平台</option>
                     <option value="twitter">Twitter</option>
@@ -309,8 +309,13 @@
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">机器人<span
                     class="text-error-500">*</span></label>
-                <PaginatedTransfer v-model="form.selected_accounts" :fetchApi="fetchBotListPaginated" labelKey="name"
-                  valueKey="id" />
+                <RobotSelector
+                  v-model="form.selected_accounts"
+                  :fetchApi="fetchBotListPaginated"
+                  labelKey="name"
+                  valueKey="id"
+                  @selectionChange="handleSelectionChange"
+                  :key="`robot-selector-${isEditMode ? editingId : 'new'}-${robotSelectorKey}`" />
               </div>
 
               <div>
@@ -384,7 +389,7 @@ import ComponentCard from '@/components/common/ComponentCard.vue'
 import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import PaginatedTransfer from '@/components/ui/PaginatedTransfer.vue'
+import RobotSelector from '@/components/ui/RobotSelector.vue'
 import { getAutoPlay, getAutoPlayDetail, createAutoPlay, updateAutoPlay, deleteAutoPlay, runNow } from '@/api/autoPlay.ts'
 import { getUser } from '@/api/index.ts'
 import { getTags } from '@/api/tag.ts'
@@ -400,9 +405,9 @@ const tasks = ref([])
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
-
+const task_timing_type = ref('task_timing_type')
 // 任务类型选择
-const activeTaskType = ref('instant')
+const activeTaskType = ref('once')
 
 // 新建任务下拉菜单
 const showTaskMenu = ref(false)
@@ -462,6 +467,45 @@ const form = ref({
   frequency_type: '',
   frequency_value: ''
 })
+
+const type = ref('once')
+
+// 选择状态管理
+const selectionStatus = ref({
+  selected: false,
+  selectStatus: false,
+  selected_accounts: []
+})
+
+// RobotSelector 组件的 key，用于强制重新渲染
+const robotSelectorKey = ref(0)
+
+// 处理选择状态变化
+const handleSelectionChange = (status) => {
+  console.log('机器人选择状态变化:', status)
+  selectionStatus.value = { ...status }
+
+  // 注意：不要在这里修改 form.value.selected_accounts
+  // 因为 v-model 会自动处理这个更新
+  // 这里只保存状态信息，用于提交时的数据处理
+}
+
+// 处理平台变化
+const handleProviderChange = () => {
+  console.log('平台变化:', form.value.provider)
+
+  // 清空已选择的机器人，因为不同平台的机器人不兼容
+  form.value.selected_accounts = []
+  selectionStatus.value = {
+    selected: false,
+    selectStatus: false,
+    selected_accounts: []
+  }
+
+  // 强制重新渲染 RobotSelector 组件，让它重新获取对应平台的机器人数据
+  // 通过改变 key 值来强制重新渲染
+  robotSelectorKey.value = Date.now()
+}
 
 // 执行频率值选项
 const frequencyValueOptions = ref([])
@@ -549,25 +593,44 @@ async function onEdit(task) {
 
     // 处理 selected_accounts：确保是数组格式，包含id和name
     let selectedAccountsValue = []
+    console.log('=== 编辑时处理 selected_accounts ===')
+    console.log('原始 selected_accounts 数据:', detailData.selected_accounts)
+    console.log('数据类型:', typeof detailData.selected_accounts)
+    console.log('是否为数组:', Array.isArray(detailData.selected_accounts))
+
     if (Array.isArray(detailData.selected_accounts)) {
       // 如果是数组格式，确保id是字符串格式
-      selectedAccountsValue = detailData.selected_accounts.map(account => ({
-        id: String(account.id || account),
-        name: account.name || String(account.id || account)
-      }))
+      selectedAccountsValue = detailData.selected_accounts.map(account => {
+        const accountObj = {
+          id: String(account.id || account),
+          name: account.name || account.remark || String(account.id || account)
+        }
+        console.log('处理数组中的账户:', account, '->', accountObj)
+        return accountObj
+      })
     } else if (typeof detailData.selected_accounts === 'object' && detailData.selected_accounts !== null) {
       // 如果是对象格式，转换为数组
-      selectedAccountsValue = Object.keys(detailData.selected_accounts).map(key => ({
-        id: String(key),
-        name: detailData.selected_accounts[key] || String(key)
-      }))
+      selectedAccountsValue = Object.keys(detailData.selected_accounts).map(key => {
+        const accountObj = {
+          id: String(key),
+          name: detailData.selected_accounts[key] || String(key)
+        }
+        console.log('处理对象中的账户:', key, '->', accountObj)
+        return accountObj
+      })
     } else if (typeof detailData.selected_accounts === 'string') {
       // 如果是字符串格式，分割后转换
-      selectedAccountsValue = detailData.selected_accounts.split(',').map(id => ({
-        id: String(id.trim()),
-        name: String(id.trim())
-      }))
+      selectedAccountsValue = detailData.selected_accounts.split(',').map(id => {
+        const accountObj = {
+          id: String(id.trim()),
+          name: String(id.trim())
+        }
+        console.log('处理字符串中的账户:', id, '->', accountObj)
+        return accountObj
+      })
     }
+
+    console.log('处理后的 selectedAccountsValue:', selectedAccountsValue)
 
     // 填充表单数据
     form.value = {
@@ -587,6 +650,17 @@ async function onEdit(task) {
       frequency_type: detailData.frequency_type || '',
       frequency_value: detailData.frequency_value || ''
     }
+
+    // 重置选择状态，确保编辑模式下状态正确
+    selectionStatus.value = {
+      selected: false,
+      selectStatus: false,
+      selected_accounts: []
+    }
+
+    console.log('=== 编辑模式表单数据填充完成 ===')
+    console.log('form.value.selected_accounts:', form.value.selected_accounts)
+    console.log('selectionStatus.value:', selectionStatus.value)
 
     // 如果有频率类型，则加载对应的频率值选项
     if (detailData.frequency_type) {
@@ -668,7 +742,8 @@ function openAdd() {
     facebook_comment_id: '',
     task_remark: '',
     frequency_type: '',
-    frequency_value: ''
+    frequency_value: '',
+    task_timing_type:task_timing_type.value
   }
   frequencyValueOptions.value = []
   showAdd.value = true
@@ -732,7 +807,12 @@ async function submitAdd() {
     return
   }
 
-  if (!form.value.selected_accounts || form.value.selected_accounts.length === 0) {
+  // 检查是否选择了机器人（包括全选状态）
+  const hasSelectedRobots = selectionStatus.value.selected === true ||
+                           (selectionStatus.value.selectStatus === false && selectionStatus.value.selected_accounts.length > 0) ||
+                           form.value.selected_accounts.length > 0
+
+  if (!hasSelectedRobots) {
     toast.error('请选择机器人', {
       description: '机器人不能为空'
     })
@@ -764,13 +844,39 @@ async function submitAdd() {
       tagsArray = form.value.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
     }
 
-    // 处理 selected_accounts 格式：保持数组格式，确保id是字符串
-    let selectedAccountsArray = []
-    if (Array.isArray(form.value.selected_accounts)) {
-      selectedAccountsArray = form.value.selected_accounts.map(account => ({
-        id: String(account.id),
-        name: account.name || String(account.id)
-      }))
+    // 处理 selected_accounts 格式：根据选择状态传递不同的数据格式
+    let submitDataForAPI = {}
+
+    if (selectionStatus.value.selected === true && selectionStatus.value.selected_accounts.length === 0) {
+      // 全选模式
+      submitDataForAPI = {
+       select_status: true,
+        selected_accounts: []
+      }
+    } else if (selectionStatus.value.selected === true && selectionStatus.value.selected_accounts.length > 0) {
+      // 自定义选择模式
+      submitDataForAPI = {
+        select_status: true,
+        selected_accounts: selectionStatus.value.selected_accounts.map(account => ({
+          id: String(account.id),
+          name: account.name || String(account.id)
+        }))
+      }
+    } else if (selectionStatus.value.selectStatus === false) {
+      // 反选模式
+      submitDataForAPI = {
+        select_status: false,
+        selected_accounts: selectionStatus.value.selected_accounts.map(account => ({
+          id: String(account.id),
+          name: account.name || String(account.id)
+        }))
+      }
+    } else {
+      // 默认情况
+      submitDataForAPI = {
+        select_status: true,
+        selected_accounts: []
+      }
     }
 
     const submitData = {
@@ -781,7 +887,8 @@ async function submitAdd() {
       mentions: form.value.mentions || '',
       tags: tagsArray,
       payload: '',
-      selected_accounts: selectedAccountsArray,
+      // 根据选择状态传递不同的数据格式
+      ...submitDataForAPI,
       prompt: form.value.prompt || '',
       twitter_reply_to_tweet_id: '',
       facebook_page_id: '',
@@ -790,6 +897,9 @@ async function submitAdd() {
       frequency_type: form.value.frequency_type,
       frequency_value: form.value.frequency_value
     }
+
+    // 调试：打印提交数据
+    console.log('=== 提交给 createAutoPlay 的数据 ===', submitData)
 
     // 根据模式调用不同的接口
     if (isEditMode.value) {
@@ -819,15 +929,13 @@ async function submitAdd() {
 // 获取机器人列表
 // 获取机器人列表（分页版本，用于穿梭框，与账号池分页逻辑保持一致）
 const fetchBotListPaginated = async (params) => {
+  console.log(111);
+
   try {
-    console.log('=== API调用参数 ===', params)
-
     const apiParams = {
-      page: params.page
-      // page_size 不传递，使用后端默认的20条
+      page: params.page,
+      provider:form.value.provider || ''
     }
-
-    // 添加搜索参数（搜索机器人备注）
     if (params.search) {
       apiParams.remark = params.search // 使用remark字段进行搜索
     }
@@ -892,9 +1000,10 @@ const toggleTaskMenu = () => {
 }
 
 // 创建即时任务
-const createInstantTask = () => {
+const createInstantTask = (type) => {
   showTaskMenu.value = false
   activeTaskType.value = 'instant'
+   task_timing_type.value = type
   openAdd()
 }
 
@@ -927,12 +1036,11 @@ const clearSearch = () => {
 
 // 获取列表数据
 const fetchlist = async () => {
-  console.log(111);
-
   try {
     const params = {
       page: page.value,
-      page_size: pageSize.value
+      page_size: pageSize.value,
+      task_timing_type:activeTaskType.value
     }
 
     // 添加筛选条件
@@ -962,8 +1070,7 @@ const fetchlist = async () => {
 // 已移除多选下拉框相关函数，改用分页穿梭框组件
 
 // 监听分页变化
-watch(page, (newPage) => {
-  console.log('Page changed to:', newPage)
+watch([page,activeTaskType],() => {
   fetchlist()
 })
 

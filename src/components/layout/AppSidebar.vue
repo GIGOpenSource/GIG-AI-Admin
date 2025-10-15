@@ -197,7 +197,7 @@ const menuGroups = ref(
       items: [
         { icon: GridIcon, name: "数据统计", path: "/" },
         { icon: TaskIcon, name: "任务列表", path: "/task" },
-        { icon: TaskIcon, name: "任务日志", path: "/taskLog" },
+        { icon: PieChartIcon, name: "任务日志", path: "/taskLog" },
       ],
     },
     {

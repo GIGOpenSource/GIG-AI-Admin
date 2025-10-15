@@ -20,7 +20,7 @@ export default defineConfig({
   },
 server: {
   host: '0.0.0.0',
-  port: 5173,
+  port: 5174,
 
   // // 关键：允许通过域名访问 dev server
   // allowedHosts: ['gigaisystem.com', 'www.gigaisystem.com'],
@@ -42,7 +42,7 @@ server: {
 },
   preview: {
     host: '0.0.0.0',
-    port: 5173,
+    port: 5174,
     allowedHosts: ['gigaisystem.com', 'www.gigaisystem.com'],
   }
 })

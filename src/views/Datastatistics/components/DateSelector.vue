@@ -81,32 +81,21 @@
           </div>
 
           <!-- 企业列表 -->
-          <div class="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
-            <div
-              v-for="company in filteredCompanies"
-              :key="company.id"
-              :class="[
-                'p-4 border-b border-gray-100 cursor-pointer transition-all hover:bg-gray-50',
-                tempSelectedCompanyId === company.id
-                  ? 'bg-orange-50 border-l-4 border-l-orange-500'
-                  : '',
-              ]"
-              @click="selectCompany(company)"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <h4 class="font-semibold text-gray-900">{{ company.name }}</h4>
-                </div>
-                <div v-if="tempSelectedCompanyId === company.id">
-                  <svg class="w-6 h-6 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
+          <div class="max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-4">
+            <div class="flex flex-wrap gap-4">
+              <label
+                v-for="company in filteredCompanies"
+                :key="company.id"
+                class="flex items-center cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  :value="company.id"
+                  v-model="tempSelectedCompanyId"
+                  class="w-4 h-4 text-orange-600 border-gray-300 focus:ring-orange-500 mr-2"
+                />
+                <span class="text-gray-700 text-sm">{{ company.name }}</span>
+              </label>
             </div>
           </div>
 
@@ -423,10 +412,6 @@ const closeCompanyPicker = () => {
   searchQuery.value = ''
 }
 
-const selectCompany = (company: Company) => {
-  // 在弹窗中选择企业时，只修改临时变量
-  tempSelectedCompanyId.value = company.id
-}
 
 const confirmCompanySelection = () => {
   if (!tempSelectedCompanyId.value) return
