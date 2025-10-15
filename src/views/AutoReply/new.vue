@@ -24,13 +24,13 @@
             <!-- 下拉菜单 -->
             <div v-if="showTaskMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
               <div class="py-1">
-                <button @click="createInstantTask" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                <button @click="createInstantTask('once')" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   创建即时任务
                 </button>
-                <button @click="createScheduledTask" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                <button @click="createScheduledTask('timing')" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="9" stroke-width="2"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
@@ -46,9 +46,9 @@
         <!-- 任务列表类型选择 -->
         <div class="mb-4 flex items-center gap-1 border-b border-gray-200">
           <button class="px-4 py-2 text-sm font-medium transition-colors relative"
-            :class="activeTaskType === 'instant' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-            @click="activeTaskType = 'instant'">
-            <div v-if="activeTaskType === 'instant'"
+            :class="activeTaskType === 'once' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+            @click="activeTaskType = 'once'">
+            <div v-if="activeTaskType === 'once'"
               class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-blue-600"></div>
             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -57,9 +57,9 @@
             即时任务列表
           </button>
           <button class="px-4 py-2 text-sm font-medium transition-colors relative"
-            :class="activeTaskType === 'scheduled' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-            @click="activeTaskType = 'scheduled'">
-            <div v-if="activeTaskType === 'scheduled'"
+            :class="activeTaskType === 'timing' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+            @click="activeTaskType = 'timing'">
+            <div v-if="activeTaskType === 'timing'"
               class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-blue-600"></div>
             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="9" stroke-width="2" />
@@ -405,9 +405,9 @@ const tasks = ref([])
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
-
+const task_timing_type = ref('task_timing_type')
 // 任务类型选择
-const activeTaskType = ref('instant')
+const activeTaskType = ref('once')
 
 // 新建任务下拉菜单
 const showTaskMenu = ref(false)
@@ -467,6 +467,8 @@ const form = ref({
   frequency_type: '',
   frequency_value: ''
 })
+
+const type = ref('once')
 
 // 选择状态管理
 const selectionStatus = ref({
@@ -740,7 +742,8 @@ function openAdd() {
     facebook_comment_id: '',
     task_remark: '',
     frequency_type: '',
-    frequency_value: ''
+    frequency_value: '',
+    task_timing_type:task_timing_type.value
   }
   frequencyValueOptions.value = []
   showAdd.value = true
@@ -997,9 +1000,10 @@ const toggleTaskMenu = () => {
 }
 
 // 创建即时任务
-const createInstantTask = () => {
+const createInstantTask = (type) => {
   showTaskMenu.value = false
   activeTaskType.value = 'instant'
+   task_timing_type.value = type
   openAdd()
 }
 
@@ -1032,12 +1036,11 @@ const clearSearch = () => {
 
 // 获取列表数据
 const fetchlist = async () => {
-  console.log(111);
-
   try {
     const params = {
       page: page.value,
-      page_size: pageSize.value
+      page_size: pageSize.value,
+      task_timing_type:activeTaskType.value
     }
 
     // 添加筛选条件
@@ -1067,8 +1070,7 @@ const fetchlist = async () => {
 // 已移除多选下拉框相关函数，改用分页穿梭框组件
 
 // 监听分页变化
-watch(page, (newPage) => {
-  console.log('Page changed to:', newPage)
+watch([page,activeTaskType],() => {
   fetchlist()
 })
 
