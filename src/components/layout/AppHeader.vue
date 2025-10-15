@@ -76,8 +76,15 @@
         class="items-center justify-between w-full gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none"
       >
         <div class="flex items-center gap-2 2xsm:gap-3">
-          <button class="!text-blue-600 px-4 py-2 text-sm font-medium rounded-lg" style="border: 1px solid #2563eb; background-color: white !important;" onmouseover="this.style.backgroundColor='white'" onmouseout="this.style.backgroundColor='white'" title="切换企业数据">
-            切换企业数据
+          <button
+            @click="openUserModal"
+            class="!text-blue-600 px-4 py-2 text-sm font-medium rounded-lg"
+            style="border: 1px solid #2563eb; background-color: white !important;"
+            onmouseover="this.style.backgroundColor='white'"
+            onmouseout="this.style.backgroundColor='white'"
+            title="切换企业数据">
+            <span v-if="selectedUser">{{ selectedUser.username }}</span>
+            <span v-else>切换企业数据</span>
           </button>
           <ThemeToggler />
           <!-- <NotificationMenu /> -->
@@ -85,12 +92,91 @@
         <UserMenu />
       </div>
     </div>
+
+    <!-- 切换企业数据弹窗 -->
+    <div v-if="showUserModal" class="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50" @click="closeUserModal">
+      <div class="bg-white rounded-lg shadow-xl w-[600px] max-w-[90vw] mx-4 border border-gray-200" @click.stop>
+        <!-- 标题栏和关闭按钮 -->
+        <div class="relative px-6 py-4 border-b border-gray-200">
+          <button @click="closeUserModal" class="absolute left-6 top-4 text-gray-400 hover:text-gray-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          <h3 class="text-lg font-semibold text-gray-900 text-center">切换企业数据</h3>
+        </div>
+
+        <div class="p-6">
+          <div v-if="isLoadingUsers" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-sm text-gray-500">加载中...</p>
+          </div>
+
+          <div v-else-if="users.length === 0" class="text-center py-8">
+            <p class="text-sm text-gray-500">暂无用户</p>
+          </div>
+
+          <div v-else class="grid grid-cols-2 gap-3">
+            <!-- admin选项 -->
+            <label class="flex items-center p-3  border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                   :class="{ 'border-blue-500 bg-blue-50': !tempSelectedUser }">
+              <input type="radio"
+                     :checked="!tempSelectedUser"
+                     @change="selectNoUser"
+                     class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+              <span class="ml-3 text-sm font-medium text-gray-900">admin</span>
+            </label>
+
+            <!-- 用户列表 -->
+            <label v-for="user in users.slice(0, 7)"
+                   :key="user.id"
+                   class="flex items-center p-3  border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                   :class="{ 'border-blue-500 bg-blue-50': tempSelectedUser?.id === user.id }">
+              <input type="radio"
+                     :value="user.id"
+                     :checked="tempSelectedUser?.id === user.id"
+                     @change="selectUser(user)"
+                     class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+              <span class="ml-3 text-sm font-medium text-gray-900">{{ user.username }}</span>
+            </label>
+
+            <!-- 如果用户超过8个，显示更多用户 -->
+            <template v-if="users.length > 7">
+              <div v-for="user in users.slice(7)"
+                   :key="user.id"
+                   class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                   :class="{ 'border-blue-500 bg-blue-50': tempSelectedUser?.id === user.id }">
+                <input type="radio"
+                       :value="user.id"
+                       :checked="tempSelectedUser?.id === user.id"
+                       @change="selectUser(user)"
+                       class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                <span class="ml-3 text-sm font-medium text-gray-900">{{ user.username }}</span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-center gap-4">
+          <button @click="confirmSelection"
+                  class="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+            确认
+          </button>
+          <button @click="closeUserModal"
+                  class="px-6 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useSidebar } from '@/composables/useSidebar'
+import { getUser } from '@/api/index'
 import ThemeToggler from '../common/ThemeToggler.vue'
 import SearchBar from './header/SearchBar.vue'
 import HeaderLogo from './header/HeaderLogo.vue'
@@ -99,6 +185,7 @@ import UserMenu from './header/UserMenu.vue'
 
 const { toggleSidebar, toggleMobileSidebar, isMobileOpen } = useSidebar()
 const role = localStorage.getItem('role')
+
 const handleToggle = () => {
   if (window.innerWidth >= 1024) {
     toggleSidebar()
@@ -120,4 +207,93 @@ const isApplicationMenuOpen = ref(false)
 const toggleApplicationMenu = () => {
   isApplicationMenuOpen.value = !isApplicationMenuOpen.value
 }
+
+// 用户类型定义
+interface User {
+  id: number | string
+  username: string
+  [key: string]: any
+}
+
+// 用户选择相关状态
+const showUserModal = ref(false)
+const users = ref<User[]>([])
+const selectedUser = ref<User | null>(null)
+const isLoadingUsers = ref(false)
+const tempSelectedUser = ref<User | null>(null) // 临时选择，用于弹窗中的选择
+
+// 打开用户选择弹窗
+const openUserModal = async () => {
+  showUserModal.value = true
+  tempSelectedUser.value = selectedUser.value // 初始化临时选择
+
+  if (users.value.length === 0) {
+    await fetchUsers()
+  }
+}
+
+// 关闭用户选择弹窗
+const closeUserModal = () => {
+  showUserModal.value = false
+  tempSelectedUser.value = null
+}
+
+// 获取用户列表
+const fetchUsers = async () => {
+  isLoadingUsers.value = true
+  try {
+    const response = await getUser({ page: 1, page_size: 100 })
+    users.value = response.results || response.data || []
+
+    // 设置当前选中的用户（从localStorage获取）
+    const currentUserId = localStorage.getItem('selectedUserId')
+    if (currentUserId) {
+      const foundUser = users.value.find(user => user.id.toString() === currentUserId)
+      selectedUser.value = foundUser || null
+    }
+    // 注意：不自动选择第一个用户，让用户主动选择
+  } catch (error) {
+    console.error('获取用户列表失败:', error)
+  } finally {
+    isLoadingUsers.value = false
+  }
+}
+
+// 在弹窗中选择用户（临时选择）
+const selectUser = (user: User) => {
+  tempSelectedUser.value = user
+}
+
+// 在弹窗中选择不选择任何用户（临时选择）
+const selectNoUser = () => {
+  tempSelectedUser.value = null
+}
+
+// 确认选择
+const confirmSelection = () => {
+  selectedUser.value = tempSelectedUser.value
+
+  if (selectedUser.value) {
+    localStorage.setItem('selectedUserId', selectedUser.value.id.toString())
+    console.log('切换到用户:', selectedUser.value.username)
+  } else {
+    localStorage.removeItem('selectedUserId')
+    console.log('重置选择，不选择任何用户')
+  }
+
+  showUserModal.value = false
+  tempSelectedUser.value = null
+
+  // 这里可以触发切换企业数据的事件
+  // 例如：emit('userChanged', selectedUser.value) 或者调用相关的API
+}
+
+onMounted(() => {
+  // 初始化时尝试从localStorage获取已保存的用户信息
+  const savedUserId = localStorage.getItem('selectedUserId')
+  if (savedUserId && users.value.length === 0) {
+    // 如果有保存的用户ID但没有用户列表，则获取用户列表
+    fetchUsers()
+  }
+})
 </script>

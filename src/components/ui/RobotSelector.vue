@@ -145,7 +145,7 @@ const filteredRobots = computed(() => {
 
 const selectedRobotIds = computed(() => {
   return props.modelValue.map(robot =>
-    typeof robot === 'object' ? robot[props.valueKey] : robot
+    String(typeof robot === 'object' ? robot[props.valueKey] : robot)
   )
 })
 
@@ -260,14 +260,16 @@ const isRobotSelected = (robot) => {
   }
 
   // 非全选状态下的正常选择逻辑
-  const robotId = robot[props.valueKey]
+  const robotId = String(robot[props.valueKey])
   const result = selectedRobotIds.value.includes(robotId)
   console.log(`普通模式：机器人 ${robotId} 是否选中: ${result}`)
+  console.log(`当前 modelValue:`, props.modelValue)
+  console.log(`selectedRobotIds:`, selectedRobotIds.value)
   return result
 }
 
 const toggleRobot = (robot) => {
-  const robotId = robot[props.valueKey]
+  const robotId = String(robot[props.valueKey])
   const isSelected = isRobotSelected(robot)
 
   console.log('=== toggleRobot 被调用 ===')
@@ -331,7 +333,7 @@ const toggleRobot = (robot) => {
   if (isSelected) {
     // 移除
     newSelected = newSelected.filter(item => {
-      const itemId = typeof item === 'object' ? item[props.valueKey] : item
+      const itemId = String(typeof item === 'object' ? item[props.valueKey] : item)
       return itemId !== robotId
     })
   } else {
@@ -373,9 +375,9 @@ const toggleSelectAll = () => {
         // 如果当前是真正的全选状态，取消全选
         isGlobalSelectAll.value = false
         // 取消全选当前过滤结果
-        const filteredIds = filteredRobots.value.map(robot => robot[props.valueKey])
+        const filteredIds = filteredRobots.value.map(robot => String(robot[props.valueKey]))
         const newSelected = props.modelValue.filter(item => {
-          const itemId = typeof item === 'object' ? item[props.valueKey] : item
+          const itemId = String(typeof item === 'object' ? item[props.valueKey] : item)
           return !filteredIds.includes(itemId)
         })
         emit('update:modelValue', newSelected)
@@ -385,9 +387,9 @@ const toggleSelectAll = () => {
       // 非全局全选状态下的正常逻辑
       isGlobalSelectAll.value = false
       // 取消全选当前过滤结果
-      const filteredIds = filteredRobots.value.map(robot => robot[props.valueKey])
+      const filteredIds = filteredRobots.value.map(robot => String(robot[props.valueKey]))
       const newSelected = props.modelValue.filter(item => {
-        const itemId = typeof item === 'object' ? item[props.valueKey] : item
+        const itemId = String(typeof item === 'object' ? item[props.valueKey] : item)
         return !filteredIds.includes(itemId)
       })
       emit('update:modelValue', newSelected)
