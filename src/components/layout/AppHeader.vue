@@ -116,7 +116,7 @@
             <p class="text-sm text-gray-500">暂无用户</p>
           </div>
 
-          <div v-else class="grid grid-cols-2 gap-3">
+          <div v-else class="grid grid-cols-4 gap-3">
             <!-- admin选项 -->
             <label class="flex items-center p-3  border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
                    :class="{ 'border-blue-500 bg-blue-50': !tempSelectedUser }">
