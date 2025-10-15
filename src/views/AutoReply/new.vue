@@ -807,7 +807,7 @@ async function submitAdd() {
     } else if (selectionStatus.value.selectStatus === false) {
       // 反选模式
       submitDataForAPI = {
-        selectStatus: false,
+        selected: false,
         selected_accounts: selectionStatus.value.selected_accounts.map(account => ({
           id: String(account.id),
           name: account.name || String(account.id)
