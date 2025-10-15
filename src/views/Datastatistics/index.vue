@@ -262,7 +262,7 @@ import TotalVolume from './components/TotalVolume.vue'
 import DataComparison from './components/DataComparison.vue'
 import { getdate } from '@/api/home'
 import { toast } from 'vue-sonner'
-import {  getdata } from '@/api/index.ts'
+import { getdata } from '@/api/index.ts'
 // 导入图片
 import maskGroupIcon from '@/assets/images/Mask group@3x-2.png'
 import maskGroupIcon1 from '@/assets/images/Mask group@3x-1.png'
@@ -575,28 +575,28 @@ const apiData = ref<{
 
 // 总数据量
 const totalData = ref({
-  total:0,
-  instagram:0,
-  x:0,
-  facebook:0,
-  totalPosts:0,//总发布数
-  totalImpressions:0,//总曝光数
-  totalComments:0, //总评论数
-  totalReplies:0,//总回复数
-  totalLikes:0,//总点赞数
-  totalClicks:0,//总点击量
+  total: 0,
+  instagram: 0,
+  x: 0,
+  facebook: 0,
+  totalPosts: 0, //总发布数
+  totalImpressions: 0, //总曝光数
+  totalComments: 0, //总评论数
+  totalReplies: 0, //总回复数
+  totalLikes: 0, //总点赞数
+  totalClicks: 0, //总点击量
 })
 
 // 获取平台数据
 const getPlatformData = () => {
   // 这里可以根据实际API返回的数据进行映射
   return {
-    posts:0,
+    posts: 0,
     impressions: 0,
     replyComments: 0,
-    replyMessages:0,
-    likes:0,
-    clicks:0,
+    replyMessages: 0,
+    likes: 0,
+    clicks: 0,
   }
 }
 // 处理平台变化
@@ -647,42 +647,47 @@ const getDateRange = (dateValue: string) => {
 }
 
 const fetchData = async () => {
-  getdata({}).then(res => {
+  getdata({}).then((res) => {
     const apiData = res
     totalData.value = {
-      totalPosts: apiData.fb.total_public_count +
+      totalPosts:
+        apiData.fb.total_public_count +
         apiData.ins.total_public_count +
         apiData.twitter.total_public_count,
 
-      totalImpressions: apiData.fb.total_impression_count +
+      totalImpressions:
+        apiData.fb.total_impression_count +
         apiData.ins.total_impression_count +
         apiData.twitter.total_impression_count,
 
-      totalComments: apiData.fb.total_comment_count +
+      totalComments:
+        apiData.fb.total_comment_count +
         apiData.ins.total_comment_count +
         apiData.twitter.total_comment_count,
 
-      totalReplies: apiData.fb.total_comment_count +
+      totalReplies:
+        apiData.fb.total_comment_count +
         apiData.ins.total_comment_count +
         apiData.twitter.total_comment_count,
 
-      totalLikes: apiData.fb.total_like_count +
+      totalLikes:
+        apiData.fb.total_like_count +
         apiData.ins.total_like_count +
         apiData.twitter.total_like_count,
 
-      totalClicks: apiData.fb.total_click_count +
+      totalClicks:
+        apiData.fb.total_click_count +
         apiData.ins.total_click_count +
         apiData.twitter.total_click_count,
 
-      total: apiData.fb.total_public_count +
+      total:
+        apiData.fb.total_public_count +
         apiData.ins.total_public_count +
         apiData.twitter.total_public_count,
 
-
-      instagram:apiData.ins.total_public_count,
+      instagram: apiData.ins.total_public_count,
       x: apiData.twitter.total_public_count,
-      facebook:apiData.fb.total_public_count
-
+      facebook: apiData.fb.total_public_count,
     }
     return res
   })

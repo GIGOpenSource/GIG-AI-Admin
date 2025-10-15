@@ -14,40 +14,60 @@
             <TableHead class="whitespace-nowrap">创建用户</TableHead>
             <TableHead class="whitespace-nowrap">类型</TableHead>
             <TableHead class="whitespace-nowrap">平台</TableHead>
-            <TableHead class="whitespace-nowrap">语言</TableHead>
+            <TableHead class="whitespace-nowrap">提示词名称</TableHead>
             <TableHead class="whitespace-nowrap">文本内容</TableHead>
-            <TableHead class="whitespace-nowrap">提及</TableHead>
-            <TableHead class="whitespace-nowrap">话题</TableHead>
-            <TableHead class="whitespace-nowrap">提示词</TableHead>
-            <TableHead class="whitespace-nowrap">备注</TableHead>
+            <TableHead class="whitespace-nowrap">账号数量</TableHead>
+            <TableHead class="whitespace-nowrap">成功数量</TableHead>
+            <TableHead class="whitespace-nowrap">失败数量</TableHead>
+            <TableHead class="whitespace-nowrap">提示词ID</TableHead>
             <TableHead class="whitespace-nowrap">创建时间</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow v-if="taskDetail">
             <TableCell class="whitespace-nowrap">1</TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.created_by || '--' }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{ taskDetail.owner_name || '--' }}</TableCell>
             <TableCell class="whitespace-nowrap">
               <span
                 :class="[
                   'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
                   taskDetail.type === 'post'
                     ? 'bg-blue-50 text-blue-600 ring-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/30'
-                    : 'bg-purple-50 text-purple-600 ring-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:ring-purple-500/30',
+                    : taskDetail.type === 'reply_comment'
+                      ? 'bg-purple-50 text-purple-600 ring-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:ring-purple-500/30'
+                      : 'bg-orange-50 text-orange-600 ring-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:ring-orange-500/30',
                 ]"
               >
-                {{ taskDetail.type === 'post' ? '发帖' : '回复评论' }}
+                {{
+                  taskDetail.type === 'post'
+                    ? '发帖'
+                    : taskDetail.type === 'reply_comment'
+                      ? '回复评论'
+                      : taskDetail.type === 'reply_mention'
+                        ? '回复消息'
+                        : taskDetail.type
+                }}
               </span>
             </TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.platform || '--' }}</TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.language || '--' }}</TableCell>
-            <TableCell class="max-w-[200px] truncate" :title="taskDetail.text_content">
-              {{ taskDetail.text_content || '--' }}
+            <TableCell class="whitespace-nowrap">{{ taskDetail.provider || '--' }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{ taskDetail.prompt_name || '--' }}</TableCell>
+            <TableCell class="max-w-[200px] truncate" :title="taskDetail.text">
+              {{ taskDetail.text || '--' }}
             </TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.mentions || '--' }}</TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.topic || '--' }}</TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.prompt || '--' }}</TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.remarks || '--' }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{ taskDetail.account_count || 0 }}</TableCell>
+            <TableCell class="whitespace-nowrap text-center">
+              <span
+                class="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-medium"
+              >
+                {{ taskDetail.success_count || 0 }}
+              </span>
+            </TableCell>
+            <TableCell class="whitespace-nowrap text-center">
+              <span class="inline-flex items-center text-red-600 dark:text-red-400 font-medium">
+                {{ taskDetail.fail_count || 0 }}
+              </span>
+            </TableCell>
+            <TableCell class="whitespace-nowrap">{{ taskDetail.prompt_id || '--' }}</TableCell>
             <TableCell class="whitespace-nowrap">{{ formatTime(taskDetail.created_at) }}</TableCell>
           </TableRow>
           <TableRow v-else>
@@ -91,10 +111,10 @@
             <!-- 右侧统计和按钮 -->
             <div class="flex items-center gap-6">
               <div class="flex items-center gap-4">
-                <span class="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                <span class="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
                   成功: {{ executionStats.success }}
                 </span>
-                <span class="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                <span class="text-sm text-red-600 dark:text-red-400 font-medium">
                   失败: {{ executionStats.failed }}
                 </span>
               </div>
@@ -115,14 +135,52 @@
         <TableHeader>
           <TableRow>
             <TableHead class="whitespace-nowrap">ID</TableHead>
+            <TableHead class="whitespace-nowrap">账号ID</TableHead>
             <TableHead class="whitespace-nowrap">发布时间</TableHead>
             <TableHead class="whitespace-nowrap">状态</TableHead>
+            <TableHead class="whitespace-nowrap">外部ID</TableHead>
+            <TableHead class="whitespace-nowrap">错误信息</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <template v-if="executionLogs.length">
+          <!-- 加载状态 -->
+          <template v-if="loading">
+            <TableRow>
+              <TableCell :colspan="6" class="py-16 text-center text-gray-400 dark:text-white/40">
+                <div class="flex items-center justify-center gap-2">
+                  <svg
+                    class="animate-spin h-5 w-5 text-blue-600"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  加载中...
+                </div>
+              </TableCell>
+            </TableRow>
+          </template>
+
+          <!-- 数据列表 -->
+          <template v-else-if="executionLogs.length">
             <TableRow v-for="log in executionLogs" :key="log.id">
               <TableCell class="whitespace-nowrap font-mono text-sm">{{ log.id }}</TableCell>
+              <TableCell class="whitespace-nowrap font-mono text-sm">{{
+                log.account || '--'
+              }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ formatTime(log.publish_time) }}</TableCell>
               <TableCell class="whitespace-nowrap">
                 <span
@@ -140,14 +198,25 @@
                         ? '失败'
                         : log.status
                   }}
-                  <span v-if="log.error_message" class="ml-1">{{ log.error_message }}</span>
                 </span>
+              </TableCell>
+              <TableCell
+                class="whitespace-nowrap font-mono text-sm max-w-[120px] truncate"
+                :title="log.external_id"
+              >
+                {{ log.external_id || '--' }}
+              </TableCell>
+              <TableCell
+                class="max-w-[200px] truncate text-red-600 dark:text-red-400"
+                :title="log.error_message"
+              >
+                {{ log.error_message || '--' }}
               </TableCell>
             </TableRow>
           </template>
           <template v-else>
             <TableRow>
-              <TableCell :colspan="3" class="py-16 text-center text-gray-400 dark:text-white/40">
+              <TableCell :colspan="6" class="py-16 text-center text-gray-400 dark:text-white/40">
                 暂无执行日志
               </TableCell>
             </TableRow>
@@ -156,30 +225,29 @@
       </Table>
 
       <!-- 分页 -->
-      <div class="mt-4 flex justify-center" v-if="total > 0">
-        <div class="flex items-center gap-4">
-          <Button
-            size="sm"
-            variant="outline"
-            @click="page > 1 ? page-- : null"
-            :disabled="page === 1"
-            class="px-4 py-2"
-          >
-            上一页
-          </Button>
-          <span class="text-sm text-gray-600 dark:text-gray-400">
-            共{{ total }}条 第{{ page }}页
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            @click="page < Math.ceil(total / pageSize) ? page++ : null"
-            :disabled="page >= Math.ceil(total / pageSize)"
-            class="px-4 py-2"
-          >
-            下一页
-          </Button>
-        </div>
+      <div class="mt-4">
+        <Pagination
+          v-model:page="page"
+          :total="total"
+          :items-per-page="pageSize"
+          :sibling-count="1"
+          show-edges
+        >
+          <PaginationContent v-slot="{ items }">
+            <PaginationPrevious />
+            <template v-for="(item, index) in items" :key="index">
+              <PaginationItem
+                v-if="item.type === 'page'"
+                :value="item.value"
+                :is-active="item.value === page"
+              >
+                {{ item.value }}
+              </PaginationItem>
+              <PaginationEllipsis v-else :index="index" />
+            </template>
+            <PaginationNext />
+          </PaginationContent>
+        </Pagination>
       </div>
     </ComponentCard>
 
@@ -239,7 +307,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
+import { logdetail, postlogdetail } from '@/api/home'
 import { toast } from 'vue-sonner'
 
 // 定义事件
@@ -249,21 +326,24 @@ defineEmits(['close'])
 interface TaskDetail {
   id: number
   created_at: string
-  created_by: string
-  type: 'post' | 'reply_comment'
-  platform: string
-  language?: string
-  text_content: string
-  mentions?: string
-  topic?: string
-  prompt?: string
-  remarks?: string
+  owner_name: string
+  type: 'post' | 'reply_comment' | 'reply_mention'
+  provider: string
+  text: string
+  prompt_name: string
+  prompt_id: number
+  owner_id: number
+  account_count: number
+  success_count: number
+  fail_count: number
 }
 
 interface ExecutionLog {
   id: string
+  account?: string
   publish_time: string
   status: 'success' | 'failed'
+  external_id?: string
   error_message?: string
 }
 
@@ -272,7 +352,7 @@ interface ExecutionStats {
   failed: number
 }
 
-defineProps<{
+const props = defineProps<{
   taskDetail: TaskDetail | null
 }>()
 
@@ -282,6 +362,7 @@ const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const showRetryConfirm = ref(false)
+const loading = ref(false)
 
 // 执行日志数据
 const executionLogs = ref<ExecutionLog[]>([])
@@ -310,43 +391,58 @@ const handleRetryClick = () => {
 
 // 获取执行日志
 const fetchExecutionLogs = async () => {
+  loading.value = true
   try {
-    // 模拟数据 - 简化数据用于测试
-    const mockLogs: ExecutionLog[] = [
-      {
-        id: '31231242442525155344',
-        publish_time: new Date().toISOString(),
-        status: 'success',
-      },
-      {
-        id: '31231242442525155345',
-        publish_time: new Date(Date.now() - 3600000).toISOString(),
-        status: 'success',
-      },
-      {
-        id: '31231242442525155346',
-        publish_time: new Date(Date.now() - 7200000).toISOString(),
-        status: 'failed',
-        error_message: '网络错误',
-      },
-    ]
-
-    // 应用筛选
-    let filteredLogs = mockLogs
-
-    if (statusFilter.value && statusFilter.value !== 'all') {
-      filteredLogs = filteredLogs.filter((log) => log.status === statusFilter.value)
+    if (!props.taskDetail?.id) {
+      executionLogs.value = []
+      total.value = 0
+      return
     }
 
-    // 分页
-    const startIndex = (page.value - 1) * pageSize.value
-    const endIndex = startIndex + pageSize.value
+    // 构建请求参数
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const params: Record<string, any> = {
+      simpletask_id: props.taskDetail.id,
+      currentPage: page.value,
+      pageSize: pageSize.value,
+    }
 
-    executionLogs.value = filteredLogs.slice(startIndex, endIndex)
-    total.value = filteredLogs.length
+    // 添加状态筛选
+    if (statusFilter.value && statusFilter.value !== 'all') {
+      params.status = statusFilter.value
+    }
+
+    // 调用API接口获取执行日志详情
+    const res = await logdetail(params)
+
+    // 处理API响应数据
+    if (res && res.results) {
+      const logs = res.results || []
+
+      // 转换数据格式以匹配组件期望的结构
+      executionLogs.value = logs.map((log: Record<string, unknown>) => ({
+        id: log.id || '',
+        account: log.account || '',
+        publish_time: log.created_at || '',
+        status: log.success === 'success' ? 'success' : 'failed',
+        external_id: log.external_id || '',
+        error_message: log.error_message || '',
+      }))
+
+      total.value = res.pagination?.total || 0
+    } else {
+      executionLogs.value = []
+      total.value = 0
+    }
   } catch (error) {
     console.error('获取执行日志失败:', error)
     toast.error('获取执行日志失败')
+
+    // 发生错误时清空数据
+    executionLogs.value = []
+    total.value = 0
+  } finally {
+    loading.value = false
   }
 }
 
@@ -356,8 +452,20 @@ const confirmRetry = async () => {
     // 关闭弹窗
     showRetryConfirm.value = false
 
-    // 这里应该调用重新执行的API
-    toast.success('已开始重新执行失败的任务')
+    // 调用重试接口
+    const params = {
+      simpletask_id: props.taskDetail?.id,
+    }
+
+    let res = await postlogdetail(params)
+
+    if (res.message) {
+      toast.success(res.message)
+    } else {
+      toast.success('已开始重新执行失败的任务')
+    }
+
+    // 重新获取执行日志详情
     await fetchExecutionLogs()
   } catch (error) {
     console.error('重新执行失败:', error)
@@ -369,6 +477,17 @@ const confirmRetry = async () => {
 watch(page, () => {
   fetchExecutionLogs()
 })
+
+// 监听任务详情变化
+watch(
+  () => props.taskDetail,
+  (newTaskDetail) => {
+    if (newTaskDetail?.id) {
+      fetchExecutionLogs()
+    }
+  },
+  { deep: true },
+)
 
 // 组件挂载时获取数据
 onMounted(() => {

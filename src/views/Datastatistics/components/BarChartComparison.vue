@@ -27,7 +27,7 @@
     </div>
 
     <!-- 柱形图容器 -->
-    <div class="h-108 bg-gray-50 rounded-lg p-4">
+    <div class="h-92 bg-gray-50 rounded-lg p-4">
       <v-chart class="w-full h-full" :option="barChartOption" :autoresize="true" />
     </div>
   </div>

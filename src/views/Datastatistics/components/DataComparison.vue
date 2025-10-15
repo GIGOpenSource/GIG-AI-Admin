@@ -39,7 +39,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-6">
       <!-- 左侧：ECharts折线图 -->
       <div class="lg:col-span-6">
-        <div class="h-108 bg-gray-50 rounded-lg p-4">
+        <div class="h-92 bg-gray-50 rounded-lg p-4">
           <v-chart
             class="w-full h-full"
             :option="chartOption"

@@ -46,6 +46,7 @@
             <option value="">请选择类型</option>
             <option value="post">发帖</option>
             <option value="reply_comment">回复评论</option>
+            <option value="reply_mention">回复消息</option>
           </select>
 
           <select
@@ -54,7 +55,7 @@
             class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
           >
             <option value="">请选择平台</option>
-            <option value="x">X</option>
+            <option value="twitter">X</option>
             <option value="facebook">Facebook</option>
             <option value="instagram">Instagram</option>
             <option value="threads">Threads</option>
@@ -66,10 +67,9 @@
             class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
           >
             <option value="">请选择提示词</option>
-            <option value="visual_aesthetics">视觉/身材美学</option>
-            <option value="relationship_consulting">情感/关系咨询</option>
-            <option value="cryptocurrency">加密货币/交易</option>
-            <option value="ai_tools">AI/科技工具分享</option>
+            <option v-for="prompt in promptConfigs" :key="prompt.id" :value="prompt.id">
+              {{ prompt.name }}
+            </option>
           </select>
 
           <!-- 日期范围选择器 -->
@@ -125,6 +125,7 @@
               <TableHead class="whitespace-nowrap">文本内容</TableHead>
               <TableHead class="whitespace-nowrap">机器人数量</TableHead>
               <TableHead class="whitespace-nowrap">发送成功数</TableHead>
+              <TableHead class="whitespace-nowrap">发送失败数</TableHead>
               <TableHead
                 class="whitespace-nowrap text-right sticky right-0 bg-white dark:bg-gray-900 z-10"
                 >操作</TableHead
@@ -132,37 +133,84 @@
             </TableRow>
           </TableHeader>
           <TableBody>
-            <template v-if="taskLogs.length">
+            <!-- 加载状态 -->
+            <template v-if="loading">
+              <TableRow>
+                <TableCell :colspan="10" class="py-16 text-center text-gray-400 dark:text-white/40">
+                  <div class="flex items-center justify-center gap-2">
+                    <svg
+                      class="animate-spin h-5 w-5 text-blue-600"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    加载中...
+                  </div>
+                </TableCell>
+              </TableRow>
+            </template>
+
+            <!-- 数据列表 -->
+            <template v-else-if="taskLogs.length">
               <TableRow v-for="(log, index) in taskLogs" :key="log.id">
                 <TableCell class="whitespace-nowrap">{{
                   (page - 1) * pageSize + index + 1
                 }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ formatTime(log.created_at) }}</TableCell>
-                <TableCell class="whitespace-nowrap">{{ log.created_by || '--' }}</TableCell>
+                <TableCell class="whitespace-nowrap">{{ log.owner_name || '--' }}</TableCell>
                 <TableCell class="whitespace-nowrap">
                   <span
                     :class="[
                       'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
                       log.type === 'post'
                         ? 'bg-blue-50 text-blue-600 ring-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/30'
-                        : 'bg-purple-50 text-purple-600 ring-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:ring-purple-500/30',
+                        : log.type === 'reply_comment'
+                          ? 'bg-purple-50 text-purple-600 ring-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:ring-purple-500/30'
+                          : 'bg-orange-50 text-orange-600 ring-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:ring-orange-500/30',
                     ]"
                   >
-                    {{ log.type === 'post' ? '发帖' : '回复评论' }}
+                    {{
+                      log.type === 'post'
+                        ? '发帖'
+                        : log.type === 'reply_comment'
+                          ? '回复评论'
+                          : log.type === 'reply_mention'
+                            ? '回复消息'
+                            : log.type
+                    }}
                   </span>
                 </TableCell>
-                <TableCell class="whitespace-nowrap">{{ log.platform || '--' }}</TableCell>
-                <TableCell class="max-w-[300px] truncate" :title="log.text_content">{{
-                  log.text_content || '--'
+                <TableCell class="whitespace-nowrap">{{ log.provider || '--' }}</TableCell>
+                <TableCell class="max-w-[300px] truncate" :title="log.text">{{
+                  log.text || '--'
                 }}</TableCell>
                 <TableCell class="whitespace-nowrap text-center">{{
-                  log.bot_count || 0
+                  log.account_count || 0
                 }}</TableCell>
                 <TableCell class="whitespace-nowrap text-center">
                   <span
                     class="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-medium"
                   >
                     {{ log.success_count || 0 }}
+                  </span>
+                </TableCell>
+                <TableCell class="whitespace-nowrap text-center">
+                  <span class="inline-flex items-center text-red-600 dark:text-red-400 font-medium">
+                    {{ log.fail_count || 0 }}
                   </span>
                 </TableCell>
                 <TableCell
@@ -184,38 +232,37 @@
 
             <template v-else>
               <TableRow>
-                <TableCell :colspan="9" class="py-16 text-center text-gray-400 dark:text-white/40"
-                  >暂无数据,请输入正确任务序号或内容!</TableCell
+                <TableCell :colspan="10" class="py-16 text-center text-gray-400 dark:text-white/40"
+                  >暂无数据</TableCell
                 >
               </TableRow>
             </template>
           </TableBody>
         </Table>
 
-        <div class="mt-4 flex justify-center" v-if="total > 0">
-          <div class="flex items-center gap-4">
-            <Button
-              size="sm"
-              variant="outline"
-              @click="page > 1 ? page-- : null"
-              :disabled="page === 1"
-              class="px-4 py-2"
-            >
-              上一页
-            </Button>
-            <span class="text-sm text-gray-600 dark:text-gray-400"
-              >共{{ total }}条 第{{ page }}页</span
-            >
-            <Button
-              size="sm"
-              variant="outline"
-              @click="page < Math.ceil(total / pageSize) ? page++ : null"
-              :disabled="page >= Math.ceil(total / pageSize)"
-              class="px-4 py-2"
-            >
-              下一页
-            </Button>
-          </div>
+        <div class="mt-4">
+          <Pagination
+            v-model:page="page"
+            :total="total"
+            :items-per-page="pageSize"
+            :sibling-count="1"
+            show-edges
+          >
+            <PaginationContent v-slot="{ items }">
+              <PaginationPrevious />
+              <template v-for="(item, index) in items" :key="index">
+                <PaginationItem
+                  v-if="item.type === 'page'"
+                  :value="item.value"
+                  :is-active="item.value === page"
+                >
+                  {{ item.value }}
+                </PaginationItem>
+                <PaginationEllipsis v-else :index="index" />
+              </template>
+              <PaginationNext />
+            </PaginationContent>
+          </Pagination>
         </div>
       </ComponentCard>
 
@@ -241,7 +288,7 @@
                     >创建用户</label
                   >
                   <p class="text-sm text-gray-900 dark:text-white">
-                    {{ selectedLog?.created_by || '--' }}
+                    {{ selectedLog?.owner_name || '--' }}
                   </p>
                 </div>
               </div>
@@ -252,7 +299,15 @@
                     >类型</label
                   >
                   <p class="text-sm text-gray-900 dark:text-white">
-                    {{ selectedLog?.type === 'post' ? '发帖' : '回复评论' }}
+                    {{
+                      selectedLog?.type === 'post'
+                        ? '发帖'
+                        : selectedLog?.type === 'reply_comment'
+                          ? '回复评论'
+                          : selectedLog?.type === 'reply_mention'
+                            ? '回复消息'
+                            : selectedLog?.type
+                    }}
                   </p>
                 </div>
                 <div>
@@ -260,7 +315,7 @@
                     >平台</label
                   >
                   <p class="text-sm text-gray-900 dark:text-white">
-                    {{ selectedLog?.platform || '--' }}
+                    {{ selectedLog?.provider || '--' }}
                   </p>
                 </div>
               </div>
@@ -272,7 +327,7 @@
                 <p
                   class="text-sm text-gray-900 dark:text-white p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                 >
-                  {{ selectedLog?.text_content || '--' }}
+                  {{ selectedLog?.text || '--' }}
                 </p>
               </div>
 
@@ -282,7 +337,7 @@
                     >机器人数量</label
                   >
                   <p class="text-sm text-gray-900 dark:text-white">
-                    {{ selectedLog?.bot_count || 0 }}
+                    {{ selectedLog?.account_count || 0 }}
                   </p>
                 </div>
                 <div>
@@ -394,6 +449,7 @@ import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { RangeCalendar } from '@/components/ui/range-calendar'
 import TaskDetail from './components/TaskDetail.vue'
 import { deleteTaskLog } from '@/api/task'
+import { tasklog, promptconfigs } from '@/api/home'
 import { toast } from 'vue-sonner'
 import {
   Table,
@@ -403,32 +459,39 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
 
 // 类型定义
 interface TaskLog {
   id: number
   created_at: string
-  created_by: string
-  type: 'post' | 'reply_comment'
-  platform: string
-  language?: string
-  text_content: string
-  mentions?: string
-  topic?: string
-  prompt?: string
-  remarks?: string
-  bot_count: number
+  owner_name: string
+  type: 'post' | 'reply_comment' | 'reply_mention'
+  provider: string
+  text: string
+  prompt_name: string
+  prompt_id: number
+  owner_id: number
+  account_count: number
   success_count: number
+  fail_count: number
 }
 
 interface FilterParams {
-  page: number
-  page_size: number
+  currentPage: number
+  pageSize: number
   search?: string
   type?: string
-  platform?: string
-  prompt?: string
+  provider?: string
+  prompt__id?: number
   start_date?: string
   end_date?: string
 }
@@ -438,6 +501,11 @@ const taskLogs = ref<TaskLog[]>([])
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
+const totalPages = ref(0)
+const loading = ref(false)
+
+// 提示词配置数据
+const promptConfigs = ref<Array<{ id: number; name: string }>>([])
 
 // 筛选条件
 const searchText = ref('')
@@ -449,7 +517,9 @@ const isFiltering = ref(false)
 // 日期范围选择器相关
 const showDatePicker = ref(false)
 const dateRange = ref({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   start: undefined as any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   end: undefined as any,
 })
 
@@ -470,6 +540,7 @@ const isDateRangeValid = computed(() => {
 })
 
 // 格式化日期
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formatDate = (date: any) => {
   if (!date) return ''
   const year = date.year
@@ -600,12 +671,30 @@ const confirmDateRange = () => {
   handleFilterChange()
 }
 
+// 获取提示词配置
+const fetchPromptConfigs = async () => {
+  try {
+    const res = await promptconfigs({})
+    console.log(res.results, 'res')
+    if (res && res.results) {
+      promptConfigs.value = res.results
+    } else {
+      promptConfigs.value = []
+    }
+    console.log(promptConfigs.value, 'promptConfigs.value')
+  } catch (error) {
+    console.error('获取提示词配置失败:', error)
+    promptConfigs.value = []
+  }
+}
+
 // 获取任务日志列表
 const fetchTaskLogs = async () => {
+  loading.value = true
   try {
     const params: FilterParams = {
-      page: page.value,
-      page_size: pageSize.value,
+      currentPage: page.value,
+      pageSize: pageSize.value,
     }
 
     // 添加筛选条件
@@ -616,203 +705,42 @@ const fetchTaskLogs = async () => {
       params.type = typeFilter.value
     }
     if (platformFilter.value) {
-      params.platform = platformFilter.value
+      params.provider = platformFilter.value
     }
     if (promptFilter.value) {
-      params.prompt = promptFilter.value
+      params.prompt__id = parseInt(promptFilter.value)
     }
     if (dateRange.value.start && dateRange.value.end) {
       params.start_date = formatDate(dateRange.value.start)
       params.end_date = formatDate(dateRange.value.end)
     }
 
-    // 临时使用假数据进行展示
-    const mockData: TaskLog[] = [
-      {
-        id: 1,
-        created_at: new Date().toISOString(),
-        created_by: 'user1',
-        type: 'post',
-        platform: 'X',
-        language: '日语',
-        text_content: 'xx牛奶好喝，营养丰富，推荐给大家！',
-        mentions: 'user1,user2,user3',
-        topic: '牛奶',
-        prompt: '饮品/营养',
-        remarks: '备注',
-        bot_count: 5,
-        success_count: 4,
-      },
-      {
-        id: 2,
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-        created_by: '测试用户',
-        type: 'reply_comment',
-        platform: 'Facebook',
-        language: '中文',
-        text_content:
-          '感谢您的关注！关于情感关系咨询，建议您从沟通开始，真诚的对话是维系感情的基础。',
-        mentions: 'user4,user5',
-        topic: '情感咨询',
-        prompt: '情感/关系咨询',
-        remarks: '回复评论',
-        bot_count: 3,
-        success_count: 3,
-      },
-      {
-        id: 3,
-        created_at: new Date(Date.now() - 7200000).toISOString(),
-        created_by: '运营团队',
-        type: 'post',
-        platform: 'Instagram',
-        text_content:
-          '今天的营销活动进展顺利，已成功发布到多个平台。通过AI/科技工具分享，我们帮助更多用户提升工作效率。',
-        bot_count: 8,
-        success_count: 7,
-      },
-      {
-        id: 4,
-        created_at: new Date(Date.now() - 10800000).toISOString(),
-        created_by: '市场部',
-        type: 'post',
-        platform: 'X',
-        text_content:
-          '加密货币市场分析：BTC突破关键阻力位，建议关注后续走势。投资有风险，请谨慎操作。',
-        bot_count: 12,
-        success_count: 11,
-      },
-      {
-        id: 5,
-        created_at: new Date(Date.now() - 14400000).toISOString(),
-        created_by: '客服团队',
-        type: 'reply_comment',
-        platform: 'Instagram',
-        text_content:
-          '您好！关于您提到的情感问题，我们建议您先冷静思考，然后与对方进行真诚的沟通。',
-        bot_count: 6,
-        success_count: 6,
-      },
-      {
-        id: 6,
-        created_at: new Date(Date.now() - 18000000).toISOString(),
-        created_by: '内容创作者',
-        type: 'post',
-        platform: 'Facebook',
-        text_content:
-          '分享最新的AI工具使用技巧，这些工具能够显著提升您的工作效率。包括自动化写作、数据分析等实用功能。',
-        bot_count: 15,
-        success_count: 14,
-      },
-      {
-        id: 7,
-        created_at: new Date(Date.now() - 21600000).toISOString(),
-        created_by: '设计师',
-        type: 'post',
-        platform: 'Instagram',
-        text_content:
-          '视觉美学设计理念分享：简约而不简单，每个元素都有其存在的意义。今天分享一些设计心得。',
-        bot_count: 9,
-        success_count: 8,
-      },
-      {
-        id: 8,
-        created_at: new Date(Date.now() - 25200000).toISOString(),
-        created_by: '财务顾问',
-        type: 'reply_comment',
-        platform: 'X',
-        text_content:
-          '关于加密货币投资建议：建议您先了解基础知识，制定合理的投资策略，切勿盲目跟风。',
-        bot_count: 4,
-        success_count: 4,
-      },
-      {
-        id: 9,
-        created_at: new Date(Date.now() - 28800000).toISOString(),
-        created_by: '产品经理',
-        type: 'post',
-        platform: 'Facebook',
-        text_content:
-          '新产品发布预告：我们将推出全新的AI助手功能，帮助用户更好地管理社交媒体内容。敬请期待！',
-        bot_count: 20,
-        success_count: 19,
-      },
-      {
-        id: 10,
-        created_at: new Date(Date.now() - 32400000).toISOString(),
-        created_by: '用户支持',
-        type: 'reply_comment',
-        platform: 'Instagram',
-        text_content:
-          '感谢您的反馈！我们会持续改进产品功能，为用户提供更好的体验。如有其他问题，请随时联系。',
-        bot_count: 7,
-        success_count: 7,
-      },
-    ]
+    // 调用真实API接口
+    const res = await tasklog(params)
 
-    // 根据筛选条件过滤数据
-    let filteredData = mockData
-
-    if (searchText.value) {
-      filteredData = filteredData.filter(
-        (item) =>
-          item.text_content.toLowerCase().includes(searchText.value.toLowerCase()) ||
-          item.created_by.toLowerCase().includes(searchText.value.toLowerCase()),
-      )
+    // 处理API响应数据
+    if (res && res.results) {
+      taskLogs.value = res.results || []
+      total.value = res.pagination?.total || 0
+      totalPages.value = res.pagination?.total_pages || 0
+    } else {
+      taskLogs.value = []
+      total.value = 0
+      totalPages.value = 0
     }
-
-    if (typeFilter.value) {
-      filteredData = filteredData.filter((item) => item.type === typeFilter.value)
-    }
-
-    if (platformFilter.value) {
-      filteredData = filteredData.filter((item) =>
-        item.platform.toLowerCase().includes(platformFilter.value.toLowerCase()),
-      )
-    }
-
-    if (promptFilter.value) {
-      const promptKeywords: Record<string, string> = {
-        visual_aesthetics: '视觉',
-        relationship_consulting: '情感',
-        cryptocurrency: '加密货币',
-        ai_tools: 'AI',
-      }
-      const keyword = promptKeywords[promptFilter.value]
-      if (keyword) {
-        filteredData = filteredData.filter((item) => item.text_content.includes(keyword))
-      }
-    }
-
-    // 处理日期范围筛选
-    if (dateRange.value.start && dateRange.value.end) {
-      const startDateObj = dateRange.value.start as any
-      const endDateObj = dateRange.value.end as any
-      const startDate = new Date(startDateObj.year, startDateObj.month - 1, startDateObj.day)
-      const endDate = new Date(endDateObj.year, endDateObj.month - 1, endDateObj.day)
-      endDate.setHours(23, 59, 59, 999) // 设置为当天的结束时间
-
-      filteredData = filteredData.filter((item) => {
-        const itemDate = new Date(item.created_at)
-        return itemDate >= startDate && itemDate <= endDate
-      })
-    }
-
-    taskLogs.value = filteredData.slice(
-      (page.value - 1) * pageSize.value,
-      page.value * pageSize.value,
-    )
-    total.value = filteredData.length
-
-    // 正式环境请使用以下代码
-    // const res = await getTaskLogs(params)
-    // taskLogs.value = res.results || res.data || []
-    // total.value = res.count || res.total || 0
   } catch (error: unknown) {
     console.error('获取任务日志失败:', error)
     const errorMessage = error instanceof Error ? error.message : '获取任务日志时发生错误'
     toast.error('获取列表失败', {
       description: errorMessage,
     })
+
+    // 发生错误时清空数据
+    taskLogs.value = []
+    total.value = 0
+    totalPages.value = 0
+  } finally {
+    loading.value = false
   }
 }
 
@@ -822,6 +750,7 @@ watch(page, () => {
 })
 
 onMounted(() => {
+  fetchPromptConfigs()
   fetchTaskLogs()
 })
 </script>
