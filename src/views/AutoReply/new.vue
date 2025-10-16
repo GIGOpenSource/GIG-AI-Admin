@@ -978,6 +978,7 @@ async function submitAdd() {
       // 根据选择状态传递不同的数据格式
       ...submitDataForAPI,
       // 如果选择了模板，传递模板ID；如果是用户输入，传递文本内容
+        exec_prom_text:form.value.prompt_id ?true:false,
       prompt: form.value.prompt_id ? form.value.prompt_id : (form.value.prompt || ''),
       twitter_reply_to_tweet_id: '',
       facebook_page_id: '',
