@@ -71,7 +71,7 @@
       </div>
 
       <div
-      v-if="role == 'admin'"
+        v-if="role == 'admin'"
         :class="[isApplicationMenuOpen ? 'flex' : 'hidden']"
         class="items-center justify-between w-full gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none"
       >
@@ -79,10 +79,11 @@
           <button
             @click="openUserModal"
             class="!text-blue-600 px-4 py-2 text-sm font-medium rounded-lg"
-            style="border: 1px solid #2563eb; background-color: white !important;"
+            style="border: 1px solid #2563eb; background-color: white !important"
             onmouseover="this.style.backgroundColor='white'"
             onmouseout="this.style.backgroundColor='white'"
-            title="切换企业数据">
+            title="切换企业数据"
+          >
             <span v-if="selectedUser">{{ selectedUser.username }}</span>
             <span v-else>切换企业数据</span>
           </button>
@@ -94,13 +95,28 @@
     </div>
 
     <!-- 切换企业数据弹窗 -->
-    <div v-if="showUserModal" class="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50" @click="closeUserModal">
-      <div class="bg-white rounded-lg shadow-xl w-[600px] max-w-[90vw] mx-4 border border-gray-200" @click.stop>
+    <div
+      v-if="showUserModal"
+      class="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50"
+      @click="closeUserModal"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl w-[600px] max-w-[90vw] mx-4 border border-gray-200"
+        @click.stop
+      >
         <!-- 标题栏和关闭按钮 -->
         <div class="relative px-6 py-4 border-b border-gray-200">
-          <button @click="closeUserModal" class="absolute left-6 top-4 text-gray-400 hover:text-gray-600 transition-colors">
+          <button
+            @click="closeUserModal"
+            class="absolute left-6 top-4 text-gray-400 hover:text-gray-600 transition-colors"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
             </svg>
           </button>
           <h3 class="text-lg font-semibold text-gray-900 text-center">切换企业数据</h3>
@@ -108,7 +124,9 @@
 
         <div class="p-6">
           <div v-if="isLoadingUsers" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <div
+              class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"
+            ></div>
             <p class="mt-2 text-sm text-gray-500">加载中...</p>
           </div>
 
@@ -118,39 +136,51 @@
 
           <div v-else class="grid grid-cols-4 gap-3">
             <!-- admin选项 -->
-            <label class="flex items-center p-3  border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                   :class="{ 'border-blue-500 bg-blue-50': !tempSelectedUser }">
-              <input type="radio"
-                     :checked="!tempSelectedUser"
-                     @change="selectNoUser"
-                     class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+            <label
+              class="flex items-center p-3 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              :class="{ 'border-blue-500 bg-blue-50': !tempSelectedUser }"
+            >
+              <input
+                type="radio"
+                :checked="!tempSelectedUser"
+                @change="selectNoUser"
+                class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              />
               <span class="ml-3 text-sm font-medium text-gray-900">admin</span>
             </label>
 
             <!-- 用户列表 -->
-            <label v-for="user in users.slice(0, 7)"
-                   :key="user.id"
-                   class="flex items-center p-3  border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                   :class="{ 'border-blue-500 bg-blue-50': tempSelectedUser?.id === user.id }">
-              <input type="radio"
-                     :value="user.id"
-                     :checked="tempSelectedUser?.id === user.id"
-                     @change="selectUser(user)"
-                     class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+            <label
+              v-for="user in users.slice(0, 7)"
+              :key="user.id"
+              class="flex items-center p-3 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              :class="{ 'border-blue-500 bg-blue-50': tempSelectedUser?.id === user.id }"
+            >
+              <input
+                type="radio"
+                :value="user.id"
+                :checked="tempSelectedUser?.id === user.id"
+                @change="selectUser(user)"
+                class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              />
               <span class="ml-3 text-sm font-medium text-gray-900">{{ user.username }}</span>
             </label>
 
             <!-- 如果用户超过8个，显示更多用户 -->
             <template v-if="users.length > 7">
-              <div v-for="user in users.slice(7)"
-                   :key="user.id"
-                   class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                   :class="{ 'border-blue-500 bg-blue-50': tempSelectedUser?.id === user.id }">
-                <input type="radio"
-                       :value="user.id"
-                       :checked="tempSelectedUser?.id === user.id"
-                       @change="selectUser(user)"
-                       class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+              <div
+                v-for="user in users.slice(7)"
+                :key="user.id"
+                class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                :class="{ 'border-blue-500 bg-blue-50': tempSelectedUser?.id === user.id }"
+              >
+                <input
+                  type="radio"
+                  :value="user.id"
+                  :checked="tempSelectedUser?.id === user.id"
+                  @change="selectUser(user)"
+                  class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
                 <span class="ml-3 text-sm font-medium text-gray-900">{{ user.username }}</span>
               </div>
             </template>
@@ -159,12 +189,16 @@
 
         <!-- 底部按钮 -->
         <div class="px-6 py-4 border-t border-gray-200 flex justify-center gap-4">
-          <button @click="confirmSelection"
-                  class="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+          <button
+            @click="confirmSelection"
+            class="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          >
             确认
           </button>
-          <button @click="closeUserModal"
-                  class="px-6 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+          <button
+            @click="closeUserModal"
+            class="px-6 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          >
             取消
           </button>
         </div>
@@ -248,7 +282,7 @@ const fetchUsers = async () => {
     // 设置当前选中的用户（从localStorage获取）
     const currentUserId = localStorage.getItem('selectedUserId')
     if (currentUserId) {
-      const foundUser = users.value.find(user => user.id.toString() === currentUserId)
+      const foundUser = users.value.find((user) => user.id.toString() === currentUserId)
       selectedUser.value = foundUser || null
     }
     // 注意：不自动选择第一个用户，让用户主动选择
