@@ -9,3 +9,9 @@ export const updatePool = (id: string, data: any) => put(`/social/pool-accounts/
 export const deletePool = (id: string) => del(`/social/pool-accounts/${id}/`)
 
 export const getPooldetails = (id: string) => get(`/social/pool-accounts/${id}/`)
+
+// 获取账号分配数据
+export const getAllocation = (data: any) => get('/social/oauth/pool/allocation', { params: data })
+
+// 转移账号
+export const transferAccounts = (data: any) => post('/social/oauth/pool/allocation', data)

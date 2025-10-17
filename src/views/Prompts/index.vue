@@ -40,10 +40,13 @@
               class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
             >
               <option value="">请选择企业</option>
-              <option value="企业A">企业A</option>
-              <option value="企业B">企业B</option>
-              <option value="企业C">企业C</option>
-              <option value="其他">其他</option>
+              <option
+                v-for="enterprise in enterpriseList"
+                :key="enterprise.id || enterprise.username"
+                :value="enterprise.id"
+              >
+                {{ enterprise.username || enterprise.name || enterprise.company }}
+              </option>
             </select>
             <Button size="sm" @click="handleRemarkSearchClick" :disabled="isRemarkSearching">
               <span v-if="isRemarkSearching" class="mr-2">搜索中...</span>
@@ -119,7 +122,7 @@
                   </TableCell>
                   <TableCell class="w-[150px]">
                     <div class="max-w-[130px] truncate" :title="acc.company">
-                      {{ acc.company || '-' }}
+                      {{ currentUserRole }}
                     </div>
                   </TableCell>
                   <TableCell class="w-[150px]">
@@ -271,21 +274,6 @@
                   placeholder="请输入API Key"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                 />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                  >所属企业</label
-                >
-                <select
-                  v-model="form.company"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                >
-                  <option value="">请选择所属企业</option>
-                  <option value="企业A">企业A</option>
-                  <option value="企业B">企业B</option>
-                  <option value="企业C">企业C</option>
-                  <option value="其他">其他</option>
-                </select>
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
@@ -460,13 +448,9 @@
               >
                 <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">导入说明</h4>
                 <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-                  <li>
-                    • Excel文件必须包含以下列：平台、名称、API
-                    Key、所属企业、是否封禁、状态、限制次数
-                  </li>
+                  <li>• Excel文件必须包含以下列：平台、名称、API Key、是否封禁、状态、限制次数</li>
                   <li>• 可选列：API Secret、Access Token、Access Token Secret、备注</li>
                   <li>• 平台：twitter、facebook</li>
-                  <li>• 所属企业：企业A、企业B、企业C、其他</li>
                   <li>• 状态：激活、未激活</li>
                   <li>• 限制次数：不限次、每天最多两次</li>
                   <li>• 是否封禁：正常、已封禁</li>
@@ -493,7 +477,6 @@
                         <th class="px-2 py-1 text-left">平台</th>
                         <th class="px-2 py-1 text-left">名称</th>
                         <th class="px-2 py-1 text-left">API Key</th>
-                        <th class="px-2 py-1 text-left">所属企业</th>
                         <th class="px-2 py-1 text-left">状态</th>
                         <th class="px-2 py-1 text-left">备注</th>
                       </tr>
@@ -507,12 +490,11 @@
                         <td class="px-2 py-1">{{ item.provider }}</td>
                         <td class="px-2 py-1">{{ item.name }}</td>
                         <td class="px-2 py-1 truncate max-w-[100px]">{{ item.api_key }}</td>
-                        <td class="px-2 py-1">{{ item.company || '-' }}</td>
                         <td class="px-2 py-1">{{ item.status }}</td>
                         <td class="px-2 py-1 truncate max-w-[80px]">{{ item.remark || '-' }}</td>
                       </tr>
                       <tr v-if="previewData.length > 5">
-                        <td colspan="6" class="px-2 py-1 text-center text-gray-500">
+                        <td colspan="5" class="px-2 py-1 text-center text-gray-500">
                           ... 还有 {{ previewData.length - 5 }} 条数据
                         </td>
                       </tr>
@@ -562,6 +544,7 @@
       <!-- 批量管理弹窗 -->
       <BatchManagementDialog
         :isOpen="showBatchManagement"
+        :enterpriseList="enterpriseList"
         @close="closeBatchManagement"
         @showError="showTransferErrorDialog"
       />
@@ -582,6 +565,7 @@ import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import BatchManagementDialog from './components/BatchManagementDialog.vue'
 import TransferErrorDialog from './components/TransferErrorDialog.vue'
 import { getPool, createPool, getPooldetails, updatePool, deletePool } from '@/api/pool.ts'
+import { getUser } from '@/api/index.ts'
 import { toast } from 'vue-sonner'
 import * as XLSX from 'xlsx'
 import {
@@ -642,6 +626,39 @@ const isAdmin = computed(() => {
   }
   return false
 })
+
+// 获取当前用户角色
+const currentUserRole = computed(() => {
+  // 安全地获取 localStorage 中的 role 值
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const profile = JSON.parse(window.localStorage.getItem('profile') || '{}')
+    return profile.username || '-'
+  }
+  return '-'
+})
+
+// 企业列表
+const enterpriseList = ref([])
+const isLoadingEnterprises = ref(false)
+
+// 获取企业列表
+const fetchEnterpriseList = async () => {
+  try {
+    isLoadingEnterprises.value = true
+    const response = await getUser({ page: 1 })
+    // 假设API返回的用户数据中包含企业信息
+    // 根据实际API响应结构调整
+    enterpriseList.value = response.results || response.data || []
+  } catch (error) {
+    console.error('获取企业列表失败:', error)
+    toast.error('获取企业列表失败', {
+      description: error.response?.data?.message || error.message || '获取企业列表时发生错误',
+    })
+  } finally {
+    isLoadingEnterprises.value = false
+  }
+}
+
 async function onEdit(account) {
   try {
     // 获取详细信息
@@ -656,7 +673,6 @@ async function onEdit(account) {
       provider: detailData.provider || '',
       name: detailData.name || '',
       api_key: detailData.api_key || '',
-      company: detailData.company || '',
       api_secret: detailData.api_secret || '',
       access_token: detailData.access_token || '',
       access_token_secret: detailData.access_token_secret || '',
@@ -759,7 +775,6 @@ function openAdd() {
     provider: '',
     name: '',
     api_key: '',
-    company: '',
     api_secret: '',
     access_token: '',
     access_token_secret: '',
@@ -779,7 +794,6 @@ function closeAdd() {
     provider: '',
     name: '',
     api_key: '',
-    company: '',
     api_secret: '',
     access_token: '',
     access_token_secret: '',
@@ -866,7 +880,6 @@ async function submitAdd() {
       provider: form.value.provider,
       name: form.value.name.trim(),
       api_key: form.value.api_key.trim(),
-      company: form.value.company || '',
       api_secret: form.value.api_secret.trim() || '',
       access_token: form.value.access_token.trim() || '',
       access_token_secret: form.value.access_token_secret.trim() || '',
@@ -969,7 +982,7 @@ const fetchlist = async () => {
 
     // 添加企业筛选参数
     if (companyFilter.value) {
-      params.company = companyFilter.value
+      params.owner_id = companyFilter.value
     }
 
     // 添加备注搜索参数
@@ -1075,15 +1088,7 @@ function parseExcelFile(file) {
 
       // 获取表头
       const headers = jsonData[0]
-      const requiredHeaders = [
-        '平台',
-        '名称',
-        'API Key',
-        '所属企业',
-        '是否封禁',
-        '状态',
-        '限制次数',
-      ]
+      const requiredHeaders = ['平台', '名称', 'API Key', '是否封禁', '状态', '限制次数']
 
       // 检查必需的列是否存在
       const missingHeaders = requiredHeaders.filter((header) => !headers.includes(header))
@@ -1137,7 +1142,6 @@ function parseExcelFile(file) {
           provider: row[headers.indexOf('平台')] || '',
           name: row[headers.indexOf('名称')] || '',
           api_key: row[headers.indexOf('API Key')] || '',
-          company: row[headers.indexOf('所属企业')] || '',
           api_secret: row[headers.indexOf('API Secret')] || '',
           access_token: row[headers.indexOf('Access Token')] || '',
           access_token_secret: row[headers.indexOf('Access Token Secret')] || '',
@@ -1256,6 +1260,7 @@ async function handleImport() {
 
 onMounted(() => {
   fetchlist()
+  fetchEnterpriseList()
 })
 </script>
 
