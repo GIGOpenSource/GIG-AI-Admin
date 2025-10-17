@@ -87,12 +87,12 @@
             <select v-model="statusFilter" @change="handleFilterChange"
               class="w-48 h-10 px-4 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
               <option value="">请选择状态</option>
-              <option value="active">待执行</option>
-              <option value="inactive">执行中</option>
-              <option value="inactive">已完成</option>
-              <option value="inactive">已暂停</option>
-              <option value="inactive">部分成功</option>
-              <option value="inactive">部分失败</option>
+              <!-- <option value="">待执行</option> -->
+              <option value="execting">执行中</option>
+               <option value="paused">已暂停</option>
+              <option value="completed">已完成</option>
+              <option value="part_success">部分成功</option>
+              <option value="part_failure">部分失败</option>
             </select>
 
             <Button size="sm" @click="handleFilterChange" :disabled="isFiltering">
@@ -116,15 +116,15 @@
               <TableHead class="whitespace-nowrap w-[80px]">类型</TableHead>
               <TableHead class="whitespace-nowrap w-[80px]">平台</TableHead>
               <TableHead class="whitespace-nowrap w-[80px]">语言</TableHead>
-              <TableHead class="whitespace-nowrap w-[120px]">文本内容</TableHead>
               <TableHead class="whitespace-nowrap w-[100px]">提及</TableHead>
               <TableHead class="whitespace-nowrap w-[100px]">话题</TableHead>
               <!-- <TableHead class="whitespace-nowrap">载荷</TableHead> -->
               <TableHead class="whitespace-nowrap w-[120px]">机器人</TableHead>
-              <TableHead class="whitespace-nowrap w-[100px]">提示词</TableHead>
+              <TableHead class="whitespace-nowrap w-[100px]">推文信息</TableHead>
+                <TableHead class="whitespace-nowrap w-[120px]">推文后缀</TableHead>
               <TableHead class="whitespace-nowrap w-[100px]">备注</TableHead>
               <!-- <TableHead class="whitespace-nowrap">Twitter回复ID</TableHead>
-              <TableHead class="whitespace-nowrap">Facebook页面ID</TableHead>
+              <TableHead class="whitespace-nowrap">Facebook页面ID</TableHead>32
               <TableHead class="whitespace-nowrap">Facebook评论ID</TableHead> -->
               <TableHead class="whitespace-nowrap w-[120px]">创建时间</TableHead>
               <TableHead class="whitespace-nowrap w-[120px]">发布时间</TableHead>
@@ -139,7 +139,6 @@
                 <TableCell class="whitespace-nowrap w-[80px]">{{ task.type == 'post' ? '发帖' : '回复评论' }}</TableCell>
                 <TableCell class="whitespace-nowrap w-[80px]">{{ task.provider || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap w-[80px]">{{ langer[task.language] || '-' }}</TableCell>
-                <TableCell class="w-[120px] max-w-[100px] truncate" :title="task.text">{{ task.text || '-' }}</TableCell>
                 <TableCell class="w-[100px] max-w-[80px] truncate" :title="task.mentions">{{ task.mentions || '-' }}</TableCell>
                 <TableCell class="w-[100px] max-w-[80px] truncate" :title="task.tags">{{task.tags.map(item => item).join(',') ||
                   '-'}}</TableCell>
@@ -148,6 +147,7 @@
                   :title="task.selected_accounts.map(item => item.name).join(',')">{{task.selected_accounts.map(item =>
                     item.name).join(',') || '-'}}</TableCell>
                 <TableCell class="w-[100px] max-w-[80px] truncate" :title="task.prompt">{{ task.prompt_name || '-' }}</TableCell>
+                 <TableCell class="w-[120px] max-w-[100px] truncate" :title="task.last_text">{{ task.last_text  || '-' }}</TableCell>
                 <TableCell class="whitespace-nowrap w-[100px]">
                   <div class="max-w-[80px] truncate" :title="task.task_remark">{{ task.task_remark || '无' }}</div>
                 </TableCell>
@@ -156,14 +156,15 @@
                 <TableCell class="whitespace-nowrap">{{ task.facebook_comment_id || '-' }}</TableCell> -->
                 <TableCell class="whitespace-nowrap w-[120px]">{{ formatTime(task.created_at) }}</TableCell>
                 <TableCell class="whitespace-nowrap w-[120px]">{{ formatTime(task.created_at) }}</TableCell>
-                <TableCell class="whitespace-nowrap w-[80px] text-blue-600">状态</TableCell>
+                <TableCell class="whitespace-nowrap w-[80px]">{{ exec_status[task.exec_status] || '--'}}</TableCell>
                 <TableCell class="text-right whitespace-nowrap sticky right-0 bg-background z-10 w-[160px]">
                   <div class="flex items-center justify-end gap-2">
                     <!-- <Button size="sm" variant="outline" @click="btn(task)">
                       执行任务
                     </Button> -->
-                    <Button size="sm" variant="outline" @click="btn(task)">
-                      暂停任务
+                    <Button size="sm" variant="outline" @click="edtionBtn(task)" v-if="task.exec_status == 'execting' || task.exec_status == 'paused'">
+
+                      {{ task.exec_status == 'execting' ?'暂停任务':'继续任务' }}
                     </Button>
                     <Button size="sm" variant="outline" @click="onEdit(task)"
                       class="!text-blue-600 hover:!text-blue-700">编辑任务</Button>
@@ -253,7 +254,7 @@
                 <div class="relative prompt-dropdown">
                   <!-- 输入框 -->
                   <input
-                    v-model="form.prompt"
+                    v-model="form.prompt_display"
                     type="text"
                     placeholder="请输入推文信息或选择模板"
                     @focus="showPromptDropdown = true"
@@ -354,22 +355,30 @@
                 <input v-model="form.facebook_comment_id" type="text" placeholder="请输入Facebook评论ID"
                   class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
               </div>
-              <div>
+              <!-- 执行频率：只有定时任务才显示 -->
+              <div v-if="task_timing_type === 'timing'">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">执行频率<span
                     class="text-error-500">*</span></label>
                 <div class="grid grid-cols-2 gap-4">
-                  <select v-model="form.frequency_type" @change="handleFrequencyTypeChange"
+                  <select v-model="form.exec_type" @change="handleExecTypeChange"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                     <option value="">请选择频率类型</option>
-                    <option value="hourly">每小时</option>
+                    <option value="fixed">指定日期</option>
                     <option value="daily">每天</option>
                     <option value="weekly">每周</option>
                     <option value="monthly">每月</option>
                   </select>
-                  <select v-model="form.frequency_value"
+                  <!-- 指定日期时显示日期时间选择器 -->
+                  <input v-if="form.exec_type === 'fixed'"
+                    v-model="form.exec_datetime"
+                    type="datetime-local"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+
+                  <!-- 其他类型显示选择器 -->
+                  <select v-else v-model="form.exec_nums"
                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                    :disabled="!form.frequency_type">
-                    <option value="">请选择频率值</option>
+                    :disabled="!form.exec_type">
+                    <option value="">请选择执行次数</option>
                     <option v-for="option in frequencyValueOptions" :key="option.value" :value="option.value">
                       {{ option.label }}
                     </option>
@@ -381,13 +390,13 @@
                     class="text-error-500"></span></label>
                 <div class="relative">
                   <textarea
-                    v-model="form.text"
+                    v-model="form.last_text"
                     placeholder="请输入推文后缀，最多300字"
                     maxlength="300"
                     rows="4"
                     class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"></textarea>
                   <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                    {{ form.text?.length || 0 }}/300
+                    {{ form.last_text?.length || 0 }}/300
                   </div>
                 </div>
               </div>
@@ -433,7 +442,7 @@ import Button from '@/components/ui/Button.vue'
 import Modal from '@/components/ui/Modal.vue'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import RobotSelector from '@/components/ui/RobotSelector.vue'
-import { getAutoPlay, getAutoPlayDetail, createAutoPlay, updateAutoPlay, deleteAutoPlay, runNow } from '@/api/autoPlay.ts'
+import { getAutoPlay, getAutoPlayDetail, createAutoPlay, updateAutoPlay, deleteAutoPlay, runNow ,editNow} from '@/api/autoPlay.ts'
 import { getUser } from '@/api/index.ts'
 import { getTags } from '@/api/tag.ts'
 import { getPromptsConfigs } from '@/api/prompts.ts'
@@ -443,6 +452,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { formatTime } from '@/lib/utils'
 
+const exec_status = {
+    execting:'执行中',
+    paused:'已暂停',
+    waiting:'等待中',
+    completed:'已完成',
+    part_success:' 部分成功',
+    part_failure:'部分失败'
+}
 const currentPageTitle = ref('任务列表')
 const tasks = ref([])
 const page = ref(1)
@@ -500,19 +517,24 @@ const form = ref({
   type: '',
   provider: '',
   language: '',
-  text: '',
-  mentions: '',
+    text: '',
+    last_text: '',
+    mentions: '',
   tags: '',
   payload: '',
   selected_accounts: [],
   prompt: '', // 推文信息文本内容
   prompt_id: '', // 选择的推文信息ID
+  prompt_display: '', // 输入框显示内容
+  task_timing_type: '', // 任务类型：once即时任务，timing定时任务
+  exec_type: '', // 执行类型：fixed指定日期，daily每天，weekly每周，monthly每月
+  exec_datetime: '', // 指定执行时间
+  exec_nums: '', // 执行次数
   twitter_reply_to_tweet_id: '',
   facebook_page_id: '',
   facebook_comment_id: '',
   task_orig_id: '',
   task_remark: '',
-  frequency_type: '',
   frequency_value: ''
 })
 
@@ -557,10 +579,11 @@ const handleProviderChange = () => {
 
 // 处理推文信息输入
 const handlePromptInput = () => {
-  const searchText = form.value.prompt.toLowerCase()
+  const searchText = form.value.prompt_display.toLowerCase()
 
   // 当用户手动输入时，清空prompt_id，表示这是用户自定义内容
   form.value.prompt_id = ''
+  form.value.prompt = form.value.prompt_display
 
   if (searchText) {
     // 根据输入内容过滤推文模板
@@ -586,7 +609,8 @@ const handlePromptBlur = () => {
 // 选择推文模板
 const selectPrompt = (prompt) => {
   // 选择模板时覆盖原来输入的内容，显示模板名称
-  form.value.prompt = prompt.name
+  form.value.prompt_display = prompt.name
+  form.value.prompt = prompt.id
   form.value.prompt_id = prompt.id
   showPromptDropdown.value = false
 }
@@ -594,43 +618,63 @@ const selectPrompt = (prompt) => {
 // 执行频率值选项
 const frequencyValueOptions = ref([])
 
-// 处理频率类型变化
-const handleFrequencyTypeChange = () => {
-  form.value.frequency_value = ''
+// 处理执行类型变化
+const handleExecTypeChange = () => {
+  // 清空相关字段
+  form.value.exec_datetime = ''
+  form.value.exec_nums = ''
 
-  switch (form.value.frequency_type) {
-    case 'hourly':
-      frequencyValueOptions.value = Array.from({ length: 24 }, (_, i) => ({
-        value: `${i}`,
-        label: `${i}时`
-      }))
+  switch (form.value.exec_type) {
+    case 'fixed':
+      // 指定日期不需要选项，使用日期时间选择器
+      frequencyValueOptions.value = []
       break
     case 'daily':
-      frequencyValueOptions.value = Array.from({ length: 24 }, (_, i) => ({
-        value: `${i}:00`,
-        label: `${i}:00`
-      }))
-      break
     case 'weekly':
-      frequencyValueOptions.value = [
-        { value: '1', label: '星期一' },
-        { value: '2', label: '星期二' },
-        { value: '3', label: '星期三' },
-        { value: '4', label: '星期四' },
-        { value: '5', label: '星期五' },
-        { value: '6', label: '星期六' },
-        { value: '7', label: '星期日' }
-      ]
-      break
     case 'monthly':
-      frequencyValueOptions.value = Array.from({ length: 31 }, (_, i) => ({
+      // 其他类型显示1-5次执行次数选项
+      frequencyValueOptions.value = Array.from({ length: 5 }, (_, i) => ({
         value: `${i + 1}`,
-        label: `${i + 1}号`
+        label: `${i + 1}次`
       }))
       break
     default:
       frequencyValueOptions.value = []
   }
+}
+
+
+// 格式化日期时间为 YYYY-MM-DD HH:mm:ss 格式
+const formatDateTime = (dateTimeString) => {
+  if (!dateTimeString) return ''
+
+  // 将 HTML datetime-local 格式 (YYYY-MM-DDTHH:mm) 转换为 YYYY-MM-DD HH:mm:ss 格式
+  const date = new Date(dateTimeString)
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+// 将 YYYY-MM-DD HH:mm:ss 格式转换为 HTML datetime-local 格式
+const parseDateTime = (dateTimeString) => {
+  if (!dateTimeString) return ''
+
+  // 将 YYYY-MM-DD HH:mm:ss 格式转换为 HTML datetime-local 格式
+  const date = new Date(dateTimeString)
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 // 立即执行任务 - 使用btn接口
 async function btn(item) {
@@ -656,6 +700,32 @@ async function btn(item) {
     executingTaskId.value = null
   }
 }
+
+//暂停，编辑任务
+async function edtionBtn(item) {
+  // 防止重复执行
+  if (executeLoading.value) return
+
+  executeLoading.value = true
+  executingTaskId.value = item.id
+
+  try {
+    const res = await editNow(String(item.id), {method:item.exec_status == 'execting' ?'pause' :'resume'})
+    console.log(res,'resres')
+    fetchlist()
+  } catch (error) {
+    console.error('Failed to run task:', error)
+    // toast.error('执行失败', {
+    //   description: error.response?.data?.message || error.message || '执行任务时发生错误'
+    // })
+  } finally {
+    executeLoading.value = false
+    executingTaskId.value = null
+  }
+}
+
+
+
 // 编辑功能
 async function onEdit(task) {
   try {
@@ -722,20 +792,28 @@ async function onEdit(task) {
       provider: detailData.provider || '',
       language: detailData.language || '',
       text: detailData.text || '',
+      last_text: detailData.last_text || '',
       mentions: detailData.mentions || '',
       tags: tagsValue,
       payload: detailData.payload || '',
       selected_accounts: selectedAccountsValue,
-      exec_prom_text:detailData.prompt_id ?true:false,
-      prompt: detailData.prompt_id ? (promptList.value.find(p => p.id === detailData.prompt_id)?.name || detailData.prompt || '') : (detailData.prompt || ''),
-      prompt_id: detailData.prompt_id || '',
+        exec_prom_text: detailData.prompt_id ? true : false,
+        prompt: detailData.prompt_id ? detailData.prompt_id : null,
+        prompt_text: detailData.prompt_id ? null : (detailData.prompt || ''),
+        // 设置输入框显示内容：如果有prompt_id显示模板名称，否则显示用户输入内容
+        prompt_display: detailData.prompt_id ? (promptList.value.find(p => p.id === detailData.prompt_id)?.name || detailData.prompt || '') : (detailData.prompt || ''),
+        task_timing_type: detailData.task_timing_type || task_timing_type.value,
+        exec_type: detailData.exec_type || '',
+        exec_datetime: parseDateTime(detailData.exec_datetime) || '',
+        exec_nums: detailData.exec_nums || '',
+
       twitter_reply_to_tweet_id: detailData.twitter_reply_to_tweet_id || '',
       facebook_page_id: detailData.facebook_page_id || '',
       facebook_comment_id: detailData.facebook_comment_id || '',
       task_remark: detailData.task_remark || '',
-      frequency_type: detailData.frequency_type || '',
       frequency_value: detailData.frequency_value || ''
     }
+    task_timing_type.value = detailData.task_timing_type
 
     // 重置选择状态，确保编辑模式下状态正确
     selectionStatus.value = {
@@ -747,12 +825,22 @@ async function onEdit(task) {
     console.log('=== 编辑模式表单数据填充完成 ===')
     console.log('form.value.selected_accounts:', form.value.selected_accounts)
     console.log('selectionStatus.value:', selectionStatus.value)
+    console.log('原始 exec_datetime:', detailData.exec_datetime)
+    console.log('转换后 exec_datetime:', form.value.exec_datetime)
+    console.log('form.value.exec_type:', form.value.exec_type)
 
-    // 如果有频率类型，则加载对应的频率值选项
-    if (detailData.frequency_type) {
-      form.value.frequency_type = detailData.frequency_type
-      handleFrequencyTypeChange()
-      form.value.frequency_value = detailData.frequency_value || ''
+    // 如果有执行类型，则加载对应的频率值选项
+    if (detailData.exec_type) {
+      form.value.exec_type = detailData.exec_type
+      // 先保存 exec_datetime 的值，因为 handleExecTypeChange 会清空它
+      const savedExecDatetime = form.value.exec_datetime
+      const savedExecNums = form.value.exec_nums
+
+      handleExecTypeChange()
+
+      // 恢复保存的值
+      form.value.exec_datetime = savedExecDatetime
+      form.value.exec_nums = savedExecNums || detailData.exec_nums || ''
     }
 
     // 打开弹窗
@@ -824,13 +912,16 @@ function openAdd() {
     selected_accounts: [],
     prompt: '',
     prompt_id: '',
+    prompt_display: '',
+    task_timing_type: task_timing_type.value,
+    exec_type: '',
+    exec_datetime: '',
+    exec_nums: '',
     twitter_reply_to_tweet_id: '',
     facebook_page_id: '',
     facebook_comment_id: '',
     task_remark: '',
-    frequency_type: '',
-    frequency_value: '',
-    task_timing_type:task_timing_type.value
+    frequency_value: ''
   }
   frequencyValueOptions.value = []
   showAdd.value = true
@@ -851,11 +942,15 @@ function closeAdd() {
     selected_accounts: [],
     prompt: '',
     prompt_id: '',
+    prompt_display: '',
+    task_timing_type: '',
+    exec_type: '',
+    exec_datetime: '',
+    exec_nums: '',
     twitter_reply_to_tweet_id: '',
     facebook_page_id: '',
     facebook_comment_id: '',
     task_remark: '',
-    frequency_type: '',
     frequency_value: ''
   }
   frequencyValueOptions.value = []
@@ -863,6 +958,7 @@ function closeAdd() {
 
 // 提交表单
 async function submitAdd() {
+
   // 防止重复提交
   if (isLoading.value) return
 
@@ -907,18 +1003,33 @@ async function submitAdd() {
     return
   }
 
-  if (!form.value.frequency_type || form.value.frequency_type.trim() === '') {
-    toast.error('请选择执行频率类型', {
-      description: '执行频率类型不能为空'
-    })
-    return
-  }
+  // 只有定时任务才验证执行频率
+  if (task_timing_type.value === 'timing') {
+    if (!form.value.exec_type || form.value.exec_type.trim() === '') {
+      toast.error('请选择执行频率类型', {
+        description: '执行频率类型不能为空'
+      })
+      return
+    }
 
-  if (!form.value.frequency_value || form.value.frequency_value.trim() === '') {
-    toast.error('请选择执行频率值', {
-      description: '执行频率值不能为空'
-    })
-    return
+    // 根据执行类型验证不同字段
+    if (form.value.exec_type === 'fixed') {
+      // 指定日期需要验证日期时间
+      if (!form.value.exec_datetime || form.value.exec_datetime.trim() === '') {
+        toast.error('请选择指定日期', {
+          description: '指定日期不能为空'
+        })
+        return
+      }
+    } else {
+      // 其他类型需要验证执行次数
+      if (!form.value.exec_nums || form.value.exec_nums.trim() === '') {
+        toast.error('请选择执行次数', {
+          description: '执行次数不能为空'
+        })
+        return
+      }
+    }
   }
 
   isLoading.value = true
@@ -972,6 +1083,7 @@ async function submitAdd() {
       provider: form.value.provider,
       language: form.value.language,
       text: form.value.text.trim(),
+      last_text: form.value.last_text,
       mentions: form.value.mentions || '',
       tags: tagsArray,
       payload: '',
@@ -979,13 +1091,23 @@ async function submitAdd() {
       ...submitDataForAPI,
       // 如果选择了模板，传递模板ID；如果是用户输入，传递文本内容
         exec_prom_text:form.value.prompt_id ?true:false,
-      prompt: form.value.prompt_id ? form.value.prompt_id : (form.value.prompt || ''),
+      prompt: form.value.prompt_id ? form.value.prompt_id : null,
+      prompt_text:form.value.prompt_id ? null : (form.value.prompt || ''),
       twitter_reply_to_tweet_id: '',
       facebook_page_id: '',
       facebook_comment_id: '',
       task_remark: form.value.task_remark.trim() || '',
-      frequency_type: form.value.frequency_type,
-      frequency_value: form.value.frequency_value
+      // 只有定时任务才包含执行频率字段
+      ...(task_timing_type.value === 'timing' ? {
+        exec_type: form.value.exec_type,
+        // 根据执行类型传递不同的字段
+        ...(form.value.exec_type === 'fixed' ? {
+          exec_datetime: formatDateTime(form.value.exec_datetime)
+        } : {
+          exec_nums: form.value.exec_nums
+        })
+      } : {}),
+      task_timing_type: task_timing_type.value
     }
 
     // 调试：打印提交数据
@@ -1094,7 +1216,7 @@ const toggleTaskMenu = () => {
 // 创建即时任务
 const createInstantTask = (type) => {
   showTaskMenu.value = false
-  activeTaskType.value = 'instant'
+  // activeTaskType.value = 'instant'
    task_timing_type.value = type
   openAdd()
 }
@@ -1102,7 +1224,9 @@ const createInstantTask = (type) => {
 // 创建定时任务
 const createScheduledTask = () => {
   showTaskMenu.value = false
-  activeTaskType.value = 'scheduled'
+  // activeTaskType.value = 'scheduled'
+  task_timing_type.value = 'timing'
+  // 不设置默认的exec_type，让用户选择
   openAdd()
 }
 

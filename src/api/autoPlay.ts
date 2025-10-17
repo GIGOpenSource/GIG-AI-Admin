@@ -14,3 +14,8 @@ export const deleteAutoPlay = (id:string) => del(`/tasks/simple/${id}/`)
 //立即执行
 export const runNow = (id:string,data: any) => post(`/tasks/simple/${id}/run/`, data)
 
+//暂停或继续
+export const editNow = (id:string,data: any) => post(`/tasks/simple/${id}/schedule/`, data)
+
+
+
