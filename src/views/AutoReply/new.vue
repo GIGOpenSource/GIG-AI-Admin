@@ -10,9 +10,7 @@
             onmouseout="this.style.backgroundColor='white'">切换企业数据</Button> -->
             <div></div>
           <div class="relative">
-            <Button size="sm" class="!text-blue-600 flex items-center gap-2"
-              style="border: 1px solid #2563eb; background-color: white !important;"
-              onmouseover="this.style.backgroundColor='white'" onmouseout="this.style.backgroundColor='white'"
+            <Button size="sm" class="!text-blue-600 flex items-center gap-2 border border-blue-600 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-gray-700"
               @click="toggleTaskMenu">
               <img src="/src/assets/images/add.png" alt="">
               新建任务
@@ -22,15 +20,15 @@
             </Button>
 
             <!-- 下拉菜单 -->
-            <div v-if="showTaskMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+            <div v-if="showTaskMenu" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
               <div class="py-1">
-                <button @click="createInstantTask('once')" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                <button @click="createInstantTask('once')" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   创建即时任务
                 </button>
-                <button @click="createScheduledTask('timing')" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                <button @click="createScheduledTask('timing')" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="9" stroke-width="2"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
@@ -131,7 +129,7 @@
               <TableHead class="whitespace-nowrap w-[120px]">创建时间</TableHead>
               <TableHead class="whitespace-nowrap w-[120px]">发布时间</TableHead>
               <TableHead class="whitespace-nowrap w-[80px]">状态</TableHead>
-              <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white z-10 w-[160px]">操作</TableHead>
+              <TableHead class="whitespace-nowrap text-right sticky right-0 bg-background z-10 w-[160px]">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -159,7 +157,7 @@
                 <TableCell class="whitespace-nowrap w-[120px]">{{ formatTime(task.created_at) }}</TableCell>
                 <TableCell class="whitespace-nowrap w-[120px]">{{ formatTime(task.created_at) }}</TableCell>
                 <TableCell class="whitespace-nowrap w-[80px] text-blue-600">状态</TableCell>
-                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white z-10 w-[160px]">
+                <TableCell class="text-right whitespace-nowrap sticky right-0 bg-background z-10 w-[160px]">
                   <div class="flex items-center justify-end gap-2">
                     <!-- <Button size="sm" variant="outline" @click="btn(task)">
                       执行任务
@@ -247,6 +245,115 @@
                 </div>
               </div>
 
+
+                    <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">推文信息<span
+                    class="text-error-500">*</span></label>
+                <!-- 自定义下拉输入框 -->
+                <div class="relative prompt-dropdown">
+                  <!-- 输入框 -->
+                  <input
+                    v-model="form.prompt"
+                    type="text"
+                    placeholder="请输入推文信息或选择模板"
+                    @focus="showPromptDropdown = true"
+                    @blur="handlePromptBlur"
+                    @input="handlePromptInput"
+                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+
+                  <!-- 下拉箭头 -->
+                  <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': showPromptDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+
+                  <!-- 下拉选项 -->
+                  <div v-if="showPromptDropdown && filteredPrompts.length > 0"
+                    class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    <div v-for="prompt in filteredPrompts" :key="prompt.id"
+                      @mousedown="selectPrompt(prompt)"
+                      class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
+                      <div>
+                        <div class="font-medium text-gray-900 dark:text-gray-100">{{ prompt.name }}</div>
+                        <!-- <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ prompt.content || prompt.name }}</div> -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">文本内容<span
+                    class="text-error-500">*</span></label>
+                <div class="relative">
+                  <textarea
+                    v-model="form.text"
+                    placeholder="请输入文本内容，最多300字"
+                    maxlength="300"
+                    rows="4"
+                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"></textarea>
+                  <div class="absolute bottom-2 right-2 text-xs text-gray-400">
+                    {{ form.text?.length || 0 }}/300
+                  </div>
+                </div>
+              </div> -->
+
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提及账号<span
+                    class="text-error-500">*</span></label>
+                <input v-model="form.mentions" type="text" placeholder="多个提及账号使用逗号隔开 如：user1，user2"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">话题<span
+                    class="text-error-500">*</span></label>
+                <input v-model="form.tags" type="text" placeholder="多个话题使用逗号隔开 如：品牌牛奶，优质水管"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+
+              <!-- <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">载荷</label>
+                <textarea v-model="form.payload" placeholder="请输入载荷数据（JSON格式）"
+                  class="dark:bg-dark-900 h-20 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"></textarea>
+              </div> -->
+
+
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">机器人<span
+                    class="text-error-500">*</span></label>
+                <RobotSelector
+                  v-model="form.selected_accounts"
+                  :fetchApi="fetchBotListPaginated"
+                  labelKey="name"
+                  valueKey="id"
+                  @selectionChange="handleSelectionChange"
+                  :key="`robot-selector-${isEditMode ? editingId : 'new'}-${robotSelectorKey}`" />
+              </div>
+
+
+
+              <!-- Twitter回复ID：仅当 type=reply_comment 且 provider=twitter 时显示 -->
+              <div v-if="form.type === 'reply_comment' && form.provider === 'twitter'">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Twitter回复ID</label>
+                <input v-model="form.twitter_reply_to_tweet_id" type="text" placeholder="请输入Twitter回复ID"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+
+              <!-- Facebook页面ID：仅当 type=post 且 provider=facebook 时显示 -->
+              <div v-if="form.type === 'post' && form.provider === 'facebook'">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Facebook页面ID</label>
+                <input v-model="form.facebook_page_id" type="text" placeholder="请输入Facebook页面ID"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
+
+              <!-- Facebook评论ID：仅当 type=reply_comment 且 provider=facebook 时显示 -->
+              <div v-if="form.type === 'reply_comment' && form.provider === 'facebook'">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Facebook评论ID</label>
+                <input v-model="form.facebook_comment_id" type="text" placeholder="请输入Facebook评论ID"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+              </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">执行频率<span
                     class="text-error-500">*</span></label>
@@ -269,14 +376,13 @@
                   </select>
                 </div>
               </div>
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">文本内容<span
-                    class="text-error-500">*</span></label>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">推文后缀<span
+                    class="text-error-500"></span></label>
                 <div class="relative">
                   <textarea
                     v-model="form.text"
-                    placeholder="请输入文本内容，最多300字"
+                    placeholder="请输入推文后缀，最多300字"
                     maxlength="300"
                     rows="4"
                     class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"></textarea>
@@ -285,69 +391,6 @@
                   </div>
                 </div>
               </div>
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提及账号<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.mentions" type="text" placeholder="多个提及账号使用逗号隔开 如：user1，user2"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">话题<span
-                    class="text-error-500">*</span></label>
-                <input v-model="form.tags" type="text" placeholder="多个话题使用逗号隔开 如：品牌牛奶，优质水管"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <!-- <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">载荷</label>
-                <textarea v-model="form.payload" placeholder="请输入载荷数据（JSON格式）"
-                  class="dark:bg-dark-900 h-20 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 resize-none"></textarea>
-              </div> -->
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">机器人<span
-                    class="text-error-500">*</span></label>
-                <RobotSelector
-                  v-model="form.selected_accounts"
-                  :fetchApi="fetchBotListPaginated"
-                  labelKey="name"
-                  valueKey="id"
-                  @selectionChange="handleSelectionChange"
-                  :key="`robot-selector-${isEditMode ? editingId : 'new'}-${robotSelectorKey}`" />
-              </div>
-
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">提示词</label>
-                <select v-model="form.prompt"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                  <option value="">请选择提示词</option>
-                  <option v-for="prompt in promptList" :key="prompt.id" :value="prompt.id">{{ prompt.name }}</option>
-                </select>
-              </div>
-
-              <!-- Twitter回复ID：仅当 type=reply_comment 且 provider=twitter 时显示 -->
-              <div v-if="form.type === 'reply_comment' && form.provider === 'twitter'">
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Twitter回复ID</label>
-                <input v-model="form.twitter_reply_to_tweet_id" type="text" placeholder="请输入Twitter回复ID"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <!-- Facebook页面ID：仅当 type=post 且 provider=facebook 时显示 -->
-              <div v-if="form.type === 'post' && form.provider === 'facebook'">
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Facebook页面ID</label>
-                <input v-model="form.facebook_page_id" type="text" placeholder="请输入Facebook页面ID"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
-              <!-- Facebook评论ID：仅当 type=reply_comment 且 provider=facebook 时显示 -->
-              <div v-if="form.type === 'reply_comment' && form.provider === 'facebook'">
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Facebook评论ID</label>
-                <input v-model="form.facebook_comment_id" type="text" placeholder="请输入Facebook评论ID"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-              </div>
-
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">备注</label>
                 <textarea v-model="form.task_remark" placeholder="请输入备注信息（可选）" rows="3"
@@ -430,6 +473,10 @@ const langer = {
 const promptList = ref([])
 const botList = ref([])
 
+// 推文信息下拉框状态
+const showPromptDropdown = ref(false)
+const filteredPrompts = ref([])
+
 // 已移除多选下拉框状态，改用分页穿梭框
 
 // 弹窗相关状态
@@ -458,7 +505,8 @@ const form = ref({
   tags: '',
   payload: '',
   selected_accounts: [],
-  prompt: '',
+  prompt: '', // 推文信息文本内容
+  prompt_id: '', // 选择的推文信息ID
   twitter_reply_to_tweet_id: '',
   facebook_page_id: '',
   facebook_comment_id: '',
@@ -505,6 +553,42 @@ const handleProviderChange = () => {
   // 强制重新渲染 RobotSelector 组件，让它重新获取对应平台的机器人数据
   // 通过改变 key 值来强制重新渲染
   robotSelectorKey.value = Date.now()
+}
+
+// 处理推文信息输入
+const handlePromptInput = () => {
+  const searchText = form.value.prompt.toLowerCase()
+
+  // 当用户手动输入时，清空prompt_id，表示这是用户自定义内容
+  form.value.prompt_id = ''
+
+  if (searchText) {
+    // 根据输入内容过滤推文模板
+    filteredPrompts.value = promptList.value.filter(prompt =>
+      prompt.name.toLowerCase().includes(searchText) ||
+      (prompt.content && prompt.content.toLowerCase().includes(searchText))
+    )
+  } else {
+    // 如果没有输入内容，显示所有模板
+    filteredPrompts.value = promptList.value
+  }
+  showPromptDropdown.value = true
+}
+
+// 处理推文信息失焦
+const handlePromptBlur = () => {
+  // 延迟关闭下拉框，让点击事件先执行
+  setTimeout(() => {
+    showPromptDropdown.value = false
+  }, 200)
+}
+
+// 选择推文模板
+const selectPrompt = (prompt) => {
+  // 选择模板时覆盖原来输入的内容，显示模板名称
+  form.value.prompt = prompt.name
+  form.value.prompt_id = prompt.id
+  showPromptDropdown.value = false
 }
 
 // 执行频率值选项
@@ -642,7 +726,9 @@ async function onEdit(task) {
       tags: tagsValue,
       payload: detailData.payload || '',
       selected_accounts: selectedAccountsValue,
-      prompt: detailData.prompt || '',
+      exec_prom_text:detailData.prompt_id ?true:false,
+      prompt: detailData.prompt_id ? (promptList.value.find(p => p.id === detailData.prompt_id)?.name || detailData.prompt || '') : (detailData.prompt || ''),
+      prompt_id: detailData.prompt_id || '',
       twitter_reply_to_tweet_id: detailData.twitter_reply_to_tweet_id || '',
       facebook_page_id: detailData.facebook_page_id || '',
       facebook_comment_id: detailData.facebook_comment_id || '',
@@ -737,6 +823,7 @@ function openAdd() {
     payload: '',
     selected_accounts: [],
     prompt: '',
+    prompt_id: '',
     twitter_reply_to_tweet_id: '',
     facebook_page_id: '',
     facebook_comment_id: '',
@@ -763,6 +850,7 @@ function closeAdd() {
     payload: '',
     selected_accounts: [],
     prompt: '',
+    prompt_id: '',
     twitter_reply_to_tweet_id: '',
     facebook_page_id: '',
     facebook_comment_id: '',
@@ -800,12 +888,12 @@ async function submitAdd() {
     return
   }
 
-  if (!form.value.text || form.value.text.trim() === '') {
-    toast.error('请填写文本内容', {
-      description: '文本内容不能为空'
-    })
-    return
-  }
+  // if (!form.value.text || form.value.text.trim() === '') {
+  //   toast.error('请填写文本内容', {
+  //     description: '文本内容不能为空'
+  //   })
+  //   return
+  // }
 
   // 检查是否选择了机器人（包括全选状态）
   const hasSelectedRobots = selectionStatus.value.selected === true ||
@@ -889,7 +977,9 @@ async function submitAdd() {
       payload: '',
       // 根据选择状态传递不同的数据格式
       ...submitDataForAPI,
-      prompt: form.value.prompt || '',
+      // 如果选择了模板，传递模板ID；如果是用户输入，传递文本内容
+        exec_prom_text:form.value.prompt_id ?true:false,
+      prompt: form.value.prompt_id ? form.value.prompt_id : (form.value.prompt || ''),
       twitter_reply_to_tweet_id: '',
       facebook_page_id: '',
       facebook_comment_id: '',
@@ -989,6 +1079,8 @@ const fetchPromptList = async () => {
   try {
     const res = await getPromptsConfigs({ page: 1 })
     promptList.value = res.results || res.data || []
+    // 初始化过滤列表
+    filteredPrompts.value = promptList.value
   } catch (error) {
     console.error('获取提示词列表失败:', error)
   }
@@ -1080,6 +1172,9 @@ watch([page,activeTaskType],() => {
 const handleClickOutside = (event) => {
   if (showTaskMenu.value && !event.target.closest('.relative')) {
     showTaskMenu.value = false
+  }
+  if (showPromptDropdown.value && !event.target.closest('.prompt-dropdown')) {
+    showPromptDropdown.value = false
   }
 }
 

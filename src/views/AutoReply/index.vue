@@ -28,7 +28,7 @@
               <TableHead class="whitespace-nowrap" style="min-width: 100px;">AI账号</TableHead>
               <TableHead  class="whitespace-nowrap">执行结果</TableHead>
               <TableHead class="whitespace-nowrap">创建时间</TableHead>
-              <TableHead class="whitespace-nowrap text-right sticky right-0 bg-white dark:bg-gray-900 z-10 w-40">操作</TableHead>
+              <TableHead class="whitespace-nowrap text-right sticky right-0 bg-background z-10 w-40">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -62,7 +62,7 @@
                 <TableCell class="whitespace-nowrap" style="min-width: 100px;">{{ getAiAccountsText(item.ai_accounts) }}</TableCell>
                 <TableCell class="whitespace-nowrap">{{ item.completed ?'已完成':'未完成' }}</TableCell>
               <TableCell class="whitespace-nowrap">{{ formatTime(item.created_at) }}</TableCell>
-              <TableCell class="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-900 z-10 w-40">
+              <TableCell class="text-right whitespace-nowrap sticky right-0 bg-background z-10 w-40">
                 <div class="flex items-center justify-end gap-2">
                   <Button size="sm" variant="outline" v-if="!item.completed" @click="btn(item)" :disabled="runNowLoading">立即执行</Button>
                   <!-- <Button size="sm" variant="outline" @click="viewResult(item)" :disabled="resultLoading">查看执行结果</Button> -->
