@@ -159,10 +159,10 @@
                 <TableCell class="whitespace-nowrap w-[80px]">{{ exec_status[task.exec_status] || '--'}}</TableCell>
                 <TableCell class="text-right whitespace-nowrap sticky right-0 bg-background z-10 w-[160px]">
                   <div class="flex items-center justify-end gap-2">
-                    <!-- <Button size="sm" variant="outline" @click="btn(task)">
+                    <Button size="sm" variant="outline" @click="btn(task)" v-if="activeTaskType === 'once'">
                       执行任务
-                    </Button> -->
-                    <Button size="sm" variant="outline" @click="edtionBtn(task)" v-if="task.exec_status == 'execting' || task.exec_status == 'paused'">
+                    </Button>
+                    <Button size="sm" variant="outline" @click="edtionBtn(task)" v-if="activeTaskType === 'timing' && task.exec_status == 'execting' || task.exec_status == 'paused'">
 
                       {{ task.exec_status == 'execting' ?'暂停任务':'继续任务' }}
                     </Button>
