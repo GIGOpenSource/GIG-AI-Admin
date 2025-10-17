@@ -14,12 +14,12 @@
             <TableHead class="whitespace-nowrap">创建用户</TableHead>
             <TableHead class="whitespace-nowrap">类型</TableHead>
             <TableHead class="whitespace-nowrap">平台</TableHead>
-            <TableHead class="whitespace-nowrap">提示词名称</TableHead>
+            <TableHead class="whitespace-nowrap">语言</TableHead>
             <TableHead class="whitespace-nowrap">文本内容</TableHead>
-            <TableHead class="whitespace-nowrap">账号数量</TableHead>
-            <TableHead class="whitespace-nowrap">成功数量</TableHead>
-            <TableHead class="whitespace-nowrap">失败数量</TableHead>
-            <TableHead class="whitespace-nowrap">提示词ID</TableHead>
+            <TableHead class="whitespace-nowrap">提及</TableHead>
+            <TableHead class="whitespace-nowrap">话题</TableHead>
+            <TableHead class="whitespace-nowrap">提示词</TableHead>
+            <TableHead class="whitespace-nowrap">备注</TableHead>
             <TableHead class="whitespace-nowrap">创建时间</TableHead>
           </TableRow>
         </TableHeader>
@@ -50,24 +50,25 @@
               </span>
             </TableCell>
             <TableCell class="whitespace-nowrap">{{ taskDetail.provider || '--' }}</TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.prompt_name || '--' }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{ taskDetail.language || '--' }}</TableCell>
             <TableCell class="max-w-[200px] truncate" :title="taskDetail.text">
               {{ taskDetail.text || '--' }}
             </TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.account_count || 0 }}</TableCell>
-            <TableCell class="whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-medium"
-              >
-                {{ taskDetail.success_count || 0 }}
-              </span>
+            <TableCell class="max-w-[150px] truncate" :title="taskDetail.mentions">
+              {{ taskDetail.mentions || '--' }}
             </TableCell>
-            <TableCell class="whitespace-nowrap text-center">
-              <span class="inline-flex items-center text-red-600 dark:text-red-400 font-medium">
-                {{ taskDetail.fail_count || 0 }}
-              </span>
+            <TableCell
+              class="max-w-[150px] truncate"
+              :title="Array.isArray(taskDetail.tags) ? taskDetail.tags.join(', ') : taskDetail.tags"
+            >
+              {{
+                Array.isArray(taskDetail.tags)
+                  ? taskDetail.tags.join(', ')
+                  : taskDetail.tags || '--'
+              }}
             </TableCell>
-            <TableCell class="whitespace-nowrap">{{ taskDetail.prompt_id || '--' }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{ taskDetail.prompt_name || '--' }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{ taskDetail.task_remark || '--' }}</TableCell>
             <TableCell class="whitespace-nowrap">{{ formatTime(taskDetail.created_at) }}</TableCell>
           </TableRow>
           <TableRow v-else>
@@ -329,13 +330,17 @@ interface TaskDetail {
   owner_name: string
   type: 'post' | 'reply_comment' | 'reply_mention'
   provider: string
-  text: string
+  text: string | null
   prompt_name: string
   prompt_id: number
   owner_id: number
   account_count: number
   success_count: number
   fail_count: number
+  language?: string
+  task_remark?: string
+  tags?: string[] | string
+  mentions?: string
 }
 
 interface ExecutionLog {
@@ -457,7 +462,7 @@ const confirmRetry = async () => {
       simpletask_id: props.taskDetail?.id,
     }
 
-    let res = await postlogdetail(params)
+    const res = await postlogdetail(params)
 
     if (res.message) {
       toast.success(res.message)

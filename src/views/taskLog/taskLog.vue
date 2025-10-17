@@ -123,6 +123,7 @@
               <TableHead class="whitespace-nowrap">类型</TableHead>
               <TableHead class="whitespace-nowrap">平台</TableHead>
               <TableHead class="whitespace-nowrap">文本内容</TableHead>
+              <TableHead class="whitespace-nowrap">提示词</TableHead>
               <TableHead class="whitespace-nowrap">机器人数量</TableHead>
               <TableHead class="whitespace-nowrap">发送成功数</TableHead>
               <TableHead class="whitespace-nowrap">发送失败数</TableHead>
@@ -136,7 +137,7 @@
             <!-- 加载状态 -->
             <template v-if="loading">
               <TableRow>
-                <TableCell :colspan="10" class="py-16 text-center text-gray-400 dark:text-white/40">
+                <TableCell :colspan="11" class="py-16 text-center text-gray-400 dark:text-white/40">
                   <div class="flex items-center justify-center gap-2">
                     <svg
                       class="animate-spin h-5 w-5 text-blue-600"
@@ -198,17 +199,18 @@
                 <TableCell class="max-w-[300px] truncate" :title="log.text">{{
                   log.text || '--'
                 }}</TableCell>
-                <TableCell class="whitespace-nowrap text-center">{{
-                  log.account_count || 0
+                <TableCell class="max-w-[200px] truncate" :title="log.prompt_name">{{
+                  log.prompt_name || '--'
                 }}</TableCell>
-                <TableCell class="whitespace-nowrap text-center">
+                <TableCell class="whitespace-nowrap">{{ log.account_count || 0 }}</TableCell>
+                <TableCell class="whitespace-nowrap">
                   <span
                     class="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-medium"
                   >
                     {{ log.success_count || 0 }}
                   </span>
                 </TableCell>
-                <TableCell class="whitespace-nowrap text-center">
+                <TableCell class="whitespace-nowrap">
                   <span class="inline-flex items-center text-red-600 dark:text-red-400 font-medium">
                     {{ log.fail_count || 0 }}
                   </span>
