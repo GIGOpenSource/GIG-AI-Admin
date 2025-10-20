@@ -83,7 +83,7 @@
             onmouseout="this.style.backgroundColor='white'"
             title="切换企业数据">
             <span v-if="selectedUser">{{ selectedUser.username }}</span>
-            <span v-else>切换企业数据</span>
+            <span v-else>重置</span>
           </button>
           <ThemeToggler />
           <!-- <NotificationMenu /> -->
@@ -116,14 +116,14 @@
           </div>
 
           <div v-else class="grid grid-cols-4 gap-3">
-            <!-- admin选项 -->
+            <!-- 重置选项 -->
             <label class="flex items-center p-3  border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
                    :class="{ 'border-blue-500 bg-blue-50': !tempSelectedUser }">
               <input type="radio"
                      :checked="!tempSelectedUser"
                      @change="selectNoUser"
                      class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-              <span class="ml-3 text-sm font-medium text-gray-900">admin</span>
+              <span class="ml-3 text-sm font-medium text-gray-900">重置</span>
             </label>
 
             <!-- 用户列表 -->
@@ -283,8 +283,8 @@ const confirmSelection = () => {
   showUserModal.value = false
   tempSelectedUser.value = null
 
-  // 这里可以触发切换企业数据的事件
-  // 例如：emit('userChanged', selectedUser.value) 或者调用相关的API
+  // 触发企业数据切换事件，通知所有页面刷新数据
+  window.dispatchEvent(new CustomEvent('enterprise-data-changed'))
 }
 
 onMounted(() => {

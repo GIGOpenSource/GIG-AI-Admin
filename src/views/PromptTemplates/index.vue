@@ -258,6 +258,7 @@ async function fetchTemplates() {
   try {
     const res = await getPromptsConfigs({
       page: page.value,
+      enterprise_id:localStorage.getItem('selectedUserId') || ''
     })
 
     // 处理分页数据
@@ -541,6 +542,17 @@ watch(page, async (newPage) => {
       description: error.response?.data?.message || error.message || '分页加载时发生错误'
     })
   }
+})
+
+// 监听企业数据切换，自动刷新数据
+const selectedUserId = ref(localStorage.getItem('selectedUserId') || '')
+watch(selectedUserId, () => {
+  fetchTemplates()
+})
+
+// 监听企业数据切换事件
+window.addEventListener('enterprise-data-changed', () => {
+  selectedUserId.value = localStorage.getItem('selectedUserId') || ''
 })
 
 onMounted(async () => {

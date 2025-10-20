@@ -392,7 +392,7 @@ const selectMetric = (metricKey: string) => {
 
 
 const fetchData = async () => {
-  getdata({}).then(res => {
+  getdata({enterprise_id:localStorage.getItem('selectedUserId') || ''}).then(res => {
     apiData.value = res
 
     // 初始化默认选中X平台的比率
@@ -448,6 +448,17 @@ watch(
 
 onMounted(() => {
   fetchData()
+})
+
+// 监听企业数据切换，自动刷新数据
+const selectedUserId = ref(localStorage.getItem('selectedUserId') || '')
+watch(selectedUserId, () => {
+  fetchData()
+})
+
+// 监听企业数据切换事件
+window.addEventListener('enterprise-data-changed', () => {
+  selectedUserId.value = localStorage.getItem('selectedUserId') || ''
 })
 </script>
 

@@ -969,6 +969,7 @@ const fetchlist = async () => {
     // 构建查询参数
     const params = {
       page: page.value,
+      enterprise_id:localStorage.getItem('selectedUserId') || ''
     }
 
     // 添加状态筛选参数
@@ -1006,6 +1007,17 @@ const fetchlist = async () => {
 watch(page, (newPage) => {
   console.log('Page changed to:', newPage)
   fetchlist()
+})
+
+// 监听企业数据切换，自动刷新数据
+const selectedUserId = ref(localStorage.getItem('selectedUserId') || '')
+watch(selectedUserId, () => {
+  fetchlist()
+})
+
+// 监听企业数据切换事件
+window.addEventListener('enterprise-data-changed', () => {
+  selectedUserId.value = localStorage.getItem('selectedUserId') || ''
 })
 
 // 导入相关方法

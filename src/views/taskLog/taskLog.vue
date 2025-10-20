@@ -495,7 +495,8 @@ interface FilterParams {
   provider?: string
   prompt__id?: number
   start_date?: string
-  end_date?: string
+  end_date?: string,
+  enterprise_id?:string
 }
 
 const currentPageTitle = ref('任务日志')
@@ -697,6 +698,7 @@ const fetchTaskLogs = async () => {
     const params: FilterParams = {
       currentPage: page.value,
       pageSize: pageSize.value,
+      enterprise_id:localStorage.getItem('selectedUserId') || ''
     }
 
     // 添加筛选条件
@@ -749,6 +751,17 @@ const fetchTaskLogs = async () => {
 // 监听分页变化
 watch(page, () => {
   fetchTaskLogs()
+})
+
+// 监听企业数据切换，自动刷新数据
+const selectedUserId = ref(localStorage.getItem('selectedUserId') || '')
+watch(selectedUserId, () => {
+  fetchTaskLogs()
+})
+
+// 监听企业数据切换事件
+window.addEventListener('enterprise-data-changed', () => {
+  selectedUserId.value = localStorage.getItem('selectedUserId') || ''
 })
 
 onMounted(() => {

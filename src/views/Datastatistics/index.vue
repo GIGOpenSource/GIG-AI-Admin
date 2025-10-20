@@ -239,7 +239,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { type DateRange } from 'reka-ui'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
@@ -573,7 +573,7 @@ const totalData = ref({
 })
 
 // 获取平台数据
-const getPlatformData = () => {
+const getPlatformData = (platformName: string) => {
   // 这里可以根据实际API返回的数据进行映射
   return {
     posts: 0,
@@ -632,7 +632,8 @@ const getDateRange = (dateValue: string) => {
 }
 
 const fetchData = async () => {
-  getdata({}).then((res) => {
+  let selectedUserId = localStorage.getItem('selectedUserId') || ''
+  getdata({enterprise_id:selectedUserId}).then((res) => {
     const apiData = res
     totalData.value = {
       totalPosts:
@@ -682,5 +683,16 @@ onMounted(() => {
   // 设置默认日期并获取数据
   selectedDate.value = currentDate
   fetchData()
+})
+
+// 监听企业数据切换，自动刷新数据
+const selectedUserId = ref(localStorage.getItem('selectedUserId') || '')
+watch(selectedUserId, () => {
+  fetchData()
+})
+
+// 监听企业数据切换事件
+window.addEventListener('enterprise-data-changed', () => {
+  selectedUserId.value = localStorage.getItem('selectedUserId') || ''
 })
 </script>

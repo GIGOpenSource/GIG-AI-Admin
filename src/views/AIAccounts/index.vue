@@ -445,6 +445,7 @@ const getList = async () => {
     const res = await getUser({
       page: page.value,
       page_size: pageSize.value,
+      enterprise_id:localStorage.getItem('selectedUserId') || ''
     })
 
     accounts.value = res.results
@@ -460,6 +461,17 @@ const getList = async () => {
 // 监听页码变化，自动刷新列表
 watch(page, () => {
   getList()
+})
+
+// 监听企业数据切换，自动刷新列表
+const selectedUserId = ref(localStorage.getItem('selectedUserId') || '')
+watch(selectedUserId, () => {
+  getList()
+})
+
+// 监听企业数据切换事件
+window.addEventListener('enterprise-data-changed', () => {
+  selectedUserId.value = localStorage.getItem('selectedUserId') || ''
 })
 
 // 初始化加载列表

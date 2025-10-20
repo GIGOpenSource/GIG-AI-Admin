@@ -473,7 +473,8 @@ const fetchlist = async () => {
   try {
     let res = await getlist({
       search: searchQuery.value,
-      page: page.value
+      page: page.value,
+      enterprise_id:localStorage.getItem('selectedUserId') || ''
     })
 
     accounts.value = res.results
@@ -491,6 +492,17 @@ const fetchlist = async () => {
 watch(page, (newPage) => {
   console.log('Page changed to:', newPage)
   fetchlist()
+})
+
+// 监听企业数据切换，自动刷新数据
+const selectedUserId = ref(localStorage.getItem('selectedUserId') || '')
+watch(selectedUserId, () => {
+  fetchlist()
+})
+
+// 监听企业数据切换事件
+window.addEventListener('enterprise-data-changed', () => {
+  selectedUserId.value = localStorage.getItem('selectedUserId') || ''
 })
 
 onMounted(() => {

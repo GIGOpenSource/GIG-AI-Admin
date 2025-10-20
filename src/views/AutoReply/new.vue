@@ -1256,7 +1256,8 @@ const fetchlist = async () => {
     const params = {
       page: page.value,
       page_size: pageSize.value,
-      task_timing_type:activeTaskType.value
+      task_timing_type:activeTaskType.value,
+      enterprise_id:localStorage.getItem('selectedUserId') || ''
     }
 
     // 添加筛选条件
@@ -1288,6 +1289,17 @@ const fetchlist = async () => {
 // 监听分页变化
 watch([page,activeTaskType],() => {
   fetchlist()
+})
+
+// 监听企业数据切换，自动刷新数据
+const selectedUserId = ref(localStorage.getItem('selectedUserId') || '')
+watch(selectedUserId, () => {
+  fetchlist()
+})
+
+// 监听企业数据切换事件
+window.addEventListener('enterprise-data-changed', () => {
+  selectedUserId.value = localStorage.getItem('selectedUserId') || ''
 })
 
 // 已移除点击外部关闭下拉框的逻辑
