@@ -101,6 +101,7 @@ const signOut = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('profile')
   localStorage.removeItem('role')
+  localStorage.removeItem('selectedUserId')
   // Close dropdown
   closeDropdown()
 
